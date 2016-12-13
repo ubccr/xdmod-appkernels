@@ -1,0 +1,46 @@
+{
+    "name": "xdmod-appkernels",
+    "version": "6.0.0",
+    "release": "1.0",
+    "files": {
+        "include_paths": [
+        ],
+        "exclude_paths": [
+            "docs"
+        ],
+        "exclude_patterns": [
+            "#/\\.#"
+        ]
+    },
+    "file_maps": {
+        "data": [
+            "appkernel",
+            "classes",
+            "html",
+            "libraries",
+            { "templates": "templates/appkernels" }
+        ],
+        "bin": [
+            "bin/"
+        ],
+        "lib": [
+            "background_scripts/"
+        ],
+        "doc": [
+            {"AUTHORS.md": "AUTHORS"},
+            {"CHANGELOG.md": "CHANGELOG"},
+            "LICENSE",
+            {"README.md": "README"}
+        ],
+        "etc": {
+            "configuration/internal_dashboard.json": "internal_dashboard.d/appkernels.json",
+            "configuration/portal_settings.ini": "portal_settings.d/appkernels.ini",
+            "configuration/roles.json": "roles.d/appkernels.json",
+            "configuration/setup.json": "setup.d/appkernels.json",
+            "configuration/rest.d": "rest.d"
+        },
+        "etc/crond": {
+            "configuration/cron.conf": "xdmod-appkernels"
+        }
+    }
+}

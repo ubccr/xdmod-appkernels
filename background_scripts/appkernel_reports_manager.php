@@ -1,0 +1,243 @@
+<?php
+/**
+ * App kernel report manager.
+ *
+ * @author Nikolay Simakov
+ * @author Jeffrey T. Palmer <jtpalmer@buffalo.edu>
+ */
+
+require_once __DIR__ . '/../configuration/linker.php';
+
+use CCR\DB;
+use CCR\Log;
+use AppKernel\AppKernelDb;
+use AppKernel\Report;
+
+// ================================================================================
+// Parse command line options
+$options = array(
+    array(
+        "h",
+        "help",
+        "Print this help message"
+    ),
+    array(
+        "m:",
+        "maint-user:",
+        "Maintenance mode, send report only to specified user"
+    ),
+    array(
+        "e:",
+        "end-date:",
+        "Finale day of the report"
+    ),
+    array(
+        "a:",
+        "app-kernel:",
+        "Generate report ony for specified app kernel"
+    ),
+    array(
+        "r:",
+        "resource:",
+        "Generate report ony for specified resource"
+    )
+);
+$options1 = "";
+$options2 = array();
+foreach ($options as $opt) {
+    $options1 .= $opt[0];
+    $options2[$opt[0]] = $opt[1];
+}
+$args = getopt($options1, $options2);
+    
+    // default values
+    // With the '-m' argument passed into this script along with a username,
+    // reports only associated with the username will be built and sent.
+$maint_mode = false;
+$maint_user = '';
+
+$end_date = new DateTime(date('Y-m-d'));
+$end_date->sub(new DateInterval('P1D'));
+
+$appkernel = null;
+
+$resource = null;
+
+foreach ($args as $arg => $value) {
+    switch ($arg) {
+        case 'h':
+        case 'help':
+            print("Usage: appkernel_reports_manager.php [Options]\n");
+            print("Options:\n");
+            foreach ($options as $opt) {
+                print('-' . str_replace(':', '', $opt[0]));
+                print(' | --' . str_replace(':', '', $opt[1]));
+                if (strpos($opt[0], ':') !== false) {
+                    print(' <option value>');
+                }
+                print("\n\t" . $opt[2] . "\n");
+            }
+            exit(0);
+            break;
+        case 'm':
+        case 'maint-user':
+            $maint_mode = true;
+            $maint_user = $value;
+            break;
+        case 'e':
+        case 'end-date':
+            $end_date = new DateTime($value);
+            break;
+        case 'a':
+        case 'app-kernel':
+            $appkernel = $value;
+            break;
+        case 'r':
+        case 'resource':
+            $resource = $value;
+            break;
+        
+        default:
+            fwrite(STDERR, 'Invalid arguments: '.$arg.' => '.$value."\n");
+            break;
+    }
+}
+print("Accepted arguments:\n");
+foreach ($args as $arg => $value) {
+    print("\t" . $arg . ' => ' . $value . "\n");
+}
+    // ================================================================================
+    
+// Logger configuration.
+$conf = array(
+    'file' => false,
+    'emailSubject' => 'App Kernel Report Scheduler'
+);
+$conf['emailSubject'] .= (APPLICATION_ENV == 'dev') ? ' [Dev]' : '';
+$logger = Log::factory('ak-reports', $conf);
+
+// Database handle.
+$db = DB::factory('appkernel');
+
+// NOTE: "process_start_time" is needed for log summary.
+$logger->notice(array(
+    'message' => 'Report scheduler start',
+    'process_start_time' => date('Y-m-d H:i:s')
+));
+
+$dailyDeliveries = $db->query(
+    'SELECT user_id, send_report_daily, send_report_weekly, send_report_monthly, settings
+    FROM mod_appkernel.report
+    WHERE send_report_daily = 1'
+);
+
+$dayOfTheWeek = intval($end_date->format('w')) + 1;
+$weeklyDeliveries = $db->query(
+    'SELECT user_id, send_report_daily, send_report_weekly, send_report_monthly, settings
+    FROM mod_appkernel.report
+    WHERE send_report_weekly = :dayOfTheWeek',
+    array(':dayOfTheWeek' => $dayOfTheWeek)
+);
+
+$lastDayOfTheMonth = intval($end_date->format('t'));
+$dayOfTheMonth = intval($end_date->format('j'));
+if ($lastDayOfTheMonth == $dayOfTheMonth) {
+    $monthlyDeliveries = $db->query(
+        'SELECT 
+            user_id, send_report_daily, send_report_weekly, 
+            send_report_monthly, settings
+	    FROM mod_appkernel.report
+	    WHERE send_report_monthly >= :dayOfTheMonth',
+        array(':dayOfTheMonth' => $dayOfTheMonth)
+    );
+} else {
+    $monthlyDeliveries = $db->query(
+        'SELECT 
+            user_id, send_report_daily, send_report_weekly,
+            send_report_monthly, settings
+	    FROM mod_appkernel.report
+	    WHERE send_report_monthly = :dayOfTheMonth',
+        array(':dayOfTheMonth' => $dayOfTheMonth)
+    );
+}
+
+$allGroupDeliveries = array(
+    array(
+        'report_type' => 'daily_report',
+        'deliveries'  => $dailyDeliveries,
+        'start_date'  => null,
+        'end_date'    => $end_date,
+    ),
+    array(
+        'report_type' => 'weekly_report',
+        'deliveries'  => $weeklyDeliveries,
+        'start_date'  => null,
+        'end_date'    => $end_date,
+    ),
+    array(
+        'report_type' => 'monthly_report',
+        'deliveries'  => $monthlyDeliveries,
+        'start_date'  => null,
+        'end_date'    => $end_date,
+    )
+);
+
+foreach ($allGroupDeliveries as $groupDeliveries) {
+    $report_type = $groupDeliveries['report_type'];
+    $deliveries  = $groupDeliveries['deliveries'];
+    $start_date  = $groupDeliveries['start_date'];
+    $end_date    = $groupDeliveries['end_date'];
+
+    $suffix = (count($deliveries) == 0) ? 'None' : count($deliveries);
+    $logger->info("Reports Scheduled for $report_type: $suffix");
+
+    foreach ($deliveries as $delivery) {
+        $user       = XDUser::getUserByID($delivery['user_id']);
+        $username   = $user->getUsername();
+        $user_email = $user->getEmailAddress();
+        $internal_dashboard_user=$user->isDeveloper() || $user->isDeveloper();
+        
+        if ($maint_mode && $username != $maint_user) {
+            continue;
+        }
+
+        try {
+            $logger->info("Preparing report $report_type for $username ({$delivery['user_id']})");
+
+            $report_param = json_decode($delivery['settings'], true);
+            
+            if ($appkernel !== null) {
+                $report_param['appKer'] = array(
+                    $appkernel
+                );
+            }
+            if ($resource !== null) {
+                $report_param['resource'] = array(
+                    $resource
+                );
+            }
+
+            $report = new Report(array(
+                'start_date'    => $start_date,
+                'end_date'      => $end_date,
+                'report_type'   => $report_type,
+                'report_params' => $report_param,
+                'user'          => $user
+            ));
+
+            $report->send_report_to_email($user_email);
+        } catch (Exception $e) {
+            $logger->err(array(
+                'message'    =>
+                    "Error Preparing $report_type for $username ({$delivery['user_id']}): " . $e->getMessage(),
+                'stacktrace' => $e->getTraceAsString(),
+            ));
+        }
+    }
+}
+
+// NOTE: "process_end_time" is needed for log summary.
+$logger->notice(array(
+    'message'          => 'Report scheduler end',
+    'process_end_time' => date('Y-m-d H:i:s'),
+));

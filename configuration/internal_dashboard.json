@@ -1,0 +1,26 @@
+{
+    "+menu": [
+        {
+            "class": "XDMoD.Arr.AppKernelDashboardPanel",
+            "config": {}
+        }
+    ],
+    "+logs": [
+        {
+            "ident": "xdmod-akrr",
+            "title": "App Kernel Ingestion"
+        },
+        {
+            "ident": "ak-reports",
+            "title": "App Kernel Report Scheduler"
+        }
+    ],
+    "+summary": [
+        {
+            "class": "XDMoD.Ingestion.ReportsPanel",
+            "config": {
+                "title": "App Kernel Ingestion Report"
+            }
+        }
+    ]
+}

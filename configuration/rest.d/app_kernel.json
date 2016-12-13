@@ -1,0 +1,6 @@
+{
+  "app_kernels": {
+    "prefix": "app_kernels",
+    "controller": "NewRest\\Controllers\\AppKernelControllerProvider"
+  }
+}

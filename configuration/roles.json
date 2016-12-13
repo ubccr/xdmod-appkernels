@@ -1,0 +1,22 @@
+{
+    "+roles": {
+        "+default": {
+            "+permitted_modules": [
+                {
+                    "name": "app_kernels",
+                    "title": "App Kernels",
+                    "position": 400,
+                    "permitted_modules": [
+                        "app_kernel_viewer",
+                        "app_kernel_explorer",
+                        "app_kernel_notification"
+                    ],
+                    "javascriptClass": "XDMoD.Module.AppKernels",
+                    "javascriptReference": "CCR.xdmod.ui.appKernels",
+                    "tooltip": "Displays data reflecting the reliability and performance of grid resources",
+                    "userManualSectionName": "App Kernels"
+                }
+            ]
+        }
+    }
+}

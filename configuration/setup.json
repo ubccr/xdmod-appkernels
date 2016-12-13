@@ -1,0 +1,9 @@
+{
+    "+menu": [
+        {
+            "position": 80,
+            "label": "Application Kernels",
+            "handler": "AppKernelsSetup"
+        }
+    ]
+}

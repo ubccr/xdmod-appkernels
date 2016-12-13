@@ -1,0 +1,37 @@
+[features]
+appkernels = "on"
+
+[appkernels-general]
+
+; The version number is updated during the upgrade process.
+version = "[:appkernels-general_version:]"
+
+; App kernel database and metric configuration.
+[appkernel]
+db_engine = "MySQLDB"
+host      = "[:appkernel_host:]"
+port      = "[:appkernel_port:]"
+user      = "[:appkernel_user:]"
+pass      = "[:appkernel_pass:]"
+database  = "mod_appkernel"
+
+; This file contains metric attributes.
+ak_metrics_path = "[:appkernel_ak_metrics_path:]"
+
+; AKRR Database configuration.
+[akrr-db]
+db_engine = "MySQLDB"
+host      = "[:akrr-db_host:]"
+port      = "[:akrr-db_port:]"
+user      = "[:akrr-db_user:]"
+pass      = "[:akrr-db_pass:]"
+database  = "mod_akrr"
+
+; AKRR REST API configuration.
+[akrr]
+username  = "[:akrr_username:]"
+password  = "[:akrr_password:]"
+host      = "[:akrr_host:]"
+port      = "[:akrr_port:]"
+end_point = "[:akrr_end_point:]"
+

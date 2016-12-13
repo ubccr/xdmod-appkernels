@@ -1,0 +1,267 @@
+Amber,,
+,Molecular Dynamics Simulation Performance,
+,Time Spent in Direct Force Calculation,S
+,Time Spent in Non-Bond List Regeneration,S
+,Time Spent in Reciprocal Force Calculation,S
+,Wall Clock Time,S
+,,
+Charmm,,
+,Molecular Dynamics Simulation Performance,
+,Time Spent in External Energy Calculation,S
+,Time Spent in Integration,S
+,Time Spent in Internal Energy Calculation,S
+,Time Spent in Non-Bond List Generation,S
+,Time Spent in Waiting (Load Unbalance-ness),S
+,User Time,S
+,Wall Clock Time,S
+,,
+CPMD,,
+,All-to-All Communication Call,S
+,All-to-All Communication Message,S
+,All-to-All Communication Time,S
+,Broadcast Communication Call,S
+,Broadcast Communication Message,S
+,Broadcast Communication Time,S
+,Global Summation Communication Call,S
+,Global Summation Communication Message,S
+,Global Summation Communication Time,S
+,Per-Process Memory,S
+,Point-to-Point Communication Call,S
+,Point-to-Point Communication Message,S
+,Point-to-Point Communication Time,S
+,Time Spent in Fast Fourier Transforms,S
+,Wall Clock Time,S
+,,
+Gamess,,
+,Time Spent in MP2 Energy Calculation,S
+,Time Spent in Restricted Hartree-Fock Calculation,S
+,User Time,S
+,Wall Clock Time,S
+,,
+Graph500,,
+,Harmonic Mean TEPS,
+,Harmonic Standard Deviation TEPS,
+,Mean Validation Time,S
+,Median TEPS,
+,Median Validation Time,S
+,Wall Clock Time,S
+,,
+HPCC,,
+,Average Double-Precision General Matrix Multiplication (DGEMM) Floating-Point Performance,
+,Average STREAM 'Add' Memory Bandwidth,
+,Average STREAM 'Copy' Memory Bandwidth,
+,Average STREAM 'Scale' Memory Bandwidth,
+,Average STREAM 'Triad' Memory Bandwidth,
+,Fast Fourier Transform (FFTW) Floating-Point Performance,
+,High Performance LINPACK Efficiency,
+,High Performance LINPACK Floating-Point Performance,
+,High Performance LINPACK Run Time,S
+,MPI Random Access,
+,Parallel Matrix Transpose (PTRANS),
+,Wall Clock Time,S
+,,
+IMB,,
+,Max Exchange Bandwidth,
+,Max MPI-2 Bidirectional 'Get' Bandwidth (aggregate),
+,Max MPI-2 Bidirectional 'Get' Bandwidth (non-aggregate),
+,Max MPI-2 Bidirectional 'Put' Bandwidth (aggregate),
+,Max MPI-2 Bidirectional 'Put' Bandwidth (non-aggregate),
+,Max MPI-2 Unidirectional 'Get' Bandwidth (aggregate),
+,Max MPI-2 Unidirectional 'Get' Bandwidth (non-aggregate),
+,Max MPI-2 Unidirectional 'Put' Bandwidth (aggregate),
+,Max MPI-2 Unidirectional 'Put' Bandwidth (non-aggregate),
+,Max PingPing Bandwidth,
+,Max PingPong Bandwidth,
+,Max SendRecv Bandwidth,
+,Min AllGather Latency,S
+,Min AllGatherV Latency,S
+,Min AllReduce Latency,S
+,Min AllToAll Latency,S
+,Min AllToAllV Latency,S
+,Min Broadcast Latency,S
+,Min Gather Latency,S
+,Min GatherV Latency,S
+,Min MPI-2 'Accumulate' Latency (aggregate),S
+,Min MPI-2 'Accumulate' Latency (non-aggregate),S
+,Min MPI-2 Window Creation Latency,S
+,Min Reduce Latency,S
+,Min ReduceScatter Latency,S
+,Min Scatter Latency,S
+,Min ScatterV Latency,S
+,Wall Clock Time,S
+,,
+IOR,,
+,HDF5 Collective N-to-1 Read Aggregate Throughput,
+,HDF5 Collective N-to-1 Write Aggregate Throughput,
+,HDF5 Independent N-to-1 Read Aggregate Throughput,
+,HDF5 Independent N-to-1 Write Aggregate Throughput,
+,HDF5 N-to-N Read Aggregate Throughput,
+,HDF5 N-to-N Write Aggregate Throughput,
+,MPIIO Collective N-to-1 Read Aggregate Throughput,
+,MPIIO Collective N-to-1 Write Aggregate Throughput,
+,MPIIO Independent N-to-1 Read Aggregate Throughput,
+,MPIIO Independent N-to-1 Write Aggregate Throughput,
+,MPIIO N-to-N Read Aggregate Throughput,
+,MPIIO N-to-N Write Aggregate Throughput,
+,POSIX N-to-1 Read Aggregate Throughput,
+,POSIX N-to-1 Write Aggregate Throughput,
+,POSIX N-to-N Read Aggregate Throughput,
+,POSIX N-to-N Write Aggregate Throughput,
+,Parallel NetCDF Collective N-to-1 Read Aggregate Throughput,
+,Parallel NetCDF Collective N-to-1 Write Aggregate Throughput,
+,Parallel NetCDF Independent N-to-1 Read Aggregate Throughput,
+,Parallel NetCDF Independent N-to-1 Write Aggregate Throughput,
+,Wall Clock Time,S
+,,
+LAMMPS,,
+,Molecular Dynamics Simulation Performance,
+,Per-Process Memory,S
+,Time Spent in Bond Potential Calculation,S
+,Time Spent in Communication,S
+,Time Spent in Long-Range Coulomb Potential (K-Space) Calculation,S
+,Time Spent in Neighbor List Regeneration,S
+,Time Spent in Pairwise Potential Calculation,S
+,Wall Clock Time,S
+,,
+MPI-Tile-IO,,
+,2D Array Collective Read Aggregate Throughput,
+,2D Array Collective Write Aggregate Throughput,
+,2D Array HDF5 Collective Read Aggregate Throughput,
+,2D Array HDF5 Collective Write Aggregate Throughput,
+,2D Array Independent Read Aggregate Throughput,
+,2D Array Independent Write Aggregate Throughput,
+,3D Array Collective Read Aggregate Throughput,
+,3D Array Collective Write Aggregate Throughput,
+,3D Array HDF5 Collective Read Aggregate Throughput,
+,3D Array HDF5 Collective Write Aggregate Throughput,
+,3D Array Independent Read Aggregate Throughput,
+,3D Array Independent Write Aggregate Throughput,
+,File Close Time (2D Data Collective Read),S
+,File Close Time (2D Data Collective Write),S
+,File Close Time (2D Data HDF5 Collective Read),S
+,File Close Time (2D Data HDF5 Collective Write),S
+,File Close Time (2D Data Independent Read),S
+,File Close Time (2D Data Independent Write),S
+,File Close Time (3D Data Collective Read),S
+,File Close Time (3D Data Collective Write),S
+,File Close Time (3D Data HDF5 Collective Read),S
+,File Close Time (3D Data HDF5 Collective Write),S
+,File Close Time (3D Data Independent Read),S
+,File Close Time (3D Data Independent Write),S
+,File Open Time (2D Data Collective Read),S
+,File Open Time (2D Data Collective Write),S
+,File Open Time (2D Data HDF5 Collective Read),S
+,File Open Time (2D Data HDF5 Collective Write),S
+,File Open Time (2D Data Independent Read),S
+,File Open Time (2D Data Independent Write),S
+,File Open Time (3D Data Collective Read),S
+,File Open Time (3D Data Collective Write),S
+,File Open Time (3D Data HDF5 Collective Read),S
+,File Open Time (3D Data HDF5 Collective Write),S
+,File Open Time (3D Data Independent Read),S
+,File Open Time (3D Data Independent Write),S
+,Wall Clock Time,S
+,Min Barrier Latency,S
+,,
+NAMD,,
+,Memory,S
+,Molecular Dynamics Simulation Performance,
+,Wall Clock Time,S
+,,
+NPB,,
+,Block Tridiagonal (BT) Floating-Point Performance,
+,Block Tridiagonal (BT) Wall Clock Time,S
+,Conjugate Gradient (CG) Floating-Point Performance,
+,Conjugate Gradient (CG) Wall Clock Time,S
+,Fast Fourier Transform (FT) Floating-Point Performance,
+,Fast Fourier Transform (FT) Wall Clock Time,S
+,LU Solver (LU) Floating-Point Performance,
+,LU Solver (LU) Wall Clock Time,S
+,Multi Grid (MG) Floating-Point Performance,
+,Multi Grid (MG) Wall Clock Time,S
+,Scalar Pentadiagonal (SP) Floating-Point Performance,
+,Scalar Pentadiagonal (SP) Wall Clock Time,S
+,Wall Clock Time,S
+,,
+NWChem,,
+,Global Arrays 'Accumulate' Amount,S
+,Global Arrays 'Accumulate' Calls,S
+,Global Arrays 'Create' Calls,S
+,Global Arrays 'Destroy' Calls,S
+,Global Arrays 'Get' Amount,S
+,Global Arrays 'Get' Calls,S
+,Global Arrays 'Put' Amount,S
+,Global Arrays 'Put' Calls,S
+,User Time,S
+,Wall Clock Time,S
+,,
+OMB,,
+,Max Bandwidth,
+,Max Bidirectional Bandwidth,
+,Max Multiple Bandwidth / Message Rate,
+,Min All-to-All Personalized Exchange Latency,S
+,Min Broadcast Latency,S
+,Min Latency,S
+,Min Multi Latency,S
+,Wall Clock Time,S
+,,
+OSJitter,,
+,Mean Involuntary Context Switches (All But One Core in Use),S
+,Mean Involuntary Context Switches (All Cores in Use),S
+,Mean Involuntary Context Switches (Half of Cores in Use),S
+,Mean Noise (All But One Core in Use),S
+,Mean Noise (All Cores in Use),S
+,Mean Noise (Half of Cores in Use),S
+,Median Involuntary Context Switches (All But One Core in Use),S
+,Median Involuntary Context Switches (All Cores in Use),S
+,Median Involuntary Context Switches (Half of Cores in Use),S
+,Median Noise (All But One Core in Use),S
+,Median Noise (All Cores in Use),S
+,Median Noise (Half of Cores in Use),S
+,Stddev Involuntary Context Switches (All But One Core in Use),S
+,Stddev Involuntary Context Switches (All Cores in Use),S
+,Stddev Involuntary Context Switches (Half of Cores in Use),S
+,Stddev Noise (All But One Core in Use),S
+,Stddev Noise (All Cores in Use),S
+,Stddev Noise (Half of Cores in Use),S
+,Wall Clock Time,S
+,,
+Quantum ESPRESSO,,
+,Per-Process Dynamical Memory,S
+,Time Spent in Electron Energy Calculation,S
+,Time Spent in Force Calculation,S
+,Time Spent in Program Initialization,S
+,User Time,S
+,Wall Clock Time,S
+,,
+WRF,,
+,Average Floating-Point Performance,
+,Average Simulation Speed,
+,Mean Time To Simulate One Timestep,S
+,Output Data Size,S
+,Peak Floating-Point Performance,
+,Peak Simulation Speed,
+,Time Spent on I/O,S
+,Wall Clock Time,S
+,,
+CESM,,
+,Atmosphere Component Simulation Performance,
+,Coupler Component Simulation Performance,
+,Initialization Time,S
+,Land Component Simulation Performance,
+,Max Per-Process Memory (Resident Set Size),S
+,Max Per-Process Memory (Virtual Size),S
+,Mean Time To Simulate One Day,S
+,Median Time To Simulate One Day,S
+,Min Per-Process Memory (Resident Set Size),S
+,Min Per-Process Memory (Virtual Size),S
+,Ocean Component Simulation Performance,
+,Output Data Size,S
+,Overall Simulation Performance,
+,Sea-Ice Component Simulation Performance,
+,Time Spent in Atmosphere Component,S
+,Time Spent in Coupler Component,S
+,Time Spent in Land Component,S
+,Time Spent in Ocean Component,S
+,Time Spent in Sea-Ice Component,S
+,Wall Clock Time,S

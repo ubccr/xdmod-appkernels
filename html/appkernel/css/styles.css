@@ -1,0 +1,58 @@
+body {
+    margin: 0px;
+}
+
+.header {
+    border-bottom: 1px solid black;
+    padding: 10px;
+    background-color: #ccc;
+    font-size: x-large;
+}
+
+.waldo {
+    float: left;
+    padding-right: 10px;
+}
+
+.content {
+    margin: 25px;
+}
+
+.src {
+    border: 1px dashed #ccc;
+    background-color: #eee;
+    padding: 5px;
+}
+
+.data {
+    border-collapse: collapse;
+    font-size: small;
+}
+
+.data td, .data th {
+    border: 1px solid #ccc;
+    padding: 3px;
+}
+
+.data td, .data th {
+    border: 1px solid #ccc;
+    padding: 3px;
+}
+
+.data td.pass {
+    background-color: green;
+    color: #fff;
+}
+
+.data td.fail {
+    background-color: red;
+    color: #fff;
+}
+
+.right td {
+    text-align: right;
+}
+
+.chart {
+    margin: 20px;
+}
