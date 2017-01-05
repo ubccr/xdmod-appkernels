@@ -405,12 +405,6 @@ XDMoD.Arr.createPeriodicityStore = function () {
     });
 }
 
-XDMoD.Arr.createPeriodicityStore2 = function () {
-    var periodicityRecordType = Ext.data.Record.create(['name', 'akrr_format']);
-    var store = new Ext.data.Store({});
-    return store;
-}
-
 XDMoD.Arr.createPeriodicityComboBox = function (config) {
     config = Ext.isDefined(config) ? config : {};
     return new Ext.form.ComboBox(Ext.apply({
