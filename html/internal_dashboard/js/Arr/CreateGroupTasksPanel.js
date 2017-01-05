@@ -10,9 +10,9 @@ XDMoD.Arr.createResourceStore = function () {
         messageProperty: 'message',
         successProperty: 'success',
         idProperty: 'id',
-        proxy: new Ext.data.HttpProxy({
+        proxy: XDMoD.REST.createHttpProxy({
             method: 'GET',
-            url: XDMoD.REST.url + '/akrr/resources?token=' + XDMoD.REST.token
+            url: 'akrr/resources'
         }),
         fields: [
             {name: 'id', type: 'int'},
@@ -93,10 +93,9 @@ XDMoD.Arr.createAppKernelStore = function (config) {
         messageProperty: 'message',
         successProperty: 'success',
         idProperty: 'id',
-        proxy: new Ext.data.HttpProxy({
+        proxy: XDMoD.REST.createHttpProxy({
             method: 'GET',
-            url: XDMoD.REST.url + '/akrr/kernels?token=' + XDMoD.REST.token
-
+            url: 'akrr/kernels'
         }),
         baseParams: {
             resource: ''
