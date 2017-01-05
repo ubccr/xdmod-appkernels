@@ -340,13 +340,6 @@ XDMoD.Arr.createPeriodicityStore = function () {
                         }));
                         return true;
                     }
-                    if ((m[2] == 'day' || m[2] == 'days')) {
-                        this.add(new this.recordType({
-                            name: value,
-                            akrr_format: '0-00-' + this.padInt(m[1], 3) + ' 00:00:00'
-                        }));
-                        return true;
-                    }
                     if ((m[2] == 'week' || m[2] == 'weeks')) {
                         this.add(new this.recordType({
                             name: value,
