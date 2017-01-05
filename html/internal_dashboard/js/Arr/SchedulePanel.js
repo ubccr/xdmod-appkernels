@@ -19,6 +19,7 @@ XDMoD.Arr.SchedulePanel = Ext.extend(Ext.FormPanel, {
     title: 'Schedule',
     updated: 0,
     createTaskWindow: null,
+    createGroupTaskWindow: null,
 
     initComponent: function () {
 
@@ -74,6 +75,26 @@ XDMoD.Arr.SchedulePanel = Ext.extend(Ext.FormPanel, {
             }
             this.createTaskWindow.show();
         },
+        group_tasks_create: function () {
+            var self = this;
+            if (!this.createGroupTaskWindow) {
+                this.createGroupTaskWindow = new Ext.Window({
+                    layout: 'fit',
+                    title: 'Create New Group Tasks',
+                    width: 700,
+                    minWidth: 700,
+                    height: 500,
+                    minHeight: 500,
+                    closeAction: 'hide',
+                    plain: true,
+                    border: false,
+                    items: new XDMoD.Arr.CreateGroupTasksPanel({
+                        parentPanel: self
+                    })
+                });
+            }
+            this.createGroupTaskWindow.show();
+        },
         task_removed: function(record) {
             this.store.remove(record);
         }
@@ -124,6 +145,16 @@ XDMoD.Arr.SchedulePanel = Ext.extend(Ext.FormPanel, {
                     scope: this,
                     handler: function () {
                         self.fireEvent('task_create');
+                    }
+                },
+                {
+                    xtype: 'button', // default for Toolbars, same as 'tbbutton'
+                    iconCls: 'add',
+                    text: 'New Group Tasks',
+                    tooltip: "Create and submit a set of new tasks",
+                    scope: this,
+                    handler: function () {
+                        self.fireEvent('group_tasks_create');
                     }
                 },
                 {
