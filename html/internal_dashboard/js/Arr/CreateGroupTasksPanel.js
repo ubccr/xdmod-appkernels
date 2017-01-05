@@ -437,6 +437,8 @@ XDMoD.Arr.createSubmitSettingsMenu = function () {
 
     var now = new Date();
     var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    // set initial starting time to closest 00, 15, 30, 45 minute of an hour
+    // i.e. starting time will be 2:45 if it is 2:36 now
     var timecoeff = 1000 * 60 * 15;
     var init_start_time = new Date(Math.round(now.getTime() / timecoeff + 1.5) * timecoeff);
     var tomorrow = new Date(today.valueOf())
@@ -549,21 +551,21 @@ XDMoD.Arr.createSubmitSettingsMenu = function () {
     var submitTimeWaysRadioGroup = new Ext.form.RadioGroup({
         fieldLabel: 'Submit Time',
         columns: 1,
-        tooltip: 'Ways for generations of submit time',
+        tooltip: 'Distribution of submit times',
         items: [{
             boxLabel: 'All tasks are started at same time',
             name: 'submit_time_gen_way',
             inputValue: 'submit_time_gen_way__start_same_time',
             checked: true,
-            tooltip: 'Ways for generations of submit time',
+            tooltip: 'Distribution of submit times',
             listeners: {
                 render: quickTipsRegister
             }
         }, {
-            boxLabel: 'Distrebute randomly, between selected time',
+            boxLabel: 'Distribute randomly, between selected time',
             name: 'submit_time_gen_way',
             inputValue: 'submit_time_gen_way__distrebute_randomly',
-            tooltip: 'Ways for generations of submit time',
+            tooltip: 'Distribution of submit times',
             listeners: {
                 render: quickTipsRegister
             }
@@ -571,7 +573,7 @@ XDMoD.Arr.createSubmitSettingsMenu = function () {
             boxLabel: 'Distrebute evenly, between selected time',
             name: 'submit_time_gen_way',
             inputValue: 'submit_time_gen_way__distrebute_evenly',
-            tooltip: 'Ways for generations of submit time',
+            tooltip: 'Distribution of submit times',
             listeners: {
                 render: quickTipsRegister
             }
@@ -672,7 +674,7 @@ XDMoD.Arr.createSubmitSettingsMenu = function () {
     var usePreferedTimeCheckbox = new Ext.form.Checkbox({
         fieldLabel: 'Use Prefered Time',
         tooltip: 'Submit jobs only during period specified in \n"Submit Job Between" field.\n' +
-        'Convinient if you want to run app kernels during the nights\n and have periodicity of several days.',
+        'Convenient if you want to run app kernels during the nights\n and have periodicity of several days.',
         name: 'use_prefered_time',
         disabled: true,
         listeners: {
@@ -1054,7 +1056,7 @@ XDMoD.Arr.CreateGroupTasksPanel = Ext.extend(Ext.FormPanel, {
             submitSettingsForm.submitStartDateField].forEach(function (field) {
             var msg = '';
             if (field.validator && field.getValue) {
-                var msg = field.validator(field.getValue());
+                msg = field.validator(field.getValue());
                 if (msg !== true) {
                     invalid_message += '<br>' + msg;
                 }
@@ -1298,6 +1300,8 @@ XDMoD.Arr.CreateGroupTasksPanel = Ext.extend(Ext.FormPanel, {
     },
     __submitTasks__sent: function (response, options) {
         if (this.tasks_to_submit.length === 0) {
+            this.tasks_to_submit = null;
+            this.number_of_tasks_to_submit = null;
             Ext.MessageBox.alert("Done", "All tasks submitted.");
         } else {
             this.__submitTasks__sendnext();
@@ -1322,16 +1326,17 @@ XDMoD.Arr.CreateGroupTasksPanel = Ext.extend(Ext.FormPanel, {
             return;
         }
         param = this.tasks_to_submit.shift();
-
-        Ext.Ajax.request({
-            url: XDMoD.REST.url + '/akrr/tasks/scheduled?token=' + XDMoD.REST.token,
+        
+        XDMoD.REST.connection.request({
+            url: 'akrr/tasks/scheduled',
             method: 'POST',
             params: Ext.urlEncode(param),
-            success: function (response, options) {
-                self.__submitTasks__sent(response, options)
-            },
-            failure: function (response, options) {
-                self.__submitTasks__failed(response, options)
+            callback:  function (options, success, response) {
+                if (success) {
+                    self.__submitTasks__sent(response, options)
+                } else {
+                    self.__submitTasks__failed(response, options)
+                }
             }
         });
     },
