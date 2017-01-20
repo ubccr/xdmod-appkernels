@@ -23,3 +23,9 @@ Using
 
 - [Command Reference](ak-commands.html)
 - [Ingestor Guide](ak-ingestor.html)
+
+Developing
+----------
+
+- [Open XDMoD Module](https://github.com/ubccr/xdmod-appkernels)
+- [AKRR](https://github.com/ubccr/akrr)
