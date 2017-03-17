@@ -226,7 +226,7 @@ XDMoD.Arr.WalltimeEditEntryPanel = Ext.extend(Ext.FormPanel, {
             idProperty: 'id',
             proxy: new Ext.data.HttpProxy({
                 method: 'GET',
-                url: '/rest/AKRR/AKRR/kernels?token=' + XDMoD.REST.token,
+                url: XDMoD.REST.url + '/akrr/kernels?token=' + XDMoD.REST.token,
                 baseParams: {
                     disabled: true
                 }
@@ -258,7 +258,7 @@ XDMoD.Arr.WalltimeEditEntryPanel = Ext.extend(Ext.FormPanel, {
             idProperty: 'id',
             proxy: new Ext.data.HttpProxy({
                 method: 'GET',
-                url: '/rest/AKRR/AKRR/resources?token=' + XDMoD.REST.token
+                url: XDMoD.REST.url + '/akrr/resources?token=' + XDMoD.REST.token
             }),
             fields: [
                 {name: 'id', type: 'int'},
