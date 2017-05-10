@@ -17,6 +17,9 @@ env:
 matrix:
     allow_failures:
         - env: TEST_SUITE=style
+    exclude:
+        - php: '5.4'
+          env: TEST_SUITE=style
 
 # Add dependency directories to the Travis cache
 cache:
