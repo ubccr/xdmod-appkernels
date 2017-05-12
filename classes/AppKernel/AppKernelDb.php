@@ -379,7 +379,7 @@ class AppKernelDb
         $resources = array();
         foreach ( $results as $row )
         {
-            $resource = new Resource;
+            $resource = new AKResource;
             $resource->id = $row['resource_id'];
             $resource->nickname = $row['nickname'];
             $resource->name = $row['resource'];
@@ -683,7 +683,7 @@ class AppKernelDb
 
         while ( FALSE !== ($row = current($result)) )
         {
-            $resource = new Resource;
+            $resource = new AKResource;
             $resource->id = $row['resource_id'];
             $resource->nickname = $row['nickname'];
             $resource->name = $row['resource'];

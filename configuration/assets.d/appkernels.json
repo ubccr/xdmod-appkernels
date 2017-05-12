@@ -39,7 +39,8 @@
                 "js/Arr/CreateSchedulePanel.js",
                 "js/Arr/EditSchedulePanel.js",
                 "js/Ingestion/AppKernelStore.js",
-                "js/Ingestion/AppKernelGrid.js"
+                "js/Ingestion/AppKernelGrid.js",
+                "js/Ingestion/ReportsPanel.js"
             ],
             "css": [
                 "css/appKer.css"

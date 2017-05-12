@@ -1,6 +1,22 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
+2017-05-11 v6.6.0
+-----------------
+
+- Miscellaneous
+    - Updated for compatibility with Open XDMoD 6.6.0
+      ([\#14](https://github.com/ubccr/xdmod-appkernels/pull/14),
+       [\#19](https://github.com/ubccr/xdmod-appkernels/pull/19))
+    - Cleaned up old and/or unused code
+      ([\#12](https://github.com/ubccr/xdmod-appkernels/pull/12))
+    - Improved quality assurance
+      ([\#9](https://github.com/ubccr/xdmod-appkernels/pull/9),
+       [\#11](https://github.com/ubccr/xdmod-appkernels/pull/11),
+       [\#13](https://github.com/ubccr/xdmod-appkernels/pull/13),
+       [\#15](https://github.com/ubccr/xdmod-appkernels/pull/15),
+       [\#16](https://github.com/ubccr/xdmod-appkernels/pull/16))
+
 2017-01-10 v6.5.0
 -----------------
 
