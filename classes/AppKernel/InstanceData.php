@@ -500,7 +500,7 @@ class AppKernelDefinition
 // Resource that application kernels are run on
 // ================================================================================
 
-class Resource
+class AKResource
 {
   public $id = NULL;  // Database id
   public $nickname = NULL;  // Resource nickname (e.g., short name such as "edge")
@@ -508,7 +508,7 @@ class Resource
   public $description = NULL;  // Resource description
   public $enabled = FALSE;  // TRUE if the resoure is enabled
   public $visible = FALSE;  // TRUE if visible outside of the application kernel tools
-}  // Resource
+}  // AKResource
 
 class ProcessingUnit
 {
