@@ -1,0 +1,50 @@
+{
+    "appkernels": {
+        "portal": {
+            "js": [
+                "gui/js/modules/AppKernels.js",
+                "gui/js/modules/app_kernels/AppKernelViewer.js",
+                "gui/js/modules/app_kernels/AppKernelExplorer.js",
+                "gui/js/modules/app_kernels/AppKernelNotificationPanel.js",
+                "internal_dashboard/js/AppKernel/InstancePanel.js",
+                "internal_dashboard/js/AppKernel/InstanceWindow.js",
+                "internal_dashboard/js/AppKernel/InstanceStore.js",
+                "internal_dashboard/js/Arr/ErrorMessageStore.js",
+                "internal_dashboard/js/Arr/ErrorMessagePanel.js"
+            ]
+        },
+        "internal_dashboard": {
+            "js": [
+                "js/Arr/SummaryStore.js",
+                "js/Arr/SummaryPortlet.js",
+                "js/Arr/ActiveTasksStore.js",
+                "js/Arr/ActiveTasksGrid.js",
+                "js/Arr/AppKerSuccessRateStore.js",
+                "js/Arr/AppKerSuccessRateGrid.js",
+                "js/Arr/AppKerSuccessRatePanel.js",
+                "js/Arr/AppKerPerformanceMapPanel.js",
+                "js/Arr/StatusPanel.js",
+                "js/Arr/ErrorMessageStore.js",
+                "js/Arr/ErrorMessagePanel.js",
+                "js/Arr/ControlRegionsPanel.js",
+                "js/Arr/SchedulePanel.js",
+                "js/Arr/AppKernelDashboardPanel.js",
+                "js/Arr/WalltimePanel.js",
+                "js/Arr/WalltimeNewEntryPanel.js",
+                "js/Arr/WalltimeEditEntryPanel.js",
+                "js/AppKernel/InstancePanel.js",
+                "js/AppKernel/InstanceWindow.js",
+                "js/Arr/ActiveTasksPanel.js",
+                "js/Arr/EditActiveTaskPanel.js",
+                "js/Arr/CreateSchedulePanel.js",
+                "js/Arr/EditSchedulePanel.js",
+                "js/Ingestion/AppKernelStore.js",
+                "js/Ingestion/AppKernelGrid.js",
+                "js/Ingestion/ReportsPanel.js"
+            ],
+            "css": [
+                "css/appKer.css"
+            ]
+        }
+    }
+}

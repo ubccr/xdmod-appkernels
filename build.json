@@ -1,6 +1,6 @@
 {
     "name": "xdmod-appkernels",
-    "version": "6.5.0",
+    "version": "6.6.0",
     "release": "1.0",
     "files": {
         "include_paths": [
@@ -37,7 +37,8 @@
             "configuration/portal_settings.ini": "portal_settings.d/appkernels.ini",
             "configuration/roles.json": "roles.d/appkernels.json",
             "configuration/setup.json": "setup.d/appkernels.json",
-            "configuration/rest.d": "rest.d"
+            "configuration/rest.d": "rest.d",
+            "configuration/assets.d": "assets.d"
         },
         "etc/crond": {
             "configuration/cron.conf": "xdmod-appkernels"

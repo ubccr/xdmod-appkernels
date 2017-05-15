@@ -11,7 +11,7 @@ Source:        %{name}-%{version}.tar.gz
 BuildRoot:     %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 BuildArch:     noarch
 BuildRequires: php-cli
-Requires:      xdmod >= 6.5.0
+Requires:      xdmod >= 6.6.0
 
 %description
 This package provides application kernel support for Open XDMoD. The
@@ -59,6 +59,12 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/cron.d/%{name}
 
 %changelog
+* Thu May 11 2017 Jeffrey T. Palmer <jtpalmer@buffalo.edu> 6.6.0-1.0
+- Miscellaneous
+    - Updated for compatibility with Open XDMoD 6.6.0
+    - Cleaned up old and/or unused code
+    - Improved quality assurance
+
 * Tue Jan 10 2017 Jeffrey T. Palmer <jtpalmer@buffalo.edu> 6.5.0-1.0
 - Spun this module out from the Open XDMoD repository.
 * Wed Sep 21 2016 Jeffrey T. Palmer <jtpalmer@buffalo.edu> 6.0.0-1.0
