@@ -5,7 +5,7 @@ namespace AppKernel;
 use xd_utilities;
 use DateTime;
 use DateInterval;
-use ZendMailWrapper;
+use CCR\MailWrapper;
 
 /**
  * class for App kernel report generator
@@ -248,7 +248,6 @@ class Report
         }
         //send report
         try {
-            $mailer_sender = xd_utilities\getConfiguration('mailer', 'sender_email');
             $subject = '[XDMoD] ';
             if ($this->report_params['report_type']==='for_specified_period') {
             } elseif ($this->report_params['report_type']==='daily_report') {
@@ -265,11 +264,11 @@ class Report
                 $subject .= ', '.$this->report_params['start_date']->format('Y-m-d').' to '.$this->report_params['end_date']->format('Y-m-d');
             }
 
-            $mail = ZendMailWrapper::init();
-            $mail->setSubject($subject);
-            $mail->addTo($send_to);
-            $mail->setFrom($mailer_sender, 'XDMoD');
-            $mail->setBodyHtml($message);
+            $mail = MailWrapper::initPHPMailer();
+            $mail->Subject = $subject;
+            $mail->addAddress($send_to);
+            $mail->isHTML(true);
+            $mail->Body = $message;
             $mail->send();
         } catch (Exception $e) {
             throw new Exception('Failed to send e-mail. '.$e->getMessage());
@@ -290,10 +289,6 @@ class Report
         } else {
             $message .= '<h1>Report Period: '.$this->report_params['start_date']->format('Y-m-d').' to '.$this->report_params['end_date']->format('Y-m-d').'</h1>';
         }
-
-        //$message .= 'start_date: '.$this->start_date->format('Y-m-d H:i:s').'<br/>';
-        //$message .= 'end_date: '.$this->end_date->format('Y-m-d H:i:s').'<br/>';
-        //$message .= 'end_date_exclusive: '.$this->end_date_exclusive->format('Y-m-d H:i:s').'<br/>';
 
         //PerformanceMap
         $perfMap=new PerformanceMap(array(
@@ -377,9 +372,6 @@ class Report
                 return null;
             }
         }
-        /*$message.="\n<br/>\n<pre>\n"
-            .print_r($perfMap,true).'<br/>'
-            ."\n</pre>";*/
         return $message;
     }
 }
