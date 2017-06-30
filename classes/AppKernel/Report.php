@@ -5,7 +5,7 @@ namespace AppKernel;
 use xd_utilities;
 use DateTime;
 use DateInterval;
-use ZendMailWrapper;
+use CCR\MailWrapper;
 
 /**
  * class for App kernel report generator
@@ -111,7 +111,7 @@ class Report
      * Constructor for Report.
      * @param array $options associative array of options see class description for possible options
      */
-    public function __construct($options=array())
+    public function __construct($options = array())
     {
         //set default values
         $siteAddress = xd_utilities\getConfigurationUrlBase('general', 'site_address');
@@ -120,34 +120,39 @@ class Report
 
         //set report_params first default then report specific then options
         $this->report_params=array_merge(array(), $this->default_report_params['default']);
-        if(array_key_exists('report_type',$options)){
-            if((!in_array($options['report_type'],array_keys($this->default_report_params))) || ($options['report_type']==='default'))
+        if (array_key_exists('report_type', $options)) {
+            if ((!in_array($options['report_type'], array_keys($this->default_report_params))) || ($options['report_type']==='default')) {
                 throw new Exception('Unknown type of report: '.$options['report_type']);
+            }
             $this->report_params=array_merge($this->report_params, $this->default_report_params[$options['report_type']]);
-        }
-        else
+        } else {
             $this->report_params=array_merge($this->report_params, $this->default_report_params[$this->report_params['report_type']]);
+        }
         $this->report_params=array_merge($this->report_params, $options);
         unset($this->report_params['report_params']);
 
         //now augment with options['report_params']
-        if(array_key_exists('report_params',$options) && array_key_exists($this->report_params['report_type'],$options['report_params']))
+        if (array_key_exists('report_params', $options) && array_key_exists($this->report_params['report_type'], $options['report_params'])) {
             $this->report_params=array_merge($this->report_params, $options['report_params'][$this->report_params['report_type']]);
+        }
 
         foreach ($options['report_params'] as $key => $value) {
-            if(in_array($key,array('for_specified_period','daily_report','weekly_report','monthly_report')))
+            if (in_array($key, array('for_specified_period','daily_report','weekly_report','monthly_report'))) {
                 continue;
+            }
             $this->report_params[$key]=$value;
         }
 
         //clone some variables to avoid data curraption
-        if($this->report_params['start_date']!==null)
-           $this->report_params['start_date']=clone  $this->report_params['start_date'];
-        if($this->report_params['end_date']!==null)
-           $this->report_params['end_date']=clone  $this->report_params['end_date'];
+        if ($this->report_params['start_date']!==null) {
+            $this->report_params['start_date']=clone  $this->report_params['start_date'];
+        }
+        if ($this->report_params['end_date']!==null) {
+            $this->report_params['end_date']=clone  $this->report_params['end_date'];
+        }
 
         //if end_date is not set then set it to yesterday
-        if($this->report_params['end_date']===null){
+        if ($this->report_params['end_date']===null) {
             $this->report_params['end_date']=new DateTime(date('Y-m-d'));
             $this->report_params['end_date']->sub(new DateInterval('P1D'));
         }
@@ -155,46 +160,48 @@ class Report
         $this->report_params['end_date_exclusive']->add(new DateInterval('P1D'));
 
         //
-        if(array_key_exists('user',$options) && $options['user']!==NULL){
+        if (array_key_exists('user', $options) && $options['user']!==null) {
             $ak_db = new \AppKernel\AppKernelDb();
-            $allResources = $ak_db->getResources(date_format(date_sub(date_create(), date_interval_create_from_date_string("90 days")),'Y-m-d'),
-                date_format(date_create(),'Y-m-d'),
-                array(),array(),$options['user']);
+            $allResources = $ak_db->getResources(date_format(date_sub(date_create(), date_interval_create_from_date_string("90 days")), 'Y-m-d'),
+                date_format(date_create(), 'Y-m-d'),
+                array(), array(), $options['user']);
             $all_resource_names=array();
-            foreach ($allResources as $r) {$all_resource_names[]=$r->nickname;}
-            
-            if($this->report_params['resource']!==NULL && count($this->report_params['resource'])==0)
-                $this->report_params['resource']=NULL;
-            if($this->report_params['resource']!==NULL && in_array('all',$this->report_params['resource']))
-                $this->report_params['resource']=NULL;
-            
-            if($this->report_params['resource']===NULL){
-                $this->report_params['resource']=$all_resource_names;
+            foreach ($allResources as $r) {
+                $all_resource_names[]=$r->nickname;
             }
-            else{
+
+            if ($this->report_params['resource']!==null && count($this->report_params['resource'])==0) {
+                $this->report_params['resource']=null;
+            }
+            if ($this->report_params['resource']!==null && in_array('all', $this->report_params['resource'])) {
+                $this->report_params['resource']=null;
+            }
+
+            if ($this->report_params['resource']===null) {
+                $this->report_params['resource']=$all_resource_names;
+            } else {
                 $allowed_resources=array();
-                foreach ($this->report_params['resource'] as $r){
-                    if(in_array($r, $all_resource_names)){
+                foreach ($this->report_params['resource'] as $r) {
+                    if (in_array($r, $all_resource_names)) {
                         $allowed_resources[]=$r;
                     }
                 }
                 $this->report_params['resource']=$allowed_resources;
             }
-            
+        } else {
+            if ($this->report_params['resource']!=null && in_array('all', $this->report_params['resource'])) {
+                $this->report_params['resource']=null;
+            }
         }
-        else{
-            if($this->report_params['resource']!=null && in_array('all',$this->report_params['resource']))
-                $this->report_params['resource']=NULL;
+        if ($this->report_params['appKer']!=null && in_array('all', $this->report_params['appKer'])) {
+            $this->report_params['appKer']=null;
         }
-        if($this->report_params['appKer']!=null && in_array('all',$this->report_params['appKer']))
-            $this->report_params['appKer']=NULL;
 
         //initiate dependent variables for periodic reports
-        if($this->report_params['report_type']==='for_specified_period'){
+        if ($this->report_params['report_type']==='for_specified_period') {
             $this->report_params['performance_map_end_date']=clone $options['end_date'];
             $this->report_params['performance_map_start_date']=clone $options['start_date'];
-        }
-        else{
+        } else {
             //$this->report_params['end_date']->sub(new DateInterval('P1D'));//periodic reports report for period ending at previous day
             $this->report_params['start_date']=clone $this->report_params['end_date'];
             $this->report_params['start_date']->sub(new DateInterval($this->report_params['report_date_interval']));
@@ -204,15 +211,13 @@ class Report
             $this->report_params['performance_map_start_date']->sub(new DateInterval($this->report_params['performance_map_date_interval']));
             $this->report_params['performance_map_start_date']->add(new DateInterval('P1D'));
         }
-        if($options['report_type']==='daily_report'){
-
+        if ($options['report_type']==='daily_report') {
         }
         $this->report_params['days']=array();
         $run_date = clone $this->report_params['start_date'];
         $day_interval = new DateInterval('P1D');
 
-        while ($run_date<$this->report_params['end_date_exclusive'])
-        {
+        while ($run_date<$this->report_params['end_date_exclusive']) {
             $this->report_params['days'][]=$run_date->format('Y/m/d');
             $run_date->add($day_interval);
         }
@@ -230,46 +235,42 @@ class Report
      * @throws Exception on failure
      *
      */
-    public function send_report_to_email($send_to,$internal_dashboard_user=false)
+    public function send_report_to_email($send_to, $internal_dashboard_user = false)
     {
         //get report
         try {
             $message=$this->make_report($internal_dashboard_user);
-            if($message===null)//i.e. do not send report (e.g. user asked to send report only on errors)
+            if ($message===null) { //i.e. do not send report (e.g. user asked to send report only on errors)
                 return;
-        }
-        catch (Exception $e) {
+            }
+        } catch (Exception $e) {
             throw new Exception('Can not prepare report. '.$e->getMessage());
         }
         //send report
         try {
-            $mailer_sender = xd_utilities\getConfiguration('mailer', 'sender_email');
             $subject = '[XDMoD] ';
-            if($this->report_params['report_type']==='for_specified_period'){
-            }
-            elseif($this->report_params['report_type']==='daily_report'){
+            if ($this->report_params['report_type']==='for_specified_period') {
+            } elseif ($this->report_params['report_type']==='daily_report') {
                 $subject .= 'Daily ';
-            }
-            elseif($this->report_params['report_type']==='weekly_report'){
+            } elseif ($this->report_params['report_type']==='weekly_report') {
                 $subject .= 'Weekly ';
-            }
-            elseif($this->report_params['report_type']==='monthly_report'){
+            } elseif ($this->report_params['report_type']==='monthly_report') {
                 $subject .= 'Monthly ';
             }
             $subject .= 'App Kernel Execution Report';
-            if($this->report_params['start_date']->format('Y-m-d')===$this->report_params['end_date']->format('Y-m-d'))
+            if ($this->report_params['start_date']->format('Y-m-d')===$this->report_params['end_date']->format('Y-m-d')) {
                 $subject .= ' for '.$this->report_params['start_date']->format('Y-m-d');
-            else
+            } else {
                 $subject .= ', '.$this->report_params['start_date']->format('Y-m-d').' to '.$this->report_params['end_date']->format('Y-m-d');
+            }
 
-            $mail = ZendMailWrapper::init();
-            $mail->setSubject($subject);
-            $mail->addTo($send_to);
-            $mail->setFrom($mailer_sender, 'XDMoD');
-            $mail->setBodyHtml($message);
+            $mail = MailWrapper::initPHPMailer();
+            $mail->Subject = $subject;
+            $mail->addAddress($send_to);
+            $mail->isHTML(true);
+            $mail->Body = $message;
             $mail->send();
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             throw new Exception('Failed to send e-mail. '.$e->getMessage());
         }
     }
@@ -279,18 +280,15 @@ class Report
      *
      * @return string html report
      */
-    public function make_report($internal_dashboard_user=false)
+    public function make_report($internal_dashboard_user = false)
     {
         //header
         $message = '';
-        if($this->report_params['start_date']->format('Y-m-d')===$this->report_params['end_date']->format('Y-m-d'))
+        if ($this->report_params['start_date']->format('Y-m-d')===$this->report_params['end_date']->format('Y-m-d')) {
             $message .= '<h1>Report Period: '.$this->report_params['start_date']->format('Y-m-d').'</h1>';
-        else
+        } else {
             $message .= '<h1>Report Period: '.$this->report_params['start_date']->format('Y-m-d').' to '.$this->report_params['end_date']->format('Y-m-d').'</h1>';
-
-        //$message .= 'start_date: '.$this->start_date->format('Y-m-d H:i:s').'<br/>';
-        //$message .= 'end_date: '.$this->end_date->format('Y-m-d H:i:s').'<br/>';
-        //$message .= 'end_date_exclusive: '.$this->end_date_exclusive->format('Y-m-d H:i:s').'<br/>';
+        }
 
         //PerformanceMap
         $perfMap=new PerformanceMap(array(
@@ -340,41 +338,40 @@ class Report
         $message.=$messagePerfMap;
 
         //check does report needed to be send
-        if($this->report_params['send_on_event']==='sendAlways')
+        if ($this->report_params['send_on_event']==='sendAlways') {
             return $message;
-        if($this->report_params['send_on_event']==='sendNever')
+        }
+        if ($this->report_params['send_on_event']==='sendNever') {
             return null;
-        if($this->report_params['send_on_event']==='sendOnAnyErrors')
-        {
-            if($sum['outOfControlRuns']+$sum['failedRuns']>0)
-                return $message;
-            else
-                return null;
         }
-        if($this->report_params['send_on_event']==='sendOnFailedRuns')
-        {
-            if($sum['failedRuns']>0)
+        if ($this->report_params['send_on_event']==='sendOnAnyErrors') {
+            if ($sum['outOfControlRuns']+$sum['failedRuns']>0) {
                 return $message;
-            else
+            } else {
                 return null;
+            }
         }
-        if($this->report_params['send_on_event']==='sendOnPatternRecAnyErrors')
-        {
-            if($pprecog->get_num_of_code_red()+$pprecog->get_num_of_code_yellow()>0)
+        if ($this->report_params['send_on_event']==='sendOnFailedRuns') {
+            if ($sum['failedRuns']>0) {
                 return $message;
-            else
+            } else {
                 return null;
+            }
         }
-        if($this->report_params['send_on_event']==='sendOnPatternRecFailedRuns')
-        {
-            if($pprecog->get_num_of_code_red()>0)
+        if ($this->report_params['send_on_event']==='sendOnPatternRecAnyErrors') {
+            if ($pprecog->get_num_of_code_red()+$pprecog->get_num_of_code_yellow()>0) {
                 return $message;
-            else
+            } else {
                 return null;
+            }
         }
-        /*$message.="\n<br/>\n<pre>\n"
-            .print_r($perfMap,true).'<br/>'
-            ."\n</pre>";*/
+        if ($this->report_params['send_on_event']==='sendOnPatternRecFailedRuns') {
+            if ($pprecog->get_num_of_code_red()>0) {
+                return $message;
+            } else {
+                return null;
+            }
+        }
         return $message;
     }
 }
