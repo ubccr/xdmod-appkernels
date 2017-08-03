@@ -117,21 +117,6 @@ Ext.extend(XDMoD.Module.AppKernels, XDMoD.PortalModule, {
         
         panel.first_time_activate = false;
         
-        if ( document.location.hash !== "" ) return;
-        
-        var viewer = CCR.xdmod.ui.Viewer.getViewer();
-        var token = viewer.tokenize(document.location.hash);
-        if (token !== undefined && "root" in token && "tab" in token && "subtab" in token ) {
-            if (token.root === panel.mainTabToken && token.tab === this.id && token.subtab !== "" && token.subtab !== "app_kernel_notification" ) {
-                for(var iGroupTab=0; iGroupTab < panel.groupTabPanel.items.length; iGroupTab++) {
-                    var subtab = panel.groupTabPanel.items.itemAt(iGroupTab);
-                    if (subtab.id === token.subtab) {
-                        // console.log("activate subtab: " + subtab.id);
-                        panel.groupTabPanel.setActiveTab(subtab.id);
-                    }
-                }
-            }
-        }
     },  // setSubtab()
 
     listeners: {

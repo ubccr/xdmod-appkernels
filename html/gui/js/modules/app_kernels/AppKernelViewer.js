@@ -1473,7 +1473,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
      */
     selectAppKernelFromUrl: function (panel) {
         var viewer = CCR.xdmod.ui.Viewer.getViewer();
-        var token = viewer.tokenize(document.location.hash);
+        var token = CCR.tokenize(document.location.hash);
         var kernel_id = viewer.getParameterByName('kernel', token.content);
         var start = viewer.getParameterByName('start', token.content);
         var end = viewer.getParameterByName('end', token.content);
