@@ -40,11 +40,14 @@ if [ "$TEST_SUITE" = "syntax" ] || [ "$TEST_SUITE" = "style" ]; then
     # Separate the changed files by language.
     php_files_changed=()
     js_files_changed=()
+    json_files_changed=()
     for file in "${files_changed[@]}"; do
         if [[ "$file" == *.php ]]; then
             php_files_changed+=("$file")
         elif [[ "$file" == *.js ]]; then
             js_files_changed+=("$file")
+        elif [[ "$file" == *.json ]]; then
+            json_files_changed+=("$file")
         fi
     done
 fi
@@ -91,6 +94,12 @@ if [ "$TEST_SUITE" = "syntax" ]; then
     done
     for file in "${js_files_changed[@]}"; do
         eslint --no-eslintrc "$file"
+        if [ $? != 0 ]; then
+            build_exit_value=2
+        fi
+    done
+    for file in "${json_files_changed[@]}"; do
+        jsonlint --quiet --compact "$file"
         if [ $? != 0 ]; then
             build_exit_value=2
         fi
