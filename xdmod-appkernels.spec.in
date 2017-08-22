@@ -59,6 +59,14 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/cron.d/%{name}
 
 %changelog
+* ??? ??? ?? 2017 Jeffrey T. Palmer <jtpalmer@buffalo.edu> 7.0.0-1.0
+- Bug Fixes
+    - Fixed various compatibility issues with PHP 7
+- Miscellaneous
+    - Updated for compatibility with Open XDMoD 7.0.0
+    - Improved development workflow
+    - Improved quality assurance
+
 * Thu May 11 2017 Jeffrey T. Palmer <jtpalmer@buffalo.edu> 6.6.0-1.0
 - Miscellaneous
     - Updated for compatibility with Open XDMoD 6.6.0
