@@ -51,7 +51,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/xdmod/
 %{_datadir}/xdmod/
 %{_docdir}/%{name}-%{version}__PRERELEASE__/
-%{_docdir}/%{name}-%{version}/
 %{_sysconfdir}/xdmod/modules.d/appkernels.json
 
 %config(noreplace) %{_sysconfdir}/xdmod/*.d/appkernels.ini
