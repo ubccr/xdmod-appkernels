@@ -51,9 +51,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/xdmod/
 %{_datadir}/xdmod/
 %{_docdir}/%{name}-%{version}__PRERELEASE__/
+%{_sysconfdir}/xdmod/modules.d/appkernels.json
 
 %config(noreplace) %{_sysconfdir}/xdmod/*.d/appkernels.ini
-%config(noreplace) %{_sysconfdir}/xdmod/*.d/appkernels.json
+%config(noreplace) %{_sysconfdir}/xdmod/assets.d/appkernels*.json
+%config(noreplace) %{_sysconfdir}/xdmod/internal_dashboard.d/appkernels*.json
+%config(noreplace) %{_sysconfdir}/xdmod/roles.d/appkernels*.json
+%config(noreplace) %{_sysconfdir}/xdmod/setup.d/appkernels*.json
 %config(noreplace) %{_sysconfdir}/xdmod/rest.d/akrr.json
 %config(noreplace) %{_sysconfdir}/xdmod/rest.d/app_kernel.json
 %config(noreplace) %{_sysconfdir}/cron.d/%{name}
