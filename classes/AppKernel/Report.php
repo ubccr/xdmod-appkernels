@@ -264,12 +264,12 @@ class Report
                 $subject .= ', '.$this->report_params['start_date']->format('Y-m-d').' to '.$this->report_params['end_date']->format('Y-m-d');
             }
 
-            $mail = MailWrapper::initPHPMailer();
-            $mail->Subject = $subject;
-            $mail->addAddress($send_to);
-            $mail->isHTML(true);
-            $mail->Body = $message;
-            $mail->send();
+            MailWrapper::sendMail(array(
+                'body'      => $message,
+                'subject'   => $subject,
+                'toAddress' => $send_to,
+                'ishtml'    => true
+            ));
         } catch (Exception $e) {
             throw new Exception('Failed to send e-mail. '.$e->getMessage());
         }
