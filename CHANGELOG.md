@@ -1,7 +1,7 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
-## 2017-0?-?? v7.0.0
+## 2017-09-21 v7.0.0
 
 - Bug Fixes
     - Fixed various compatibility issues with PHP 7 ([\#18](https://github.com/ubccr/xdmod-appkernels/pull/18))
