@@ -1,6 +1,15 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
+## 2017-09-21 v7.0.0
+
+- Bug Fixes
+    - Fixed various compatibility issues with PHP 7 ([\#18](https://github.com/ubccr/xdmod-appkernels/pull/18))
+- Miscellaneous
+    - Updated for compatibility with Open XDMoD 7.0.0 ([\#20](https://github.com/ubccr/xdmod-appkernels/pull/20), [\#28](https://github.com/ubccr/xdmod-appkernels/pull/28), [\#29](https://github.com/ubccr/xdmod-appkernels/pull/29))
+    - Improved development workflow ([\#21](https://github.com/ubccr/xdmod-appkernels/pull/21))
+    - Improved quality assurance ([\#22](https://github.com/ubccr/xdmod-appkernels/pull/22), [\#27](https://github.com/ubccr/xdmod-appkernels/pull/27), [\#30](https://github.com/ubccr/xdmod-appkernels/pull/30))
+
 2017-05-11 v6.6.0
 -----------------
 
