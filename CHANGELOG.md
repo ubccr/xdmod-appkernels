@@ -5,6 +5,7 @@ Open XDMoD Application Kernels Change Log
 
 - Bug Fixes
     - Fixed various compatibility issues with PHP 7 ([\#18](https://github.com/ubccr/xdmod-appkernels/pull/18))
+    - Fixed issue that allowed incompatible versions of XDMoD and this module to be installed when installing via RPM ([\#35](https://github.com/ubccr/xdmod-appkernels/pull/35))
 - Miscellaneous
     - Updated for compatibility with Open XDMoD 7.0.0 ([\#20](https://github.com/ubccr/xdmod-appkernels/pull/20), [\#28](https://github.com/ubccr/xdmod-appkernels/pull/28), [\#29](https://github.com/ubccr/xdmod-appkernels/pull/29))
     - Improved development workflow ([\#21](https://github.com/ubccr/xdmod-appkernels/pull/21))
