@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
+PATH="$(pwd)/vendor/bin:$(pwd)/node_modules/.bin:$(pwd)/../xdmod/vendor/bin:$PATH"
 export PATH
-PATH="$(pwd)/vendor/bin:$(pwd)/node_modules/.bin:$PATH"
 
 source ~/.nvm/nvm.sh
 nvm use "$NODE_VERSION"
@@ -35,7 +35,7 @@ if [ "$TEST_SUITE" = "syntax" ] || [ "$TEST_SUITE" = "style" ]; then
     files_changed=()
     while IFS= read -r -d $'\0' file; do
         files_changed+=("$file")
-    done < <(git diff --name-only --diff-filter=d -z "$TRAVIS_COMMIT_RANGE")
+    done < <(git diff --name-only --diff-filter=da -z "$TRAVIS_COMMIT_RANGE")
 
     # Separate the changed files by language.
     php_files_changed=()
@@ -50,6 +50,17 @@ if [ "$TEST_SUITE" = "syntax" ] || [ "$TEST_SUITE" = "style" ]; then
             json_files_changed+=("$file")
         fi
     done
+
+    # Get any added files by language
+    php_files_added=()
+    js_files_added=()
+    while IFS= read -r -d $'\0' file; do
+        if [[ "$file" == *.php ]]; then
+            php_files_added+=("$file")
+        elif [[ "$file" == *.js ]]; then
+            js_files_added+=("$file")
+        fi
+    done < <(git diff --name-only --diff-filter=A -z "$TRAVIS_COMMIT_RANGE")
 fi
 
 # Build tests require the corresponding version of Open XDMoD.
@@ -58,26 +69,9 @@ if [ "$TEST_SUITE" = "build" ]; then
     echo "Cloning Open XDMoD branch '$xdmod_branch'"
     git clone --depth=1 --branch="$xdmod_branch" https://github.com/ubccr/xdmod.git ../xdmod
 
-    # If PHP 5.3.3 is installed, SSL/TLS isn't available to PHP.
-    # Use a newer version of PHP for installing Composer dependencies.
-    using_php_533="false"; [[ "$(php --version)" == PHP\ 5.3.3\ * ]] && using_php_533="true"
-    if "$using_php_533"; then
-        echo "Using newer version of PHP for installing dependencies"
-        phpenv global 5.3
-        php --version
-    fi
-
-    # Install Composer dependencies.
-    pushd ../xdmod >/dev/null
-    composer install
-    popd >/dev/null
-
-    # If using PHP 5.3.3 for testing purposes, stop using the newer PHP version.
-    if "$using_php_533"; then
-        echo "Reverting back to PHP 5.3.3 for testing"
-        phpenv global 5.3.3
-        php --version
-    fi
+    pushd ../xdmod
+    . .travis.install.sh
+    popd
 
     # Create a symlink from Open XDMoD to this module.
     ln -s "$(pwd)" "../xdmod/open_xdmod/modules/$module_dir"
@@ -105,41 +99,51 @@ if [ "$TEST_SUITE" = "syntax" ]; then
         fi
     done
 elif [ "$TEST_SUITE" = "style" ]; then
+    npm install https://github.com/jpwhite4/lint-diff/tarball/master
+
     for file in "${php_files_changed[@]}"; do
+        phpcs "$file" --report=json > "$file.lint.new.json"
+        if [ $? != 0 ]; then
+            git show "$commit_range_start:$file" | phpcs --stdin-path="$file" --report=json > "$file.lint.orig.json"
+            ./node_modules/.bin/lint-diff "$file.lint.orig.json" "$file.lint.new.json"
+            if [ $? != 0 ]; then
+                build_exit_value=2
+            fi
+            rm "$file.lint.orig.json"
+        fi
+        rm "$file.lint.new.json"
+    done
+    for file in "${php_files_added[@]}"; do
         phpcs "$file"
         if [ $? != 0 ]; then
             build_exit_value=2
         fi
     done
     for file in "${js_files_changed[@]}"; do
+        eslint "$file" -f json > "$file.lint.new.json"
+        if [ $? != 0 ]; then
+            git show "$commit_range_start:$file" | eslint --stdin --stdin-filename "$file" -f json > "$file.lint.orig.json"
+            ./node_modules/.bin/lint-diff "$file.lint.orig.json" "$file.lint.new.json"
+            if [ $? != 0 ]; then
+                build_exit_value=2
+            fi
+            rm "$file.lint.orig.json"
+        fi
+        rm "$file.lint.new.json"
+    done
+    for file in "${js_files_added[@]}"; do
         eslint "$file"
         if [ $? != 0 ]; then
             build_exit_value=2
         fi
     done
 elif [ "$TEST_SUITE" = "build" ]; then
-    # If PHP 5.3.3 is installed, SSL/TLS isn't available to PHP.
-    # Use a newer version of PHP for installing Composer dependencies.
-    using_php_533="false"; [[ "$(php --version)" == PHP\ 5.3.3\ * ]] && using_php_533="true"
-    if "$using_php_533"; then
-        echo "Using newer version of PHP for installing dependencies"
-        phpenv global 5.3
-        php --version
-    fi
-
     echo "Building Open XDMoD..."
     ../xdmod/open_xdmod/build_scripts/build_package.php --module xdmod
     echo "Building $module_name module..."
     ../xdmod/open_xdmod/build_scripts/build_package.php --module "$module_dir"
     if [ $? != 0 ]; then
         build_exit_value=2
-    fi
-
-    # If using PHP 5.3.3 for testing purposes, stop using the newer PHP version.
-    if "$using_php_533"; then
-        echo "Reverting back to PHP 5.3.3 for testing"
-        phpenv global 5.3.3
-        php --version
     fi
 
     xdmod_install_dir="$HOME/xdmod-install"
