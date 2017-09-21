@@ -3,7 +3,7 @@
 
 set -e
 
-ENDPOINT=https://api.github.com/repos/ubccr/xdmod-supremm
+ENDPOINT=https://api.github.com/repos/ubccr/xdmod-appkernels
 BRANCHFILTER='xdmod[0-9]\.[0-9]'
 
 branches=$(curl -s $ENDPOINT/releases | jq .[].target_commitish | grep -o $BRANCHFILTER)
