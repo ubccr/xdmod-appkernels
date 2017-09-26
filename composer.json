@@ -5,6 +5,5 @@
         }
     },
     "require-dev": {
-        "squizlabs/php_codesniffer": "2.8.0"
     }
 }

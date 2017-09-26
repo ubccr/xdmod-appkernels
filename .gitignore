@@ -308,3 +308,5 @@ configuration/aggregation_meta/
 # eclipse project files
 /.project
 
+# External Travis testing assets
+/.travis/
