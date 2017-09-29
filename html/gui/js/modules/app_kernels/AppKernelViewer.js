@@ -1283,6 +1283,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             if(selected===false){
                 sm.select(root.childNodes[0]);
             }
+        } else {
+            CCR.xdmod.ui.Viewer.getViewer().el.unmask();
         }
     },
 
