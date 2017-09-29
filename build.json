@@ -23,9 +23,6 @@
         "bin": [
             "bin/"
         ],
-        "lib": [
-            "background_scripts/"
-        ],
         "doc": [
             {"AUTHORS.md": "AUTHORS"},
             {"CHANGELOG.md": "CHANGELOG"},
