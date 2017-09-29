@@ -1,6 +1,6 @@
 {
     "name": "xdmod-appkernels",
-    "version": "6.5.0",
+    "version": "7.0.1",
     "description": "The Application Kernels module for Open XDMoD.",
     "dependencies": {},
     "devDependencies": {
