@@ -378,7 +378,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
         $format = \DataWarehouse\ExportBuilder::getFormat(
             $formatParams,
             'session_variable',
-            array('session_variable', 'png_inline', 'img_tag', 'png', 'svg')
+            array('session_variable', 'png_inline', 'img_tag', 'png', 'svg', 'pdf')
         );
 
         $dataset = $this->getDatasets($request, $app, true);
@@ -550,7 +550,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
                     );
                 }
             } else
-                if ($format == 'png' || $format == 'svg' || $format == 'png_inline') {
+                if ($format == 'png' || $format == 'svg' || $format == 'pdf' || $format == 'png_inline') {
                     foreach ($returnValue as $vis) {
                         return new Response(
                             $vis,

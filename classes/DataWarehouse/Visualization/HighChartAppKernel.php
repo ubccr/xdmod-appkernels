@@ -667,12 +667,7 @@ class HighChartAppKernel extends HighChart2
         {
             return '<img class="xd-img" alt="'.$this->getTitle().'" width="'.$this->_width*$this->_scale.'" height="'.$this->_height*$this->_scale.'"  class="chart_thumb-img" src="data:image/png;base64,'.base64_encode(\xd_charting\exportHighchart($returnData['data'][0], $this->_width, $this->_height, $this->_scale, 'png')).'" />';
         }
-        else
-        if ($format == 'svg')
-        {
-            return \xd_charting\exportHighchart($returnData['data'][0], $this->_width, $this->_height, $this->_scale, 'svg');
-        }
 
-        return \xd_charting\exportHighchart($returnData['data'][0], $this->_width, $this->_height, $this->_scale, 'png');
+        return \xd_charting\exportHighchart($returnData['data'][0], $this->_width, $this->_height, $this->_scale, $format);
     }
 }
