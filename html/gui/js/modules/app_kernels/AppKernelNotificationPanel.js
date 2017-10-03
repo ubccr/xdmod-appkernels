@@ -401,41 +401,43 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
                     layout: 'form',
                     collapsed: false,
                     collapsible: true,
-                    items: [this.resourcesList, this.appkernelsList]
+                    items: [this.resourcesList, this.appkernelsList],
+                    buttons: [
+                    {
+                        text: 'Reset Selection',
+                        tooltip: 'Reset selection of resources and appkernels to default',
+                        scope: this,
+                        handler: function (b, e) {
+                            var form = this.notificationSettingsForm.getForm();
+                            var formData = Ext.encode(form.getValues());
+                            
+                            Ext.Ajax.request({
+                                url: XDMoD.REST.baseURL + 'app_kernels/notifications/default?token=' + XDMoD.REST.token,
+                                method : 'GET',
+                                params : {
+                                    curent_tmp_settings: formData
+                                },
+                                timeout: 60000,  // 1 Minute,
+                                scope: this,
+                                success: function (response) {
+                                    var form = this.notificationSettingsForm.getForm();
+                                    var response2 = Ext.decode(response.responseText);
+                                    if(response2.success){
+                                        form.setValues(response2.data);
+                                    }else{
+                                        Ext.Msg.alert("Load failed", response2.message);
+                                    }
+                                },
+                                failure: function (response) {
+                                    Ext.Msg.alert("Load failed", response.message);
+                                }
+                            });
+                        }
+                    }]
+                    
                 }
             ],
             buttons: [
-                {
-                    text: 'Load Defaults',
-                    tooltip: 'Overwrite current settings with default, hit Save Settings to save preferences to the profile',
-                    scope: this,
-                    handler: function (b, e) {
-                        var form = this.notificationSettingsForm.getForm();
-                        var formData = Ext.encode(form.getValues());
-                        
-                        Ext.Ajax.request({
-                            url: XDMoD.REST.baseURL + 'app_kernels/notifications/default?token=' + XDMoD.REST.token,
-                            method : 'GET',
-                            params : {
-                                curent_tmp_settings: formData
-                            },
-                            timeout: 60000,  // 1 Minute,
-                            scope: this,
-                            success: function (response) {
-                                var form = this.notificationSettingsForm.getForm();
-                                var response2 = Ext.decode(response.responseText);
-                                if(response2.success){
-                                    form.setValues(response2.data);
-                                }else{
-                                    Ext.Msg.alert("Load failed", response2.message);
-                                }
-                            },
-                            failure: function (response) {
-                                Ext.Msg.alert("Load failed", response.message);
-                            }
-                        });
-                    }
-                },
                 {
                     text: 'Load Settings',
                     tooltip: 'Load previously saved settings from profile, will overwrite modified settings',
