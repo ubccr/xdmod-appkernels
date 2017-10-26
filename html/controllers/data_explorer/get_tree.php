@@ -156,8 +156,6 @@ try
 				'type' => 'app_kernel',
 				'iconCls' => 'appkernel', 
 				'leaf' => false,
-				//'singleClickExpand' => true,
-				//'disabled' => $ak_disabled,
 				'uiProvider' => 'Ext.tree.TriStateNodeUI',
 				'expanded' => in_array('app_kernel_'.$app_kernel->id,$expandedAppKernels),
 				'children' => $children
