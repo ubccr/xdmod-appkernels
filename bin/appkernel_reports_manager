@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 /**
  * App kernel report manager.
@@ -6,7 +7,7 @@
  * @author Jeffrey T. Palmer <jtpalmer@buffalo.edu>
  */
 
-require_once __DIR__ . '/../configuration/linker.php';
+require_once __DIR__ . '/../share/configuration/linker.php';
 
 use CCR\DB;
 use CCR\Log;
@@ -193,6 +194,11 @@ foreach ($allGroupDeliveries as $groupDeliveries) {
 
     foreach ($deliveries as $delivery) {
         $user       = XDUser::getUserByID($delivery['user_id']);
+        if(is_null($user)){
+            $logger->err( "can not find user with id: {$delivery['user_id']}");
+            continue;
+        }
+        
         $username   = $user->getUsername();
         $user_email = $user->getEmailAddress();
         $internal_dashboard_user=$user->isDeveloper() || $user->isDeveloper();
