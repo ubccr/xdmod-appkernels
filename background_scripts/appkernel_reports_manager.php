@@ -6,7 +6,7 @@
  * @author Jeffrey T. Palmer <jtpalmer@buffalo.edu>
  */
 
-require_once __DIR__ . '/../configuration/linker.php';
+require_once __DIR__ . '/../share/configuration/linker.php';
 
 use CCR\DB;
 use CCR\Log;
