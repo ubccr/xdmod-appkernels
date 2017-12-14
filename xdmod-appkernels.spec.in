@@ -53,7 +53,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_docdir}/%{name}-%{version}__PRERELEASE__/
 %{_sysconfdir}/xdmod/modules.d/appkernels.json
 
-%config(noreplace) %{_sysconfdir}/xdmod/*.d/appkernels.ini
+%config(noreplace) %attr(0440,apache,xdmod) %{_sysconfdir}/xdmod/*.d/appkernels.ini
 %config(noreplace) %{_sysconfdir}/xdmod/assets.d/appkernels*.json
 %config(noreplace) %{_sysconfdir}/xdmod/internal_dashboard.d/appkernels*.json
 %config(noreplace) %{_sysconfdir}/xdmod/roles.d/appkernels*.json
