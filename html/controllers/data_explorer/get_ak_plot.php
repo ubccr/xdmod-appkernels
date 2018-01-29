@@ -20,6 +20,3 @@ foreach ($result['headers'] as $k => $v) {
 }
 
 echo $result['results'];
-
-?>
-

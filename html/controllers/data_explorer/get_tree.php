@@ -18,33 +18,35 @@ try
         checkDateParameters();
         
         $resources = $ak_db->getResources(
-            $_REQUEST['start_date'], $_REQUEST['end_date'], 
-            $selectedProcessingUnits, $selectedMetrics
+            $_REQUEST['start_date'],
+            $_REQUEST['end_date'],
+            $selectedProcessingUnits,
+            $selectedMetrics
         );
         $allResources = $ak_db->getResources();
 
         
         foreach($allResources as $resource)
         {
-            if($resource->visible != 1) { continue;
+            if($resource->visible != 1) {
+                continue;
             }
-            $returnData[] = 
+            $returnData[] =
             array(
                 'text' => $resource->name,
-                'id' => $resource->id, 
-                'nick' => $resource->nickname, 
+                'id' => $resource->id,
+                'nick' => $resource->nickname,
                 'qtip' => $resource->description,
                 'type' => 'resource',
-                'iconCls' => 'resource', 
+                'iconCls' => 'resource',
                 'leaf' => true,
                 'disabled' =>  !isset($resources[$resource->nickname]),
                 'checked' => in_array($resource->id, $selectedResourceIds)
             );
         }
         $returnData = array('totalCount'=> 1, 'data' => array(array('nodes' => json_encode($returnData))));
-    } 
-    else
-    if(isset($_REQUEST['node']) && $_REQUEST['node'] === 'pus') {
+    }
+    elseif(isset($_REQUEST['node']) && $_REQUEST['node'] === 'pus') {
         $selectedResourceIds = getSelectedResourceIds();
         $selectedProcessingUnits = getSelectedPUCounts();
         $selectedMetrics = getSelectedMetrics();
@@ -54,8 +56,10 @@ try
         $selectedProcessingUnitsCount = count($selectedProcessingUnits);
         
         $processing_units = $ak_db->getProcessingUnits(
-            '2010-01-01', date("Y-m-d"),  
-            $selectedResourceIds, $selectedMetrics
+            '2010-01-01',
+            date("Y-m-d"),
+            $selectedResourceIds,
+            $selectedMetrics
         );
 
         $all_processing_units = $ak_db->getProcessingUnits();
@@ -67,16 +71,17 @@ try
             
             foreach($processing_units as $pu)
             {
-                if($processing_unit->count === $pu->count && $processing_unit->unit === $pu->unit) { $disabled = false;
+                if($processing_unit->count === $pu->count && $processing_unit->unit === $pu->unit) {
+                    $disabled = false;
                 }
             }
-            $pus[$processing_unit->count] = 
+            $pus[$processing_unit->count] =
             array(
                 'text' => $processing_unit->count,
-                'id' => $processing_unit->count, 
+                'id' => $processing_unit->count,
                 'qtip' => $processing_unit->count.' Node(s)/Core(s)',
                 'type' => 'node',
-                'iconCls' => 'node', 
+                'iconCls' => 'node',
                 'leaf' => true,
                 //'disabled' => $disabled,
                 'checked' => $selectedProcessingUnitsCount === 0 || in_array($processing_unit->count, $selectedProcessingUnits)
@@ -85,21 +90,22 @@ try
         $returnData = array('totalCount'=> 1, 'data' => array(array('nodes' => json_encode(array_values($pus)))));
 
     }
-    else
-    if(isset($_REQUEST['node']) && $_REQUEST['node'] === 'app_kernels') {
+    elseif(isset($_REQUEST['node']) && $_REQUEST['node'] === 'app_kernels') {
         $selectedResourceIds = getSelectedResourceIds();
         $selectedMetrics = getSelectedMetrics();
         $expandedAppKernels = getExpandedAppKernels();
         checkDateParameters();
                 
-        //$app_kernels = $ak_db->getUniqueAppKernels('2010-01-01',date("Y-m-d")/*, 
+        //$app_kernels = $ak_db->getUniqueAppKernels('2010-01-01',date("Y-m-d")/*,
         //                                            $selectedResourceIds, $selectedProcessingUnits*/);
             
         $all_app_kernels = $ak_db->getUniqueAppKernels();
         foreach($all_app_kernels as $app_kernel)
         {
             $metrics = $ak_db->getMetrics(
-                $app_kernel->id, '2010-01-01', date("Y-m-d")/*, 
+                $app_kernel->id,
+                '2010-01-01',
+                date("Y-m-d")/*,
                 $selectedResourceIds, $selectedProcessingUnits*/
             );
             $all_metrics = $ak_db->getMetrics($app_kernel->id);
@@ -110,7 +116,8 @@ try
                 $metric_disabled = true;
                 foreach($metrics as $m)
                 {
-                    if($metric->id === $m->id) { $metric_disabled = false;
+                    if($metric->id === $m->id) {
+                        $metric_disabled = false;
                     }
                 }
                 
@@ -122,13 +129,13 @@ try
                 foreach($pus as $pu)
                 {
                     $pu_children[] = array('text' => $pu->count.' '.$pu->unit,
-                    'id' => $c_id.'_'.$pu->count, 
+                    'id' => $c_id.'_'.$pu->count,
                     'qtip' => $metric->name,
                     'start_ts' => $app_kernel->start_ts,
                     'end_ts' => $app_kernel->end_ts,
                     'ak_def_id' => $app_kernel->id,
                     'type' => 'pu',
-                    'iconCls' => 'node', 
+                    'iconCls' => 'node',
                     'leaf' => true,
                     //'disabled' => $metric_disabled,
                     'uiProvider' => 'Ext.tree.TriStateNodeUI',
@@ -138,16 +145,16 @@ try
                 }
                 
                 $children[] = array('text' => $metric->name,
-                    'id' => $c_id, 
+                    'id' => $c_id,
                     'qtip' => $metric->name,
                     'start_ts' => $app_kernel->start_ts,
                     'end_ts' => $app_kernel->end_ts,
                     'ak_def_id' => $app_kernel->id,
                     'type' => 'metric',
-                    'iconCls' => 'metric', 
+                    'iconCls' => 'metric',
                     'leaf' => false,
                     //'singleClickExpand' => true,
-                    'expanded' => in_array($c_id, $expandedAppKernels), 
+                    'expanded' => in_array($c_id, $expandedAppKernels),
                     'uiProvider' => 'Ext.tree.TriStateNodeUI',
                     //'disabled' => $metric_disabled,
                     'checked' => in_array($c_id, $selectedMetrics),
@@ -155,12 +162,12 @@ try
                     );
             }
             $returnData[] = array('text' => $app_kernel->name,/*.' '.date('Y-m-d',$app_kernel->start_ts).' '.date('Y-m-d', $app_kernel->end_ts)*/
-                'id' => 'app_kernel_'.$app_kernel->id, 
+                'id' => 'app_kernel_'.$app_kernel->id,
                 'qtip' => $app_kernel->description,
                 'start_ts' => $app_kernel->start_ts,
                 'end_ts' => $app_kernel->end_ts,
                 'type' => 'app_kernel',
-                'iconCls' => 'appkernel', 
+                'iconCls' => 'appkernel',
                 'leaf' => false,
                 'uiProvider' => 'Ext.tree.TriStateNodeUI',
                 'expanded' => in_array('app_kernel_'.$app_kernel->id, $expandedAppKernels),
@@ -182,5 +189,3 @@ catch(Exception $ex)
 }
 
 xd_controller\returnJSON($returnData);
-?>
-
