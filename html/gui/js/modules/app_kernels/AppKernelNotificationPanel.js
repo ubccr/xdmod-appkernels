@@ -48,7 +48,8 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
         }
         return false;
     },
-    sendReport: function (baseParams) {
+    sendReport: function (baseParams2) {
+        var baseParams = baseParams2;
         var form = this.notificationSettingsForm.getForm();
         baseParams.report_param = form.getValues();
         baseParams.report_param[baseParams.report_type + '_send_on_event'] = 'sendAlways';
