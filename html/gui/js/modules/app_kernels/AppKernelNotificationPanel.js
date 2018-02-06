@@ -11,7 +11,7 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
             if (formData === '{}') {
                 formData = '{"send_report_weekly_on_day":"Monday","send_report_monthly_on_day":"1","resourcesList_all":"on","appkernelsList_all":"on","controlThreshold":"-0.5"}';
             }
-            
+
             Ext.Ajax.request({
                 url: XDMoD.REST.baseURL + 'app_kernels/notifications?token=' + XDMoD.REST.token,
                 method: 'GET',
