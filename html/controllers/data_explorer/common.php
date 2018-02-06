@@ -34,6 +34,5 @@ function getExpandedAppKernels()
     
 function getShowChangeIndicator()
 {
-    return  ( isset($_REQUEST['show_change_indicator'])
-              ? $_REQUEST['show_change_indicator'] === 'y' : false );
+    return isset($_REQUEST['show_change_indicator']) ? $_REQUEST['show_change_indicator'] === 'y' : false;
 }

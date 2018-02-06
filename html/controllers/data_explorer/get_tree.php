@@ -11,7 +11,7 @@ try
      
     if(isset($_REQUEST['node']) && $_REQUEST['node'] === 'resources') {
         $selectedResourceIds = getSelectedResourceIds();
-        $selectedProcessingUnits = array();//getSelectedPUCounts();
+        $selectedProcessingUnits = array();
         $selectedMetrics = getSelectedMetrics();
         $expandedAppKernels = getExpandedAppKernels();
 
@@ -83,7 +83,6 @@ try
                 'type' => 'node',
                 'iconCls' => 'node',
                 'leaf' => true,
-                //'disabled' => $disabled,
                 'checked' => $selectedProcessingUnitsCount === 0 || in_array($processing_unit->count, $selectedProcessingUnits)
             );
         }
@@ -95,9 +94,6 @@ try
         $selectedMetrics = getSelectedMetrics();
         $expandedAppKernels = getExpandedAppKernels();
         checkDateParameters();
-                
-        //$app_kernels = $ak_db->getUniqueAppKernels('2010-01-01',date("Y-m-d")/*,
-        //                                            $selectedResourceIds, $selectedProcessingUnits*/);
             
         $all_app_kernels = $ak_db->getUniqueAppKernels();
         foreach($all_app_kernels as $app_kernel)
@@ -105,8 +101,7 @@ try
             $metrics = $ak_db->getMetrics(
                 $app_kernel->id,
                 '2010-01-01',
-                date("Y-m-d")/*,
-                $selectedResourceIds, $selectedProcessingUnits*/
+                date("Y-m-d")
             );
             $all_metrics = $ak_db->getMetrics($app_kernel->id);
             
@@ -137,10 +132,8 @@ try
                     'type' => 'pu',
                     'iconCls' => 'node',
                     'leaf' => true,
-                    //'disabled' => $metric_disabled,
                     'uiProvider' => 'Ext.tree.TriStateNodeUI',
                     'checked' =>  in_array($c_id.'_'.$pu->count, $selectedMetrics) || in_array($c_id, $selectedMetrics)
-                    //'children' => $pu_children
                     );
                 }
                 
@@ -153,15 +146,13 @@ try
                     'type' => 'metric',
                     'iconCls' => 'metric',
                     'leaf' => false,
-                    //'singleClickExpand' => true,
                     'expanded' => in_array($c_id, $expandedAppKernels),
                     'uiProvider' => 'Ext.tree.TriStateNodeUI',
-                    //'disabled' => $metric_disabled,
                     'checked' => in_array($c_id, $selectedMetrics),
                     'children' => $pu_children
                     );
             }
-            $returnData[] = array('text' => $app_kernel->name,/*.' '.date('Y-m-d',$app_kernel->start_ts).' '.date('Y-m-d', $app_kernel->end_ts)*/
+            $returnData[] = array('text' => $app_kernel->name,
                 'id' => 'app_kernel_'.$app_kernel->id,
                 'qtip' => $app_kernel->description,
                 'start_ts' => $app_kernel->start_ts,

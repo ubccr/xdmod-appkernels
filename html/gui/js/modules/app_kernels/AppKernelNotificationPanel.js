@@ -11,17 +11,7 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
             if (formData === '{}') {
                 formData = '{"send_report_weekly_on_day":"Monday","send_report_monthly_on_day":"1","resourcesList_all":"on","appkernelsList_all":"on","controlThreshold":"-0.5"}';
             }
-
-            /* form.load({
-                url: 'internal_dashboard/controllers/arr/settings.php',//XDMoD.REST.prependPathBase('/app_kernels/notifications'),
-                params: {
-                    operation: 'load_notification_settings',
-                    curent_tmp_settings: formData
-                },
-                failure: function (form, action) {
-                    Ext.Msg.alert("Load failed", action.result.errorMessage);
-                }
-            }); */
+            
             Ext.Ajax.request({
                 url: XDMoD.REST.baseURL + 'app_kernels/notifications?token=' + XDMoD.REST.token,
                 method: 'GET',
@@ -144,10 +134,6 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
                 load: function (t, records) {
                     var i = 0;
                     for (i = 0; i < records.length; i++) {
-                        // console.log(records[i].data.name);
-                        /* var h = new Ext.form.Hidden({
-                         name: 'resourcesList_'+records[i].data.name
-                         }); */
                         var cb = new Ext.form.Checkbox({
                             boxLabel: records[i].data.name,
                             name: 'resourcesList_' + records[i].data.name
@@ -160,13 +146,9 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
                         this.resourcesList.doLayout();
                     }
                     this.resourcesListStoreLoaded = true;
-                    // fireEvent(
-                    // this.loadSettings();
                 }
             }
         });
-        // this.resourcesListStore.load();
-        // this.resourcesListStore.save( );
         // appkernelsList
         this.appkernelsList = new Ext.form.CheckboxGroup({
             fieldLabel: 'App. Kernels',
@@ -200,7 +182,6 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
                         this.appkernelsList.doLayout();
                     }
                     this.appkernelsListStoreLoaded = true;
-                    // this.loadSettings();
                 }
             }
         });
@@ -218,21 +199,12 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
             ['sendOnPatternRecFailedRuns', 'Send on Major Pattern Errors']
         ];
         this.notificationSettingsForm = new Ext.form.FormPanel({
-            // xtype:'fieldset',
-            // title:'Report Periodicity Settings',
             autoHeight: true,
-            // frame:false,
-            // border:false,
-            // collapsed: false,
-            // collapsible: true,
-            // defaultType: 'checkbox',
             items: [
                 {
                     xtype: 'fieldset',
                     title: 'Report Periodicity Settings',
                     autoHeight: true,
-                    // frame:false,
-                    // border:false,
                     collapsed: false,
                     collapsible: true,
                     items: [
@@ -556,10 +528,6 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
             ]
         });
         XDMoD.Module.AppKernels.AppKernelNotificationPanel.superclass.initComponent.apply(this, arguments);
-        // XDMoD.Arr.NotificationPanel.superclass.constructor.call(this, config);
-
-        // this.appkernelsListStore.load();
-        // this.resourcesListStore.load();
 
         this.initLoadSettings = function () {
             if (this.loadSettings()) {
