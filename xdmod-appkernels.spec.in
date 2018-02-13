@@ -48,7 +48,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_bindir}/xdmod-akrr-ingestor
-%{_libdir}/xdmod/
+%{_bindir}/appkernel_reports_manager
 %{_datadir}/xdmod/
 %{_docdir}/%{name}-%{version}__PRERELEASE__/
 %{_sysconfdir}/xdmod/modules.d/appkernels.json

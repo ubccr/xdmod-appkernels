@@ -8,50 +8,42 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
             var form = this.notificationSettingsForm.getForm();
             var formData = Ext.encode(form.getValues());
 
-            if (formData == '{}')
+            if (formData === '{}') {
                 formData = '{"send_report_weekly_on_day":"Monday","send_report_monthly_on_day":"1","resourcesList_all":"on","appkernelsList_all":"on","controlThreshold":"-0.5"}';
+            }
 
-            /*form.load({
-                url: 'internal_dashboard/controllers/arr/settings.php',//XDMoD.REST.prependPathBase('/app_kernels/notifications'),
-                params: {
-                    operation: 'load_notification_settings',
-                    curent_tmp_settings: formData
-                },
-                failure: function (form, action) {
-                    Ext.Msg.alert("Load failed", action.result.errorMessage);
-                }
-            });*/
             Ext.Ajax.request({
                 url: XDMoD.REST.baseURL + 'app_kernels/notifications?token=' + XDMoD.REST.token,
-                method : 'GET',
-                params : {
+                method: 'GET',
+                params: {
                     curent_tmp_settings: formData
                 },
-                timeout: 60000,  // 1 Minute,
+                timeout: 60000, // 1 Minute,
                 scope: this,
                 success: function (response) {
-                    var form = this.notificationSettingsForm.getForm();
+                    var form2 = this.notificationSettingsForm.getForm();
                     var response2 = Ext.decode(response.responseText);
-                    if(response2.success){
-                        form.setValues(response2.data);
-                    }else{
-                        Ext.Msg.alert("Load failed", response2.message);
+                    if (response2.success) {
+                        form2.setValues(response2.data);
+                    } else {
+                        Ext.Msg.alert('Load failed', response2.message);
                     }
                 },
                 failure: function (response) {
-                    Ext.Msg.alert("Load failed", response.message);
+                    Ext.Msg.alert('Load failed', response.message);
                 }
             });
-           
+
             return true;
         }
         return false;
     },
-    sendReport: function (baseParams) {
+    sendReport: function (baseParams2) {
+        var baseParams = baseParams2;
         var form = this.notificationSettingsForm.getForm();
-        baseParams['report_param'] = form.getValues();
-        baseParams['report_param'][baseParams['report_type'] + '_send_on_event'] = 'sendAlways';
-        baseParams['report_param'] = Ext.encode(baseParams['report_param']);
+        baseParams.report_param = form.getValues();
+        baseParams.report_param[baseParams.report_type + '_send_on_event'] = 'sendAlways';
+        baseParams.report_param = Ext.encode(baseParams.report_param);
 
         Ext.MessageBox.show({
             msg: 'Sending report, please wait...',
@@ -62,66 +54,57 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
                 interval: 200
             }
         });
-        
+
         Ext.Ajax.request({
             url: XDMoD.REST.baseURL + 'app_kernels/notifications/send?token=' + XDMoD.REST.token,
-            method : 'GET',
-            params : baseParams,
-            timeout: 120000,  // 1 Minute,
+            method: 'GET',
+            params: baseParams,
+            timeout: 120000, // 1 Minute,
             scope: this,
             success: function (response) {
                 var response2 = Ext.decode(response.responseText);
-                if(response2.success){
+                if (response2.success) {
                     Ext.MessageBox.hide();
-                    
+
                     if ('message' in response2) {
                         Ext.MessageBox.alert('Status', response2.message);
-                    }
-                    else{
+                    } else {
                         Ext.MessageBox.alert('Status', 'Can not send report');
                     }
-                }else{
-                   Ext.MessageBox.alert('Status', 'Can not send report');
+                } else {
+                    Ext.MessageBox.alert('Status', 'Can not send report');
                 }
             },
-            failure: function (response) {
+            failure: function (/* response */) {
                 Ext.MessageBox.alert('Status', 'Can not send report');
             }
         });
     },
     initComponent: function () {
-        //Send report to e-mail for specified period
+        // Send report to e-mail for specified period
         this.durationToolbar = new CCR.xdmod.ui.DurationToolbar({
             id: 'duration_selector_' + this.id,
             alignRight: false,
             showRefresh: false,
             showAggregationUnit: false,
-            scope: this //also scope of handle
+            scope: this // also scope of handle
         });
 
         this.durationToolbar.dateSlider.region = 'south';
 
-        function exportFunction(format, showTitle, scale, width, height) {
-            var parameters = appKerPerformanceMapGrid.store.baseParams;
-
-            parameters['format'] = format;
-
-
-        };
-
         var sendReportButton = new Ext.Button({
-            /*========================================sendReport===============================================*/
+            /*= =======================================sendReport=============================================== */
             id: 'send_report_button_' + this.id,
             text: 'Send Report',
             iconCls: 'send_report',
             tooltip: 'Send report via e-mail for specified period',
-            scope: this, //also scope of handle
+            scope: this, // also scope of handle
             handler: function () {
                 var baseParams = {};
                 baseParams.start_date = this.durationToolbar.getStartDate().format('Y-m-d');
                 baseParams.end_date = this.durationToolbar.getEndDate().format('Y-m-d');
-                baseParams.report_type = 'for_specified_period',
-                    baseParams.operation = 'send_report';
+                baseParams.report_type = 'for_specified_period';
+                baseParams.operation = 'send_report';
 
                 this.sendReport(baseParams);
             }
@@ -130,13 +113,13 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
         this.durationToolbar.addItem('-');
         this.durationToolbar.addItem(sendReportButton);
 
-        //resourcesList
+        // resourcesList
         this.resourcesList = new Ext.form.CheckboxGroup({
             fieldLabel: 'Resources',
             columns: 5,
             vertical: true,
             items: [
-                {boxLabel: 'all', name: 'resourcesList_all', checked: true}
+                { boxLabel: 'all', name: 'resourcesList_all', checked: true }
             ]
         });
         this.resourcesListStoreLoaded = false;
@@ -148,39 +131,31 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
             restful: true,
             listeners: {
                 scope: this,
-                load: function (t, records, options) {
+                load: function (t, records) {
                     var i = 0;
                     for (i = 0; i < records.length; i++) {
-                        //console.log(records[i].data.name);
-                        /*var h = new Ext.form.Hidden({
-                         name: 'resourcesList_'+records[i].data.name
-                         });*/
                         var cb = new Ext.form.Checkbox({
                             boxLabel: records[i].data.name,
                             name: 'resourcesList_' + records[i].data.name
                         });
-                        if(this.resourcesList.items instanceof Ext.util.MixedCollection){
+                        if (this.resourcesList.items instanceof Ext.util.MixedCollection) {
                             this.resourcesList.items.add(cb);
-                        }else{
+                        } else {
                             this.resourcesList.items.push(cb);
                         }
                         this.resourcesList.doLayout();
                     }
                     this.resourcesListStoreLoaded = true;
-                    //fireEvent(
-                    //this.loadSettings();
                 }
             }
         });
-        //this.resourcesListStore.load();
-        //this.resourcesListStore.save( );
-        //appkernelsList
+        // appkernelsList
         this.appkernelsList = new Ext.form.CheckboxGroup({
             fieldLabel: 'App. Kernels',
             columns: 5,
             vertical: true,
             items: [
-                {boxLabel: 'all', name: 'appkernelsList_all', checked: true}
+                { boxLabel: 'all', name: 'appkernelsList_all', checked: true }
             ]
         });
         this.appkernelsListStoreLoaded = false;
@@ -192,22 +167,21 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
             restful: true,
             listeners: {
                 scope: this,
-                load: function (t, records, options) {
+                load: function (t, records) {
                     var i = 0;
                     for (i = 0; i < records.length; i++) {
                         var cb = new Ext.form.Checkbox({
                             boxLabel: records[i].data.name,
                             name: 'appkernelsList_' + records[i].data.name
                         });
-                        if(this.appkernelsList.items instanceof Ext.util.MixedCollection){
+                        if (this.appkernelsList.items instanceof Ext.util.MixedCollection) {
                             this.appkernelsList.items.addAll(cb);
-                        }else{
+                        } else {
                             this.appkernelsList.items.push(cb);
                         }
                         this.appkernelsList.doLayout();
                     }
                     this.appkernelsListStoreLoaded = true;
-                    //this.loadSettings();
                 }
             }
         });
@@ -225,21 +199,12 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
             ['sendOnPatternRecFailedRuns', 'Send on Major Pattern Errors']
         ];
         this.notificationSettingsForm = new Ext.form.FormPanel({
-            //xtype:'fieldset',
-            //title:'Report Periodicity Settings',
             autoHeight: true,
-            //frame:false,
-            //border:false,
-            //collapsed: false,
-            //collapsible: true,
-            //defaultType: 'checkbox',
             items: [
                 {
                     xtype: 'fieldset',
                     title: 'Report Periodicity Settings',
                     autoHeight: true,
-                    //frame:false,
-                    //border:false,
                     collapsed: false,
                     collapsible: true,
                     items: [
@@ -401,46 +366,48 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
                     layout: 'form',
                     collapsed: false,
                     collapsible: true,
-                    items: [this.resourcesList, this.appkernelsList]
+                    items: [this.resourcesList, this.appkernelsList],
+                    buttons: [
+                        {
+                            text: 'Reset Selection',
+                            tooltip: 'Reset selection of resources and appkernels to default',
+                            scope: this,
+                            handler: function () {
+                                var form = this.notificationSettingsForm.getForm();
+                                var formData = Ext.encode(form.getValues());
+
+                                Ext.Ajax.request({
+                                    url: XDMoD.REST.baseURL + 'app_kernels/notifications/default?token=' + XDMoD.REST.token,
+                                    method: 'GET',
+                                    params: {
+                                        curent_tmp_settings: formData
+                                    },
+                                    timeout: 60000, // 1 Minute,
+                                    scope: this,
+                                    success: function (response) {
+                                        var form2 = this.notificationSettingsForm.getForm();
+                                        var response2 = Ext.decode(response.responseText);
+                                        if (response2.success) {
+                                            form2.setValues(response2.data);
+                                        } else {
+                                            Ext.Msg.alert('Load failed', response2.message);
+                                        }
+                                    },
+                                    failure: function (response) {
+                                        Ext.Msg.alert('Load failed', response.message);
+                                    }
+                                });
+                            }
+                        }]
+
                 }
             ],
             buttons: [
                 {
-                    text: 'Load Defaults',
-                    tooltip: 'Overwrite current settings with default, hit Save Settings to save preferences to the profile',
-                    scope: this,
-                    handler: function (b, e) {
-                        var form = this.notificationSettingsForm.getForm();
-                        var formData = Ext.encode(form.getValues());
-                        
-                        Ext.Ajax.request({
-                            url: XDMoD.REST.baseURL + 'app_kernels/notifications/default?token=' + XDMoD.REST.token,
-                            method : 'GET',
-                            params : {
-                                curent_tmp_settings: formData
-                            },
-                            timeout: 60000,  // 1 Minute,
-                            scope: this,
-                            success: function (response) {
-                                var form = this.notificationSettingsForm.getForm();
-                                var response2 = Ext.decode(response.responseText);
-                                if(response2.success){
-                                    form.setValues(response2.data);
-                                }else{
-                                    Ext.Msg.alert("Load failed", response2.message);
-                                }
-                            },
-                            failure: function (response) {
-                                Ext.Msg.alert("Load failed", response.message);
-                            }
-                        });
-                    }
-                },
-                {
                     text: 'Load Settings',
                     tooltip: 'Load previously saved settings from profile, will overwrite modified settings',
                     scope: this,
-                    handler: function (b, e) {
+                    handler: function () {
                         this.loadSettings();
                     }
                 },
@@ -448,29 +415,26 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
                     text: 'Save Settings',
                     tooltip: 'Save modified preferences to the profile',
                     scope: this,
-                    handler: function (b, e) {
+                    handler: function () {
                         var form = this.notificationSettingsForm.getForm();
                         var formData = Ext.encode(form.getValues());
-                        
+
                         Ext.Ajax.request({
                             url: XDMoD.REST.baseURL + 'app_kernels/notifications?token=' + XDMoD.REST.token,
-                            method : 'PUT',
-                            params : {
+                            method: 'PUT',
+                            params: {
                                 curent_tmp_settings: formData
                             },
-                            timeout: 60000,  // 1 Minute,
+                            timeout: 60000, // 1 Minute,
                             scope: this,
                             success: function (response) {
-                                var form = this.notificationSettingsForm.getForm();
                                 var response2 = Ext.decode(response.responseText);
-                                if(response2.success){
-                                    
-                                }else{
-                                    Ext.Msg.alert("Saving failed", "Saving failed");
+                                if (!response2.success) {
+                                    Ext.Msg.alert('Saving failed', 'Saving failed');
                                 }
                             },
-                            failure: function (response) {
-                                Ext.Msg.alert("Saving failed", "Saving failed");
+                            failure: function () {
+                                Ext.Msg.alert('Saving failed', 'Saving failed');
                             }
                         });
                     }
@@ -494,9 +458,9 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
                     handler: function () {
                         var baseParams = {};
                         var sendReportNowForDatefield = Ext.get('sendReportNowForDatefield' + this.id);
-                        baseParams.end_date = sendReportNowForDatefield.getValue();//.format('Y-m-d');
-                        baseParams.report_type = 'daily_report',
-                            baseParams.operation = 'send_report';
+                        baseParams.end_date = sendReportNowForDatefield.getValue();// .format('Y-m-d');
+                        baseParams.report_type = 'daily_report';
+                        baseParams.operation = 'send_report';
 
                         this.sendReport(baseParams);
                     }
@@ -509,9 +473,9 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
                     handler: function () {
                         var baseParams = {};
                         var sendReportNowForDatefield = Ext.get('sendReportNowForDatefield' + this.id);
-                        baseParams.end_date = sendReportNowForDatefield.getValue();//.format('Y-m-d');
-                        baseParams.report_type = 'weekly_report',
-                            baseParams.operation = 'send_report';
+                        baseParams.end_date = sendReportNowForDatefield.getValue();// .format('Y-m-d');
+                        baseParams.report_type = 'weekly_report';
+                        baseParams.operation = 'send_report';
 
                         this.sendReport(baseParams);
                     }
@@ -524,9 +488,9 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
                     handler: function () {
                         var baseParams = {};
                         var sendReportNowForDatefield = Ext.get('sendReportNowForDatefield' + this.id);
-                        baseParams.end_date = sendReportNowForDatefield.getValue();//.format('Y-m-d');
-                        baseParams.report_type = 'monthly_report',
-                            baseParams.operation = 'send_report';
+                        baseParams.end_date = sendReportNowForDatefield.getValue();// .format('Y-m-d');
+                        baseParams.report_type = 'monthly_report';
+                        baseParams.operation = 'send_report';
 
                         this.sendReport(baseParams);
                     }
@@ -543,7 +507,7 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
             labelWidth: 110,
             autoScroll: true,
             frame: false,
-            'items': [
+            items: [
                 {
                     xtype: 'panel',
                     title: 'Notification options'
@@ -564,14 +528,11 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
             ]
         });
         XDMoD.Module.AppKernels.AppKernelNotificationPanel.superclass.initComponent.apply(this, arguments);
-        //XDMoD.Arr.NotificationPanel.superclass.constructor.call(this, config);
-
-        //this.appkernelsListStore.load();
-        //this.resourcesListStore.load();
 
         this.initLoadSettings = function () {
-            if (this.loadSettings())
+            if (this.loadSettings()) {
                 this.un('afterlayout', this.initLoadSettings, this);
+            }
         };
 
         this.on('afterlayout', this.initLoadSettings, this);
