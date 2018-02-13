@@ -12,7 +12,7 @@ class DataExplorer extends Common
         $selectedProcessingUnits = $this->getSelectedPUCounts();
         $selectedMetrics = $this->getSelectedMetrics();
         $showChangeIndicator = $this->getShowChangeIndicator();
-        $format = \DataWarehouse\ExportBuilder::getFormat($this->request, 'png', array('svg', 'png', 'png_inline', 'svg_inline', 'xml', 'csv', 'jsonstore', 'hc_jsonstore'));
+        $format = \DataWarehouse\ExportBuilder::getFormat($this->request, 'png', array('svg', 'pdf', 'png', 'png_inline', 'svg_inline', 'xml', 'csv', 'jsonstore', 'hc_jsonstore'));
         $inline = true;
         if(isset($this->request['inline']))
         {
@@ -119,7 +119,7 @@ class DataExplorer extends Common
         $filename = 'data_explorer_'.$start_date.'_to_'.$end_date.'_'.implode('_',$filename_resources).'_'.implode('_',$filename_kernels).'_'.implode('_',$filename_metrics);
 
         $filename = substr($filename,0,100);
-        if($format === 'hc_jsonstore' || $format === 'png' || $format === 'svg' || $format === 'png_inline' || $format === 'svg_inline')
+        if($format === 'hc_jsonstore' || $format === 'png' || $format === 'svg' || $format === 'pdf' || $format === 'png_inline' || $format === 'svg_inline')
         {
             $hc = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $swap_xy);
 			$title=$title?$title:implode(', ',$filename_resources).'; '.implode(', ',$filename_kernels).'; '.implode(', ',$filename_metrics);

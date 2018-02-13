@@ -742,7 +742,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
 
                 Ext.apply(parameters, opts);
 
-                var urlEndComponent = parameters.format == 'png' || parameters.format == 'svg' || parameters.format == 'eps' ? 'plots' : 'datasets';
+                var imageTypes = ['png', 'svg', 'pdf', 'eps'];
+                var urlEndComponent = imageTypes.includes(parameters.format) ? 'plots' : 'datasets';
                 XDMoD.REST.download({
                     url: 'app_kernels/' + urlEndComponent,
                     method: 'GET',
