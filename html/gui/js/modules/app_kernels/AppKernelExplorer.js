@@ -1013,6 +1013,16 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 return;
             }
 
+            var i;
+            var chart = chartStore.getAt(0).data;
+            if (chart.yAxis && Array.isArray(chart.yAxis)) {
+                for (i = 0; i < chart.yAxis.length; i++) {
+                    chart.yAxis[i].labels.formatter = function () {
+                        return this.value < 0.01 ? this.value : Highcharts.numberFormat(this.value);
+                    };
+                }
+            }
+
             var selectedResourceIds = this.getSelectedResourceIds();
             var selectedMetrics = this.getSelectedMetrics();
             var noData = selectedResourceIds.length === 0 || selectedMetrics.length === 0;
@@ -1075,6 +1085,13 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
         var highChartPanel = new CCR.xdmod.ui.HighChartPanel({
 
             id: 'hc-panel' + this.id,
+            baseChartOptions: {
+                legend: {
+                    labelFormatter: function () {
+                        return this.name;
+                    }
+                }
+            },
             store: chartStore
 
         }); //highChartPanel
