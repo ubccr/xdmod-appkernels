@@ -740,6 +740,15 @@ XDMoD.Arr.ControlRegionsPanel=Ext.extend(XDMoD.PortalModule,
                         },
                         plotOptions: {
                           series:{
+                              point: {
+                                  events: {
+                                      click: function () {
+                                          self.contextMenuOnClick({
+                                              x: Math.floor(this.x / 1000.0)
+                                          });
+                                      }
+                                  }
+                              },
                             animation: false
                           }
                         },
@@ -763,6 +772,15 @@ XDMoD.Arr.ControlRegionsPanel=Ext.extend(XDMoD.PortalModule,
 
                     var chartOptions = r.get('hc_jsonstore');
                     jQuery.extend(true, chartOptions, baseChartOptions);
+
+                    var idx;
+                    if (chartOptions.yAxis) {
+                        for (idx = 0; idx < chartOptions.yAxis.length; idx++) {
+                            chartOptions.yAxis[idx].labels.formatter = function () {
+                                return this.value < 0.01 ? this.value : Highcharts.numberFormat(this.value);
+                            };
+                        }
+                    }
 
                     chartOptions.exporting.enabled = false;
                     chartOptions.credits.enabled = isChart;

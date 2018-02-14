@@ -587,10 +587,19 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                                 }
                             }
                         },
-                        plotOptions:{
-                          series:{
-                            animation: false
-                          }
+                        plotOptions: {
+                            series: {
+                                animation: false,
+                                point: {
+                                    events: {
+                                        click: function () {
+                                            if (this.series.userOptions.drillId) {
+                                                XDMoD.Module.AppKernels.AppKernelViewer.selectChildUnitsChart(this.series.userOptions.drillId);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         },
                         loading: {
                             labelStyle: {
@@ -607,6 +616,15 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
 
                     var chartOptions = r.get('hc_jsonstore');
                     jQuery.extend(true, chartOptions, baseChartOptions);
+
+                    var idx;
+                    if (chartOptions.yAxis) {
+                        for (idx = 0; idx < chartOptions.yAxis.length; idx++) {
+                            chartOptions.yAxis[idx].labels.formatter = function () {
+                                return this.value < 0.01 ? this.value : Highcharts.numberFormat(this.value);
+                            };
+                        }
+                    }
 
                     chartOptions.exporting.enabled = false;
                     chartOptions.credits.enabled = isChart;

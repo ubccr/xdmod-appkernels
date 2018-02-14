@@ -120,12 +120,6 @@ class HighChartAppKernel extends HighChart2
             'lineWidth' => 1 + $font_size/4,
             'plotBands' => array()
         );
-                /*$this->_chart['chart']=array('events' => array(
-                        'click' => "function(event){
-                                                    console.log('x:'+event.xAxis[0].value);
-                                                    console.log(".'"chart click\n"'.");
-                        }"
-                ));*/
 
         $colors = \DataWarehouse\Visualization::getColors(33);
         $colors = array_reverse($colors);
@@ -157,10 +151,7 @@ class HighChartAppKernel extends HighChart2
                     'labels' => array(
                         'style' => array(
                             'fontSize' => (11 + $font_size).'px'
-                        ),
-                        'formatter' => "function(){
-                            return this.value< 0.01?this.value:Highcharts.numberFormat(this.value);
-                        }"
+                        )
                     ),
                     'opposite' => $this->_axisCount % 2 == 1,
                     'min' => false?null:$yMin,
@@ -265,13 +256,7 @@ class HighChartAppKernel extends HighChart2
             if($drillDown&&$contextMenuOnClick===NULL)
             {
                 $data_series_desc['cursor'] = 'pointer';
-                $data_series_desc['point'] = array(
-                    'events' => array(
-                        'click' => "function(event){
-                                                    XDMoD.Module.AppKernels.AppKernelViewer.selectChildUnitsChart(".$dataset->rawNumProcUnits.");
-                        }"
-                    )
-                );
+                $data_series_desc['drillId'] = $dataset->rawNumProcUnits;
             }
 
             $this->_chart['series'][] = $data_series_desc;
@@ -355,10 +340,7 @@ class HighChartAppKernel extends HighChart2
                         'labels' => array(
                             'style' => array(
                                 'fontSize' => (11 + $font_size).'px'
-                            ),
-                            'formatter' => "function(){
-                                return this.value< 0.01?this.value:Highcharts.numberFormat(this.value);
-                            }"
+                            )
                         ),
                         'opposite' => $this->_axisCount % 2 == 1,
                         'type' => 'linear',
@@ -598,14 +580,6 @@ class HighChartAppKernel extends HighChart2
                     if($contextMenuOnClick!==NULL){
                         for($i=0;$i<count($this->_chart['series']);$i++){
                             $this->_chart['series'][$i]['cursor'] = 'pointer';
-                $this->_chart['series'][$i]['point'] = array(
-                                'events' => array(
-                                    'click' => "function(event){
-                                        var extpanel=Ext.getCmp('".$contextMenuOnClick."');
-                                        extpanel.contextMenuOnClick({'x':((this.x/1000.0)|0)});
-                                    }"
-                                )
-                            );
                         }
                     }
                     $this->_datasetCount++;
