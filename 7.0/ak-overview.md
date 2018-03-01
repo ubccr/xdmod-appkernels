@@ -2,7 +2,6 @@
 title: Application Kernels Overview
 redirect_from:
     - "/7.0/"
-    - ""
 ---
 
 Application Kernel Performance Monitoring Module of XDMoD tool is

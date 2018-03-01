@@ -1,3 +1,3 @@
 ---
-redirect_to: /7.0/ak-install-source.html
+redirect_to: /7.5/ak-install-source.html
 ---
