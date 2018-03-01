@@ -1,6 +1,15 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
+## 2018-03-01 v7.5.0
+
+- Features
+    - Added PDF export support
+- Bug Fixes
+    - Fixed report generator and ingestion cron scripts
+    - Fixed loading mask when no data is present
+    - Added missing files
+
 ## 2017-09-21 v7.0.0
 
 - Bug Fixes
