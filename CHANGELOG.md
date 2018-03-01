@@ -1,6 +1,8 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
+## 2018-??-?? v8.0.0
+
 ## 2018-03-01 v7.5.0
 
 - Features
