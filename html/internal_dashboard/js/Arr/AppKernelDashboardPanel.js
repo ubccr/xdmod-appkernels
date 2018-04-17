@@ -62,6 +62,9 @@ XDMoD.Arr.AppKernelDashboardPanel = Ext.extend(Ext.ux.GroupTabPanel, {
 
 
     },
+    adjustBodyWidth: function (w) {
+        return w - this.tabWidth - 2;
+    },
     listeners: {
         'tabchange': {
             fn: function (tabpanel,tab) {
