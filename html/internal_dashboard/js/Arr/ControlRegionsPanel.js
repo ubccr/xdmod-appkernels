@@ -740,7 +740,16 @@ XDMoD.Arr.ControlRegionsPanel=Ext.extend(XDMoD.PortalModule,
                         },
                         plotOptions: {
                           series:{
-                            animation: false
+                            animation: false,
+                            point: {
+                                events: {
+                                    click: function () {
+                                        self.contextMenuOnClick({
+                                            x: (this.x/1000.0) | 0
+                                        });
+                                    }
+                                }
+                            }
                           }
                         },
                         loading: {
