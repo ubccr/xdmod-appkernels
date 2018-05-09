@@ -531,7 +531,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
         if ($format == 'session_variable') {
             return new Response(
-                \xd_charting\encodeJSON(array(
+                json_encode(array(
                     'success' => true,
                     'results' => $returnValue,
                 )),

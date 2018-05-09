@@ -588,9 +588,18 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                             }
                         },
                         plotOptions:{
-                          series:{
-                            animation: false
-                          }
+                            series:{
+                                animation: false,
+                                point: {
+                                    events: {
+                                        click: function () {
+                                            if (this.series.userOptions.rawNumProcUnits) {
+                                                XDMoD.Module.AppKernels.AppKernelViewer.selectChildUnitsChart(this.series.userOptions.rawNumProcUnits);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         },
                         loading: {
                             labelStyle: {
@@ -612,9 +621,9 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                     chartOptions.credits.enabled = isChart;
 
                     if (isMenu) {
-                        this.charts.push(new Highcharts.Chart(chartOptions));
+                        this.charts.push(XDMoD.utils.createChart(chartOptions));
                     } else {
-                        this.chart = new Highcharts.Chart(chartOptions);
+                        this.chart = XDMoD.utils.createChart(chartOptions);
                     }
                 }, this);
 
