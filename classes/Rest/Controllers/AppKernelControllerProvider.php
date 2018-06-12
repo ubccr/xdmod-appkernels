@@ -398,8 +398,8 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
         $resourceDescription = '';
         $lastResult = new \AppKernel\Dataset('Empty App Kernel Dataset', -1, "", -1, "", -1, "", "", "", "");
-        $hc = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $swap_xy);
-        $hc->setTitle($show_title ? 'Empty App Kernel Dataset' : null, $font_size);
+        $hc = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
+        $hc->setTitle($show_title ? 'Empty App Kernel Dataset' : NULL, $font_size);
         $hc->setLegend($legend_location, $font_size);
 
         $datasets = array();
@@ -471,6 +471,9 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
                 }
                 if ($format != 'params') {
+                    $hc = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
+                    $hc->setTitle($show_title ? $result->metric : NULL, $font_size);
+                    $hc->setSubtitle($show_title ? $result->resourceName : NULL, $font_size);
                     $hc = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $swap_xy);
                     $hc->setTitle($show_title ? $result->metric : null, $font_size);
                     $hc->setSubtitle($show_title ? $result->resourceName : null, $font_size);
