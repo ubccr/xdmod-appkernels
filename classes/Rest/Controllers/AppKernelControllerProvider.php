@@ -1,5 +1,5 @@
 <?php
-namespace NewRest\Controllers;
+namespace Rest\Controllers;
 
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,26 +37,26 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
         $root = $this->prefix;
 
-        $controller->get("$root/details", '\NewRest\Controllers\AppKernelControllerProvider::getDetails');
-        $controller->get("$root/datasets", '\NewRest\Controllers\AppKernelControllerProvider::getDatasets');
-        $controller->get("$root/plots", '\NewRest\Controllers\AppKernelControllerProvider::getPlots');
-        $controller->get("$root/control_regions", '\NewRest\Controllers\AppKernelControllerProvider::getControlRegions');
-        $controller->post("$root/control_regions", '\NewRest\Controllers\AppKernelControllerProvider::createOrUpdateControlRegions')
+        $controller->get("$root/details", '\Rest\Controllers\AppKernelControllerProvider::getDetails');
+        $controller->get("$root/datasets", '\Rest\Controllers\AppKernelControllerProvider::getDatasets');
+        $controller->get("$root/plots", '\Rest\Controllers\AppKernelControllerProvider::getPlots');
+        $controller->get("$root/control_regions", '\Rest\Controllers\AppKernelControllerProvider::getControlRegions');
+        $controller->post("$root/control_regions", '\Rest\Controllers\AppKernelControllerProvider::createOrUpdateControlRegions')
             ->value('update', false);
-        $controller->put("$root/control_regions", '\NewRest\Controllers\AppKernelControllerProvider::createOrUpdateControlRegions')
+        $controller->put("$root/control_regions", '\Rest\Controllers\AppKernelControllerProvider::createOrUpdateControlRegions')
             ->value('update', true);
-        $controller->delete("$root/control_regions", '\NewRest\Controllers\AppKernelControllerProvider::deleteControlRegions');
+        $controller->delete("$root/control_regions", '\Rest\Controllers\AppKernelControllerProvider::deleteControlRegions');
 
-        $controller->get("$root/notifications", '\NewRest\Controllers\AppKernelControllerProvider::getNotifications');
-        $controller->put("$root/notifications", '\NewRest\Controllers\AppKernelControllerProvider::putNotifications');
-        $controller->get("$root/notifications/default", '\NewRest\Controllers\AppKernelControllerProvider::getDefaultNotifications');
-        $controller->get("$root/notifications/send", '\NewRest\Controllers\AppKernelControllerProvider::sendNotification');
+        $controller->get("$root/notifications", '\Rest\Controllers\AppKernelControllerProvider::getNotifications');
+        $controller->put("$root/notifications", '\Rest\Controllers\AppKernelControllerProvider::putNotifications');
+        $controller->get("$root/notifications/default", '\Rest\Controllers\AppKernelControllerProvider::getDefaultNotifications');
+        $controller->get("$root/notifications/send", '\Rest\Controllers\AppKernelControllerProvider::sendNotification');
 
-        $controller->get("$root/resources", '\NewRest\Controllers\AppKernelControllerProvider::getResources');
-        $controller->get("$root/app_kernels", '\NewRest\Controllers\AppKernelControllerProvider::getAppKernels');
+        $controller->get("$root/resources", '\Rest\Controllers\AppKernelControllerProvider::getResources');
+        $controller->get("$root/app_kernels", '\Rest\Controllers\AppKernelControllerProvider::getAppKernels');
 
-        $controller->get("$root/performance_map", '\NewRest\Controllers\AppKernelControllerProvider::getPerformanceMap');
-        $controller->get("$root/success_rate", '\NewRest\Controllers\AppKernelControllerProvider::getAppKernelSuccessRate');
+        $controller->get("$root/performance_map", '\Rest\Controllers\AppKernelControllerProvider::getPerformanceMap');
+        $controller->get("$root/success_rate", '\Rest\Controllers\AppKernelControllerProvider::getAppKernelSuccessRate');
     }
 
     /**

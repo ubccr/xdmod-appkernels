@@ -1,6 +1,6 @@
 <?php
 
-namespace NewRest\Controllers;
+namespace Rest\Controllers;
 
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
@@ -40,46 +40,46 @@ class AkrrControllerProvider extends BaseControllerProvider
 
         // SETUP: the routes this controller will manage.
         $controller
-            ->get("$root/token", '\NewRest\Controllers\AkrrControllerProvider::getToken');
+            ->get("$root/token", '\Rest\Controllers\AkrrControllerProvider::getToken');
 
         $controller
-            ->get("$root/resources", '\NewRest\Controllers\AkrrControllerProvider::getResources');
+            ->get("$root/resources", '\Rest\Controllers\AkrrControllerProvider::getResources');
 
         $controller
-            ->get("$root/kernels", '\NewRest\Controllers\AkrrControllerProvider::getKernels');
+            ->get("$root/kernels", '\Rest\Controllers\AkrrControllerProvider::getKernels');
 
 
         $controller
-            ->get("$root/tasks/scheduled", '\NewRest\Controllers\AkrrControllerProvider::getTasks');
+            ->get("$root/tasks/scheduled", '\Rest\Controllers\AkrrControllerProvider::getTasks');
         $controller
-            ->post("$root/tasks/scheduled", '\NewRest\Controllers\AkrrControllerProvider::createTask');
+            ->post("$root/tasks/scheduled", '\Rest\Controllers\AkrrControllerProvider::createTask');
         $controller
-            ->put("$root/tasks/scheduled/{id}", '\NewRest\Controllers\AkrrControllerProvider::updateTask')
+            ->put("$root/tasks/scheduled/{id}", '\Rest\Controllers\AkrrControllerProvider::updateTask')
             ->convert('id', $idConverter);
         $controller
-            ->delete("$root/tasks/scheduled/{id}", '\NewRest\Controllers\AkrrControllerProvider::deleteTask')
-            ->convert('id', $idConverter);
-
-        $controller
-            ->get("$root/walltime", '\NewRest\Controllers\AkrrControllerProvider::getWalltime');
-
-        $controller
-            ->post("$root/walltime", '\NewRest\Controllers\AkrrControllerProvider::createWalltime');
-
-        $controller
-            ->put("$root/walltime", '\NewRest\Controllers\AkrrControllerProvider::updateWalltime');
-        $controller
-            ->delete("$root/walltime/{id}", '\NewRest\Controllers\AkrrControllerProvider::deleteWalltime')
+            ->delete("$root/tasks/scheduled/{id}", '\Rest\Controllers\AkrrControllerProvider::deleteTask')
             ->convert('id', $idConverter);
 
         $controller
-            ->get("$root/tasks/active", '\NewRest\Controllers\AkrrControllerProvider::getActiveTasks');
+            ->get("$root/walltime", '\Rest\Controllers\AkrrControllerProvider::getWalltime');
+
         $controller
-            ->put("$root/tasks/active/{id}", '\NewRest\Controllers\AkrrControllerProvider::updateActiveTask')
+            ->post("$root/walltime", '\Rest\Controllers\AkrrControllerProvider::createWalltime');
+
+        $controller
+            ->put("$root/walltime", '\Rest\Controllers\AkrrControllerProvider::updateWalltime');
+        $controller
+            ->delete("$root/walltime/{id}", '\Rest\Controllers\AkrrControllerProvider::deleteWalltime')
             ->convert('id', $idConverter);
 
         $controller
-            ->delete("$root/tasks/active/{id}", '\NewRest\Controllers\AkrrControllerProvider::deleteActiveTask')
+            ->get("$root/tasks/active", '\Rest\Controllers\AkrrControllerProvider::getActiveTasks');
+        $controller
+            ->put("$root/tasks/active/{id}", '\Rest\Controllers\AkrrControllerProvider::updateActiveTask')
+            ->convert('id', $idConverter);
+
+        $controller
+            ->delete("$root/tasks/active/{id}", '\Rest\Controllers\AkrrControllerProvider::deleteActiveTask')
             ->convert('id', $idConverter);
     }
 
