@@ -102,7 +102,7 @@ class AkrrControllerProvider extends BaseControllerProvider
     {
         return $app
             ->json(
-                $this->_call($request, '/token', 'GET', false, false),
+                $this->call($request, '/token', 'GET', false, false),
                 200
             )
             ->setTtl(60);
@@ -129,7 +129,7 @@ class AkrrControllerProvider extends BaseControllerProvider
     public function getResources(Request $request, Application $app)
     {
         return $app->json(
-            $this->_call($request, '/resources'),
+            $this->call($request, '/resources'),
             200
         );
     }
@@ -156,7 +156,7 @@ class AkrrControllerProvider extends BaseControllerProvider
     public function getKernels(Request $request, Application $app)
     {
         return $app->json(
-            $this->_call($request, '/kernels'),
+            $this->call($request, '/kernels'),
             200
         );
     }
@@ -191,7 +191,7 @@ class AkrrControllerProvider extends BaseControllerProvider
     public function getTasks(Request $request, Application $app)
     {
         return $app->json(
-            $this->_call($request, '/scheduled_tasks'),
+            $this->call($request, '/scheduled_tasks'),
             200
         );
     }
@@ -228,7 +228,7 @@ class AkrrControllerProvider extends BaseControllerProvider
         $data['app'] = $appKernel;
 
         return $app->json(
-            $this->_call($request, '/scheduled_tasks', 'POST', $data),
+            $this->call($request, '/scheduled_tasks', 'POST', $data),
             200
         );
     }
@@ -258,7 +258,7 @@ class AkrrControllerProvider extends BaseControllerProvider
         $data = $this->cleanUpData($data);
 
         return $app->json(
-            $this->_call($request, "/scheduled_tasks/$id", 'POST', $data),
+            $this->call($request, "/scheduled_tasks/$id", 'POST', $data),
             200
         );
     }
@@ -279,7 +279,7 @@ class AkrrControllerProvider extends BaseControllerProvider
     {
 
         return $app->json(
-            $this->_call($request, "/scheduled_tasks/$id", 'DELETE'),
+            $this->call($request, "/scheduled_tasks/$id", 'DELETE'),
             200
         );
     }
@@ -312,7 +312,7 @@ class AkrrControllerProvider extends BaseControllerProvider
     {
 
         return $app->json(
-            $this->_call($request, '/walltime'),
+            $this->call($request, '/walltime'),
             200
         );
     }
@@ -348,7 +348,7 @@ class AkrrControllerProvider extends BaseControllerProvider
         unset($data['app_kernel']);
 
         return $app->json(
-            $this->_call($request, "/walltime/$resource/$appKernel", 'POST', $data),
+            $this->call($request, "/walltime/$resource/$appKernel", 'POST', $data),
             200
         );
     }
@@ -378,7 +378,7 @@ class AkrrControllerProvider extends BaseControllerProvider
         unset($data['app_kernel']);
 
         return $app->json(
-            $this->_call($request, "/walltime/$resource/$appKernel", 'POST', $data),
+            $this->call($request, "/walltime/$resource/$appKernel", 'POST', $data),
             200
         );
     }
@@ -399,7 +399,7 @@ class AkrrControllerProvider extends BaseControllerProvider
     public function deleteWalltime(Request $request, Application $app, $id)
     {
         return $app->json(
-            $this->_call($request, "/walltime/$id", 'DELETE'),
+            $this->call($request, "/walltime/$id", 'DELETE'),
             200
         );
     }
@@ -445,7 +445,7 @@ class AkrrControllerProvider extends BaseControllerProvider
     {
 
         return $app->json(
-            $this->_call($request, '/active_tasks'),
+            $this->call($request, '/active_tasks'),
             200
         );
     }
@@ -473,7 +473,7 @@ class AkrrControllerProvider extends BaseControllerProvider
         $data = $this->cleanUpData($data);
 
         return $app->json(
-            $this->_call($request, "/active_tasks/$id", 'PUT', $data),
+            $this->call($request, "/active_tasks/$id", 'PUT', $data),
             200
         );
     }
@@ -494,7 +494,7 @@ class AkrrControllerProvider extends BaseControllerProvider
     public function deleteActiveTask(Request $request, Application $app, $id)
     {
         return $app->json(
-            $this->_call($request, "/active_tasks/$id", 'DELETE'),
+            $this->call($request, "/active_tasks/$id", 'DELETE'),
             200
         );
     }
@@ -531,7 +531,7 @@ class AkrrControllerProvider extends BaseControllerProvider
      * @throws HttpInvalidParamException
      * @throws \Exception
      */
-    private function _call(Request $request, $path, $method = 'GET', $data = null, $useToken = true)
+    private function call(Request $request, $path, $method = 'GET', $data = null, $useToken = true)
     {
         if (!isset($path)) {
             throw new HttpInvalidParamException('A path is required for the requested operation.');
@@ -546,7 +546,7 @@ class AkrrControllerProvider extends BaseControllerProvider
         if ($useToken) {
 
             if (!isset($this->token)) {
-                $results = $this->_call($request, '/token', 'GET', false, false);
+                $results = $this->call($request, '/token', 'GET', false, false);
                 if (isset($results) && isset($results['data']) && isset($results['data']['token'])) {
                     $this->token = $results['data']['token'];
                 }
