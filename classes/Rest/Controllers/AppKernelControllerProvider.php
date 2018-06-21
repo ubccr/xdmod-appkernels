@@ -1264,12 +1264,15 @@ class AppKernelControllerProvider extends BaseControllerProvider
     {
         $id = array();
         switch ($type) {
+            // comment describing why there is no break.
             case self::TREENODE_UNITS:
                 array_unshift($id, $record['num_units']);
+            // comment describing why there is no break.
             case self::TREENODE_METRIC:
                 if (isset($record['metric_id'])) {
                     array_unshift($id, $record['metric_id']);
                 }
+            // comment describing why there is no break.
             case self::TREENODE_RESOURCE:
                 array_unshift($id, $record['resource_id']);
             case self::TREENODE_APPKERNEL:

@@ -221,7 +221,7 @@ class AkrrControllerProvider extends BaseControllerProvider
             'group_id'
         ));
 
-        $data = $this->_cleanUpData($data);
+        $data = $this->cleanUpData($data);
 
         $appKernel = $data['app_kernel'];
         unset($data['app_kernel']);
@@ -255,7 +255,7 @@ class AkrrControllerProvider extends BaseControllerProvider
             'repeat_in'
         ));
 
-        $data = $this->_cleanUpData($data);
+        $data = $this->cleanUpData($data);
 
         return $app->json(
             $this->_call($request, "/scheduled_tasks/$id", 'POST', $data),
@@ -340,7 +340,7 @@ class AkrrControllerProvider extends BaseControllerProvider
             'comments'
         ));
 
-        $data = $this->_cleanUpData($data);
+        $data = $this->cleanUpData($data);
 
         $resource = $data['resource'];
         $appKernel = $data['app_kernel'];
@@ -370,7 +370,7 @@ class AkrrControllerProvider extends BaseControllerProvider
             'comments'
         ));
 
-        $data = $this->_cleanUpData($data);
+        $data = $this->cleanUpData($data);
 
         $resource = $data['resource'];
         $appKernel = $data['app_kernel'];
@@ -470,7 +470,7 @@ class AkrrControllerProvider extends BaseControllerProvider
             'next_check_time'
         ));
 
-        $data = $this->_cleanUpData($data);
+        $data = $this->cleanUpData($data);
 
         return $app->json(
             $this->_call($request, "/active_tasks/$id", 'PUT', $data),
@@ -506,7 +506,7 @@ class AkrrControllerProvider extends BaseControllerProvider
      * @param array $data
      * @return array that was passed in, only "clean".
      */
-    private function _cleanUpData(array $data)
+    private function cleanUpData(array $data)
     {
         if (isset($data)) {
             unset($data['token']);
@@ -519,7 +519,7 @@ class AkrrControllerProvider extends BaseControllerProvider
     /**
      * A convenience method that reduces the amount of boilerplate required to wire up an end point in this controller.
      * It handles: token management and base url management ( aka. host, port and end point of the AKRR REST API )
-     * before passing control on to the _callAPI method.
+     * before passing control on to the callAPI method.
      *
      * @param Request $request that will be used to gather the information required to complete the requested action.
      * @param string $path to the unique AKRR REST endpoint that is to be called.
@@ -540,7 +540,7 @@ class AkrrControllerProvider extends BaseControllerProvider
             throw new HttpInvalidParamException('A method is required for the requested operation.');
         }
 
-        $baseUrl = $this->_getUrl();
+        $baseUrl = $this->getUrl();
         $url = "$baseUrl$path";
 
         if ($useToken) {
@@ -555,13 +555,13 @@ class AkrrControllerProvider extends BaseControllerProvider
                 throw new HttpException('Unable to retrieve the required information. Unable to process request.');
             }
 
-            $curlResult = $this->_callAPI($url, $this->token, null, $method, $data);
+            $curlResult = $this->callAPI($url, $this->token, null, $method, $data);
         } else {
 
             $username = \xd_utilities\getConfiguration('akrr', 'username');
             $password = \xd_utilities\getConfiguration('akrr', 'password');
 
-            $curlResult = $this->_callAPI($url, $username, $password, $method, $data, $useToken);
+            $curlResult = $this->callAPI($url, $username, $password, $method, $data, $useToken);
         }
 
 
@@ -575,7 +575,7 @@ class AkrrControllerProvider extends BaseControllerProvider
      * @throws Exception if the settings file is not readable.
      * @throws \Exception if there is a problem retrieving data from the settings file.
      */
-    private function _getUrl()
+    private function getUrl()
     {
         $host = \xd_utilities\getConfiguration('akrr', 'host');
         $port = \xd_utilities\getConfiguration('akrr', 'port');
@@ -598,7 +598,7 @@ class AkrrControllerProvider extends BaseControllerProvider
      *     authentication.
      * @return array
      */
-    private function _callAPI(
+    private function callAPI(
         $path,
         $username,
         $password,
