@@ -103,7 +103,8 @@ class AkrrControllerProvider extends BaseControllerProvider
         return $app
             ->json(
                 $this->_call($request, '/token', 'GET', false, false),
-                200)
+                200
+            )
             ->setTtl(60);
     }
 
@@ -129,7 +130,8 @@ class AkrrControllerProvider extends BaseControllerProvider
     {
         return $app->json(
             $this->_call($request, '/resources'),
-            200);
+            200
+        );
     }
 
     /**
@@ -155,7 +157,8 @@ class AkrrControllerProvider extends BaseControllerProvider
     {
         return $app->json(
             $this->_call($request, '/kernels'),
-            200);
+            200
+        );
     }
 
     /**
@@ -189,7 +192,8 @@ class AkrrControllerProvider extends BaseControllerProvider
     {
         return $app->json(
             $this->_call($request, '/scheduled_tasks'),
-            200);
+            200
+        );
     }
 
     /**
@@ -225,7 +229,8 @@ class AkrrControllerProvider extends BaseControllerProvider
 
         return $app->json(
             $this->_call($request, '/scheduled_tasks', 'POST', $data),
-            200);
+            200
+        );
     }
 
     /**
@@ -254,7 +259,8 @@ class AkrrControllerProvider extends BaseControllerProvider
 
         return $app->json(
             $this->_call($request, "/scheduled_tasks/$id", 'POST', $data),
-            200);
+            200
+        );
     }
 
     /**
@@ -274,7 +280,8 @@ class AkrrControllerProvider extends BaseControllerProvider
 
         return $app->json(
             $this->_call($request, "/scheduled_tasks/$id", 'DELETE'),
-            200);
+            200
+        );
     }
 
     /**
@@ -306,7 +313,8 @@ class AkrrControllerProvider extends BaseControllerProvider
 
         return $app->json(
             $this->_call($request, '/walltime'),
-            200);
+            200
+        );
     }
 
     /**
@@ -341,7 +349,8 @@ class AkrrControllerProvider extends BaseControllerProvider
 
         return $app->json(
             $this->_call($request, "/walltime/$resource/$appKernel", 'POST', $data),
-            200);
+            200
+        );
     }
 
     /**
@@ -370,7 +379,8 @@ class AkrrControllerProvider extends BaseControllerProvider
 
         return $app->json(
             $this->_call($request, "/walltime/$resource/$appKernel", 'POST', $data),
-            200);
+            200
+        );
     }
 
     /**
@@ -390,7 +400,8 @@ class AkrrControllerProvider extends BaseControllerProvider
     {
         return $app->json(
             $this->_call($request, "/walltime/$id", 'DELETE'),
-            200);
+            200
+        );
     }
 
     /**
@@ -435,7 +446,8 @@ class AkrrControllerProvider extends BaseControllerProvider
 
         return $app->json(
             $this->_call($request, '/active_tasks'),
-            200);
+            200
+        );
     }
 
     /**
@@ -462,7 +474,8 @@ class AkrrControllerProvider extends BaseControllerProvider
 
         return $app->json(
             $this->_call($request, "/active_tasks/$id", 'PUT', $data),
-            200);
+            200
+        );
     }
 
     /**
@@ -482,7 +495,8 @@ class AkrrControllerProvider extends BaseControllerProvider
     {
         return $app->json(
             $this->_call($request, "/active_tasks/$id", 'DELETE'),
-            200);
+            200
+        );
     }
 
     /**
@@ -519,8 +533,12 @@ class AkrrControllerProvider extends BaseControllerProvider
      */
     private function _call(Request $request, $path, $method = 'GET', $data = null, $useToken = true)
     {
-        if (!isset($path)) throw new HttpInvalidParamException('A path is required for the requested operation.');
-        if (!isset($method)) throw new HttpInvalidParamException('A method is required for the requested operation.');
+        if (!isset($path)) {
+            throw new HttpInvalidParamException('A path is required for the requested operation.');
+        }
+        if (!isset($method)) {
+            throw new HttpInvalidParamException('A method is required for the requested operation.');
+        }
 
         $baseUrl = $this->_getUrl();
         $url = "$baseUrl$path";
@@ -533,7 +551,9 @@ class AkrrControllerProvider extends BaseControllerProvider
                     $this->token = $results['data']['token'];
                 }
             }
-            if (!isset($this->token)) throw new HttpException('Unable to retrieve the required information. Unable to process request.');
+            if (!isset($this->token)) {
+                throw new HttpException('Unable to retrieve the required information. Unable to process request.');
+            }
 
             $curlResult = $this->_callAPI($url, $this->token, null, $method, $data);
         } else {
@@ -585,8 +605,8 @@ class AkrrControllerProvider extends BaseControllerProvider
         $method = 'GET',
         $data = false,
         $useToken = true
-    )
-    {
+    ) {
+    
 
         $url = $path;
 
@@ -626,9 +646,9 @@ class AkrrControllerProvider extends BaseControllerProvider
             curl_setopt($curl, CURLOPT_USERPWD, sprintf("%s:%s", $username, $password));
         }
 
-        curl_setopt($curl, CURLOPT_UNRESTRICTED_AUTH, TRUE);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
+        curl_setopt($curl, CURLOPT_UNRESTRICTED_AUTH, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
 
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -656,6 +676,4 @@ class AkrrControllerProvider extends BaseControllerProvider
 
         return $result;
     }
-
-
 }
