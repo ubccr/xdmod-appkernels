@@ -1,6 +1,6 @@
 {
   "akrr": {
     "prefix": "akrr",
-    "controller": "NewRest\\Controllers\\AkrrControllerProvider"
+    "controller": "Rest\\Controllers\\AkrrControllerProvider"
   }
 }
