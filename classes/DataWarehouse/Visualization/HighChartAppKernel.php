@@ -32,6 +32,7 @@ class HighChartAppKernel extends HighChart2
         $scale,
         $width,
         $height,
+        $user,
         $swap_xy = false
     ) {
         parent::__construct(
@@ -39,7 +40,9 @@ class HighChartAppKernel extends HighChart2
             $start_date,
             $end_date,
             $scale,
-            $width,$height,
+            $width,
+            $height,
+            $user,
             $swap_xy
         );
 
