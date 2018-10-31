@@ -1,5 +1,5 @@
 <?php
-namespace NewRest\Controllers;
+namespace Rest\Controllers;
 
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,26 +37,26 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
         $root = $this->prefix;
 
-        $controller->get("$root/details", '\NewRest\Controllers\AppKernelControllerProvider::getDetails');
-        $controller->get("$root/datasets", '\NewRest\Controllers\AppKernelControllerProvider::getDatasets');
-        $controller->get("$root/plots", '\NewRest\Controllers\AppKernelControllerProvider::getPlots');
-        $controller->get("$root/control_regions", '\NewRest\Controllers\AppKernelControllerProvider::getControlRegions');
-        $controller->post("$root/control_regions", '\NewRest\Controllers\AppKernelControllerProvider::createOrUpdateControlRegions')
+        $controller->get("$root/details", '\Rest\Controllers\AppKernelControllerProvider::getDetails');
+        $controller->get("$root/datasets", '\Rest\Controllers\AppKernelControllerProvider::getDatasets');
+        $controller->get("$root/plots", '\Rest\Controllers\AppKernelControllerProvider::getPlots');
+        $controller->get("$root/control_regions", '\Rest\Controllers\AppKernelControllerProvider::getControlRegions');
+        $controller->post("$root/control_regions", '\Rest\Controllers\AppKernelControllerProvider::createOrUpdateControlRegions')
             ->value('update', false);
-        $controller->put("$root/control_regions", '\NewRest\Controllers\AppKernelControllerProvider::createOrUpdateControlRegions')
+        $controller->put("$root/control_regions", '\Rest\Controllers\AppKernelControllerProvider::createOrUpdateControlRegions')
             ->value('update', true);
-        $controller->delete("$root/control_regions", '\NewRest\Controllers\AppKernelControllerProvider::deleteControlRegions');
+        $controller->delete("$root/control_regions", '\Rest\Controllers\AppKernelControllerProvider::deleteControlRegions');
 
-        $controller->get("$root/notifications", '\NewRest\Controllers\AppKernelControllerProvider::getNotifications');
-        $controller->put("$root/notifications", '\NewRest\Controllers\AppKernelControllerProvider::putNotifications');
-        $controller->get("$root/notifications/default", '\NewRest\Controllers\AppKernelControllerProvider::getDefaultNotifications');
-        $controller->get("$root/notifications/send", '\NewRest\Controllers\AppKernelControllerProvider::sendNotification');
+        $controller->get("$root/notifications", '\Rest\Controllers\AppKernelControllerProvider::getNotifications');
+        $controller->put("$root/notifications", '\Rest\Controllers\AppKernelControllerProvider::putNotifications');
+        $controller->get("$root/notifications/default", '\Rest\Controllers\AppKernelControllerProvider::getDefaultNotifications');
+        $controller->get("$root/notifications/send", '\Rest\Controllers\AppKernelControllerProvider::sendNotification');
 
-        $controller->get("$root/resources", '\NewRest\Controllers\AppKernelControllerProvider::getResources');
-        $controller->get("$root/app_kernels", '\NewRest\Controllers\AppKernelControllerProvider::getAppKernels');
+        $controller->get("$root/resources", '\Rest\Controllers\AppKernelControllerProvider::getResources');
+        $controller->get("$root/app_kernels", '\Rest\Controllers\AppKernelControllerProvider::getAppKernels');
 
-        $controller->get("$root/performance_map", '\NewRest\Controllers\AppKernelControllerProvider::getPerformanceMap');
-        $controller->get("$root/success_rate", '\NewRest\Controllers\AppKernelControllerProvider::getAppKernelSuccessRate');
+        $controller->get("$root/performance_map", '\Rest\Controllers\AppKernelControllerProvider::getPerformanceMap');
+        $controller->get("$root/success_rate", '\Rest\Controllers\AppKernelControllerProvider::getAppKernelSuccessRate');
     }
 
     /**
@@ -108,18 +108,18 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
         // Debug mode does not show metrics
 
-        $groupBy = (NULL !== $numProcUnits ? NULL
-            : (NULL !== $metricId ? "num_proc_units"
-                : (NULL !== $resourceId ? ($debugMode ? "num_proc_units" : "metric")
-                    : (NULL !== $akId ? "resource"
+        $groupBy = (null !== $numProcUnits ? null
+            : (null !== $metricId ? "num_proc_units"
+                : (null !== $resourceId ? ($debugMode ? "num_proc_units" : "metric")
+                    : (null !== $akId ? "resource"
                         : "ak"))));
         $resource_first = $this->getBooleanParam($request, 'resource_first', false, false);
 
         if ($resource_first) {
-            $groupBy = (NULL !== $numProcUnits ? NULL
-                : (NULL !== $metricId ? "num_proc_units"
-                    : (NULL !== $akId ? ($debugMode ? "num_proc_units" : "metric")
-                        : (NULL !== $resourceId ? "ak"
+            $groupBy = (null !== $numProcUnits ? null
+                : (null !== $metricId ? "num_proc_units"
+                    : (null !== $akId ? ($debugMode ? "num_proc_units" : "metric")
+                        : (null !== $resourceId ? "ak"
                             : "resource"))));
         }
 
@@ -143,36 +143,39 @@ class AppKernelControllerProvider extends BaseControllerProvider
         }
 
         // Determine the node type. Debug mode does not show metrics
-        if ($resource_first)
+        if ($resource_first) {
             $nodeType = self::TREENODE_RESOURCE;
-        else
+        } else {
             $nodeType = self::TREENODE_APPKERNEL;
+        }
 
-        if (NULL !== $collected || NULL !== $instanceId)
-            $nodeType = NULL;
-        else if (($debugMode || NULL !== $metricId) &&
-            NULL !== $resourceId && NULL !== $akId && NULL !== $numProcUnits
-        )
+        if (null !== $collected || null !== $instanceId) {
+            $nodeType = null;
+        } elseif (($debugMode || null !== $metricId) &&
+            null !== $resourceId && null !== $akId && null !== $numProcUnits
+        ) {
             $nodeType = self::TREENODE_INSTANCE;
-        else if (NULL !== $metricId && NULL !== $resourceId && NULL !== $akId)
+        } elseif (null !== $metricId && null !== $resourceId && null !== $akId) {
             $nodeType = self::TREENODE_UNITS;
-        else if (NULL !== $resourceId && NULL !== $akId)
+        } elseif (null !== $resourceId && null !== $akId) {
             $nodeType = ($debugMode ? self::TREENODE_UNITS : self::TREENODE_METRIC);
-        else {
+        } else {
             if ($resource_first) {
-                if (NULL !== $resourceId)
+                if (null !== $resourceId) {
                     $nodeType = self::TREENODE_APPKERNEL;
+                }
 
             } else {
-                if (NULL !== $akId)
+                if (null !== $akId) {
                     $nodeType = self::TREENODE_RESOURCE;
+                }
             }
         }
 
 
         // Load up the data
 
-        if (NULL !== $nodeType) {
+        if (null !== $nodeType) {
             $restrictions = array('ak' => $akId,
                 'resource' => $resourceId,
                 'metric' => $metricId, //AG 9/6/12 added to fix expand bug
@@ -198,7 +201,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
                 'resource_id' => $resourceId,
                 'num_units' => $numProcUnits,
                 'instance_id' => $instanceId);
-            $db->loadAppKernelInstanceInfo($akOptions, $ak, TRUE);
+            $db->loadAppKernelInstanceInfo($akOptions, $ak, true);
             $results[] = $ak->toHtml();
         }
 
@@ -292,23 +295,21 @@ class AppKernelControllerProvider extends BaseControllerProvider
         if ($format == 'json') //default format
         {
             return $app->json($results);
-        } else
-            if ($format == 'jsonstore') //not supported yet
+        } elseif ($format == 'jsonstore') //not supported yet
             {
 
-            } else
-                if ($format == 'xls' || $format == 'csv' || $format == 'xml') {
-                    $title = 'data';
-                    $exportedDatas = array();
-                    foreach ($datasetList as $result) {
-                        $exportedDatas[] = $result->export();
-                        $title = $result->akName . ': ' . $result->resourceName . ': ' . $result->metric;
-                    }
+        } elseif ($format == 'xls' || $format == 'csv' || $format == 'xml') {
+            $title = 'data';
+            $exportedDatas = array();
+            foreach ($datasetList as $result) {
+                $exportedDatas[] = $result->export();
+                $title = $result->akName . ': ' . $result->resourceName . ': ' . $result->metric;
+            }
 
-                    $content = \DataWarehouse\ExportBuilder::export($exportedDatas, $format, $inline);
+            $content = \DataWarehouse\ExportBuilder::export($exportedDatas, $format, $inline);
 
-                    return new Response($content['results'], Response::HTTP_OK, $content['headers']);
-                }
+            return new Response($content['results'], Response::HTTP_OK, $content['headers']);
+        }
     }
 
     /**
@@ -397,12 +398,13 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
         $resourceDescription = '';
         $lastResult = new \AppKernel\Dataset('Empty App Kernel Dataset', -1, "", -1, "", -1, "", "", "", "");
-        $hc = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $swap_xy);
-        $hc->setTitle($show_title ? 'Empty App Kernel Dataset' : NULL, $font_size);
+        $hc = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
+        $hc->setTitle($show_title ? 'Empty App Kernel Dataset' : null, $font_size);
         $hc->setLegend($legend_location, $font_size);
 
         $datasets = array();
-        $hc->configure($datasets,
+        $hc->configure(
+            $datasets,
             $font_size,
             $limit,
             $offset,
@@ -428,8 +430,9 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
         foreach ($results as $result) {
             $num_proc_units_changed = false;
-            if ($show_num_proc_units_separately && $result->rawNumProcUnits != $lastResult->rawNumProcUnits)
+            if ($show_num_proc_units_separately && $result->rawNumProcUnits != $lastResult->rawNumProcUnits) {
                 $num_proc_units_changed = true;
+            }
 
             if ($result->akName != $lastResult->akName
                 || $result->resourceName != $lastResult->resourceName
@@ -468,10 +471,9 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
                 }
                 if ($format != 'params') {
-                    $hc = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $swap_xy);
-                    $hc->setTitle($show_title ? $result->metric : NULL, $font_size);
-                    $hc->setSubtitle($show_title ? $result->resourceName : NULL, $font_size);
-                    $hc->setLegend($legend_location, $font_size);
+                    $hc = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
+                    $hc->setTitle($show_title ? $result->metric : null, $font_size);
+                    $hc->setSubtitle($show_title ? $result->resourceName : null, $font_size);
                 }
             }
 
@@ -479,7 +481,8 @@ class AppKernelControllerProvider extends BaseControllerProvider
             if ($format != 'params') {
                 $datasets = array($result);
 
-                $hc->configure($datasets,
+                $hc->configure(
+                    $datasets,
                     $font_size,
                     $limit,
                     $offset,
@@ -531,7 +534,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
         if ($format == 'session_variable') {
             return new Response(
-                \xd_charting\encodeJSON(array(
+                json_encode(array(
                     'success' => true,
                     'results' => $returnValue,
                 )),
@@ -540,30 +543,28 @@ class AppKernelControllerProvider extends BaseControllerProvider
                     'Content-Type' => 'application/javascript',
                 )
             );
-        } else
-            if ($format == 'img_tag') {
-                foreach ($returnValue as $vis) {
-                    return new Response(
-                        $vis,
-                        Response::HTTP_OK,
-                        \DataWarehouse\ExportBuilder::getHeader($format)
-                    );
-                }
-            } else
-                if ($format == 'png' || $format == 'svg' || $format == 'pdf' || $format == 'png_inline') {
-                    foreach ($returnValue as $vis) {
-                        return new Response(
-                            $vis,
-                            Response::HTTP_OK,
-                            \DataWarehouse\ExportBuilder::getHeader(
-                                $format,
-                                $inline,
-                                'ak_usage_' . $start_date . '_to_' . $end_date . '_' . $lastResult->resourceName . '_' . $lastResult->akName . '_' . $lastResult->metric
-                            )
-                        );
-                    }
+        } elseif ($format == 'img_tag') {
+            foreach ($returnValue as $vis) {
+                return new Response(
+                    $vis,
+                    Response::HTTP_OK,
+                    \DataWarehouse\ExportBuilder::getHeader($format)
+                );
+            }
+        } elseif ($format == 'png' || $format == 'svg' || $format == 'pdf' || $format == 'png_inline') {
+            foreach ($returnValue as $vis) {
+                return new Response(
+                    $vis,
+                    Response::HTTP_OK,
+                    \DataWarehouse\ExportBuilder::getHeader(
+                        $format,
+                        $inline,
+                        'ak_usage_' . $start_date . '_to_' . $end_date . '_' . $lastResult->resourceName . '_' . $lastResult->akName . '_' . $lastResult->metric
+                    )
+                );
+            }
 
-                }
+        }
     }
 
     /**
@@ -634,8 +635,17 @@ class AppKernelControllerProvider extends BaseControllerProvider
         $control_region_def_id = $this->getStringParam($request, 'control_region_def_id');
 
         // Create or update the control regions.
-        $msg = $db->newControlRegions($resource_id, $ak_def_id, $control_region_type,
-            $startDateTime, $endDateTime, $n_points, $comment, $update, $control_region_def_id);
+        $msg = $db->newControlRegions(
+            $resource_id,
+            $ak_def_id,
+            $control_region_type,
+            $startDateTime,
+            $endDateTime,
+            $n_points,
+            $comment,
+            $update,
+            $control_region_def_id
+        );
 
         // If successful, calculate controls.
         if ($msg['success']) {
@@ -720,10 +730,12 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
             formatNotificationSettingsFromClient($curent_tmp_settings, true);
 
-            $sqlres = $pdo->query('SELECT user_id,send_report_daily,send_report_weekly,send_report_monthly,settings
+            $sqlres = $pdo->query(
+                'SELECT user_id,send_report_daily,send_report_weekly,send_report_monthly,settings
                                     FROM mod_appkernel.report
                                     WHERE user_id=:user_id',
-                array(':user_id' => $user_id));
+                array(':user_id' => $user_id)
+            );
 
             if (count($sqlres) == 1) {
                 $sqlres = $sqlres[0];
@@ -767,13 +779,16 @@ class AppKernelControllerProvider extends BaseControllerProvider
             $send_report_weekly = ($curent_tmp_settings['weekly_report']['send_on_event'] === 'sendNever') ? (-$curent_tmp_settings['weekly_report']['send_on']) : ($curent_tmp_settings['weekly_report']['send_on']);
             $send_report_monthly = ($curent_tmp_settings['monthly_report']['send_on_event'] === 'sendNever') ? (-$curent_tmp_settings['monthly_report']['send_on']) : ($curent_tmp_settings['monthly_report']['send_on']);
 
-            $sqlres = $pdo->query('SELECT user_id,send_report_daily,send_report_weekly,send_report_monthly,settings
+            $sqlres = $pdo->query(
+                'SELECT user_id,send_report_daily,send_report_weekly,send_report_monthly,settings
                                     FROM mod_appkernel.report
                                     WHERE user_id=:user_id',
-                array(':user_id' => $user_id));
+                array(':user_id' => $user_id)
+            );
 
             if (count($sqlres) == 0) {
-                $sqlres = $pdo->insert('INSERT INTO mod_appkernel.report (user_id,send_report_daily,send_report_weekly,send_report_monthly,settings)
+                $sqlres = $pdo->insert(
+                    'INSERT INTO mod_appkernel.report (user_id,send_report_daily,send_report_weekly,send_report_monthly,settings)
                                         VALUES (:user_id,:send_report_daily,:send_report_weekly,:send_report_monthly,:settings)',
                     array(
                         ':user_id' => $user_id,
@@ -781,9 +796,11 @@ class AppKernelControllerProvider extends BaseControllerProvider
                         ':send_report_weekly' => $send_report_weekly,
                         ':send_report_monthly' => $send_report_monthly,
                         ':settings' => json_encode($curent_tmp_settings)//str_replace('"',"'",json_encode($curent_tmp_settings))
-                    ));
+                    )
+                );
             } else {
-                $sqlres = $pdo->execute('UPDATE mod_appkernel.report
+                $sqlres = $pdo->execute(
+                    'UPDATE mod_appkernel.report
                                         SET send_report_daily=:send_report_daily,send_report_weekly=:send_report_weekly,
                                             send_report_monthly=:send_report_monthly,settings=:settings
                                         WHERE user_id=:user_id',
@@ -793,7 +810,8 @@ class AppKernelControllerProvider extends BaseControllerProvider
                         ':send_report_weekly' => $send_report_weekly,
                         ':send_report_monthly' => $send_report_monthly,
                         ':settings' => json_encode($curent_tmp_settings)//str_replace('"',"'",json_encode($curent_tmp_settings))
-                    ));
+                    )
+                );
             }
             $response['data'] = array();
             $response['success'] = true;
@@ -846,27 +864,29 @@ class AppKernelControllerProvider extends BaseControllerProvider
         try {
 
             $start_date = $this->getStringParam($request, 'start_date', false, null);
-            if ($start_date !== null)
+            if ($start_date !== null) {
                 $start_date = new \DateTime($start_date);
+            }
 
             $end_date = $this->getStringParam($request, 'end_date', false, null);
-            if ($end_date !== null)
+            if ($end_date !== null) {
                 $end_date = new \DateTime($end_date);
+            }
 
             $format = $this->getStringParam($request, 'format', true);
 
-            $resources = NULL;
-            $appKers = NULL;
-            $problemSizes = NULL;
+            $resources = null;
+            $appKers = null;
+            $problemSizes = null;
 
             if (count($resources) === 0) {
-                $resources = NULL;
+                $resources = null;
             }
             if (count($appKers) === 0) {
-                $appKers = NULL;
+                $appKers = null;
             }
             if (count($problemSizes) === 0) {
-                $problemSizes = NULL;
+                $problemSizes = null;
             }
 
 
@@ -900,8 +920,9 @@ class AppKernelControllerProvider extends BaseControllerProvider
                 $exportData['title'] = array('title' => 'App Kernels Performance Map (control threshold = ' . $controlThreshold . ' )');
                 $exportData['duration'] = array('from:' => $start_date, 'to' => $end_date);
                 $exportData['headers'] = array('resource', 'appKer', 'problemSize');
-                foreach ($rec_dates as $rec_date)
+                foreach ($rec_dates as $rec_date) {
                     $exportData['headers'][] = $rec_date;
+                }
 
                 $exportData['rows'] = array();
                 foreach ($response['response'] as $result) {
@@ -910,8 +931,9 @@ class AppKernelControllerProvider extends BaseControllerProvider
                         'appKer' => $result['appKer'],
                         'problemSize' => $result['problemSize']
                     );
-                    foreach ($rec_dates as $rec_date)
+                    foreach ($rec_dates as $rec_date) {
                         $expRes[$rec_date] = $result[$rec_date];
+                    }
                     $exportData['rows'][] = $expRes;
                 }
 
@@ -949,12 +971,14 @@ class AppKernelControllerProvider extends BaseControllerProvider
             $report_type = $this->getStringParam($request, 'report_type', true);
 
             $start_date = $this->getStringParam($request, 'start_date', false, null);
-            if ($start_date !== null)
+            if ($start_date !== null) {
                 $start_date = new \DateTime($start_date);
+            }
 
             $end_date = $this->getStringParam($request, 'end_date', false, null);
-            if ($end_date !== null)
+            if ($end_date !== null) {
                 $end_date = new \DateTime($end_date);
+            }
 
             $report_param = $this->getStringParam($request, 'report_param', true);
             $report_param = json_decode($report_param, true);
@@ -1005,10 +1029,12 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
             formatNotificationSettingsFromClient($curent_tmp_settings, true);
 
-            $sqlres = $pdo->query('SELECT user_id,send_report_daily,send_report_weekly,send_report_monthly,settings
+            $sqlres = $pdo->query(
+                'SELECT user_id,send_report_daily,send_report_weekly,send_report_monthly,settings
                                     FROM mod_appkernel.report
                                     WHERE user_id=:user_id',
-                array(':user_id' => $user_id));
+                array(':user_id' => $user_id)
+            );
 
             if (count($sqlres) == 1) {
                 $sqlres = $sqlres[0];
@@ -1041,14 +1067,20 @@ class AppKernelControllerProvider extends BaseControllerProvider
             $user = $this->getUserFromRequest($request);
 
 
-            $allResources = $ak_db->getResources(date_format(date_sub(date_create(), date_interval_create_from_date_string("90 days")), 'Y-m-d'),
+            $allResources = $ak_db->getResources(
+                date_format(date_sub(date_create(), date_interval_create_from_date_string("90 days")), 'Y-m-d'),
                 date_format(date_create(), 'Y-m-d'),
-                array(), array(), $user);
+                array(),
+                array(),
+                $user
+            );
 
 
             $returnData = array();
             foreach ($allResources as $resource) {
-                if ($resource->visible != 1) continue;
+                if ($resource->visible != 1) {
+                    continue;
+                }
 
                 $returnData[] = array(
                     'id' => $resource->id,
@@ -1084,11 +1116,12 @@ class AppKernelControllerProvider extends BaseControllerProvider
             $returnData = array();
             foreach ($all_app_kernels as $app_kernel) {
                 //print_r($app_kernel);
-                if ($app_kernel->end_ts > $start_ts)
+                if ($app_kernel->end_ts > $start_ts) {
                     $returnData[] = array('name' => $app_kernel->name,
                         'id' => 'app_kernel_' . $app_kernel->id,
                         'end_ts' => $app_kernel->end_ts
                     );
+                }
             }
             $response['response'] = $returnData;
             $response['success'] = true;
@@ -1172,7 +1205,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
                 $node['text'] = date("Y-m-d H:i:s", $record['collected']);
                 $node['collected'] = $record['collected'];
                 $node['num_proc_units'] = $record['num_units'];
-                $node['metric_id'] = (isset($record['metric_id']) ? $record['metric_id'] : NULL);
+                $node['metric_id'] = (isset($record['metric_id']) ? $record['metric_id'] : null);
                 $node['resource_id'] = $record['resource_id'];
                 $node['ak_id'] = $record['ak_def_id'];
                 $node['instance_id'] = $record['instance_id'];
@@ -1181,33 +1214,39 @@ class AppKernelControllerProvider extends BaseControllerProvider
                 $text = $record['num_units'] . " " . $record['processor_unit'] . ($record['num_units'] > 1 ? "s" : "");
                 $node['text'] = $text;
                 $node['num_proc_units'] = $record['num_units'];
-                $node['metric_id'] = (isset($record['metric_id']) ? $record['metric_id'] : NULL);
+                $node['metric_id'] = (isset($record['metric_id']) ? $record['metric_id'] : null);
                 $node['resource_id'] = $record['resource_id'];
                 $node['ak_id'] = $record['ak_def_id'];
                 break;
             case self::TREENODE_METRIC:
                 $node['text'] = $record['metric'];
-                $node['metric_id'] = (isset($record['metric_id']) ? $record['metric_id'] : NULL);
+                $node['metric_id'] = (isset($record['metric_id']) ? $record['metric_id'] : null);
                 $node['resource_id'] = $record['resource_id'];
                 $node['ak_id'] = $record['ak_def_id'];
                 break;
             case self::TREENODE_RESOURCE:
                 $node['text'] = $record['resource'];
                 $node['resource_id'] = $record['resource_id'];
-                if (!$resource_first)
+                if (!$resource_first) {
                     $node['ak_id'] = $record['ak_def_id'];
+                }
                 break;
             case self::TREENODE_APPKERNEL:
                 $node['text'] = $record['ak_name'];/*.' '.date('Y-m-d',$record['start_ts']).' '.date('Y-m-d', $record['end_ts'])*/
                 $node['ak_id'] = $record['ak_def_id'];
-                if ($resource_first)
+                if ($resource_first) {
                     $node['resource_id'] = $record['resource_id'];
+                }
                 break;
             default:
                 break;
         }
-        if (isset($record['start_ts'])) $node['start_ts'] = $record['start_ts'];
-        if (isset($record['end_ts'])) $node['end_ts'] = $record['end_ts'];
+        if (isset($record['start_ts'])) {
+            $node['start_ts'] = $record['start_ts'];
+        }
+        if (isset($record['end_ts'])) {
+            $node['end_ts'] = $record['end_ts'];
+        }
         return (object)$node;
     }
 
@@ -1224,13 +1263,18 @@ class AppKernelControllerProvider extends BaseControllerProvider
     {
         $id = array();
         switch ($type) {
+            // comment describing why there is no break.
             case self::TREENODE_UNITS:
                 array_unshift($id, $record['num_units']);
+            // comment describing why there is no break.
             case self::TREENODE_METRIC:
-                if (isset($record['metric_id']))
+                if (isset($record['metric_id'])) {
                     array_unshift($id, $record['metric_id']);
+                }
+            // comment describing why there is no break.
             case self::TREENODE_RESOURCE:
                 array_unshift($id, $record['resource_id']);
+            // comment describing why there is no break.
             case self::TREENODE_APPKERNEL:
                 array_unshift($id, $record['ak_def_id']);
                 break;
@@ -1288,8 +1332,9 @@ class AppKernelControllerProvider extends BaseControllerProvider
         $resources = explode(';', strtolower($raw_resources));
 
         $resourceSelected = '';
-        if (count($resources) == 1)
+        if (count($resources) == 1) {
             $resourceSelected = "AND resource='$resources[0]'";
+        }
 
         $raw_appKers = $this->getStringParam($req, 'appKers');
         $appKers = explode(';', strtolower($raw_appKers));
@@ -1341,16 +1386,19 @@ class AppKernelControllerProvider extends BaseControllerProvider
                 $problemSize = explode('.', $row['reporternickname']);
                 $problemSize = (int)$problemSize[count($problemSize) - 1];
 
-                if (!array_key_exists($resource, $results))
+                if (!array_key_exists($resource, $results)) {
                     continue;
-                if (!array_key_exists($appKer, $results[$resource]))
+                }
+                if (!array_key_exists($appKer, $results[$resource])) {
                     continue;
+                }
 
-                if (!array_key_exists($problemSize, $results[$resource][$appKer]))
+                if (!array_key_exists($problemSize, $results[$resource][$appKer])) {
                     $results[$resource][$appKer][$problemSize] = array(
                         "succ" => 0,
                         "unsucc" => 0,
                     );
+                }
                 $results[$resource][$appKer][$problemSize]["succ"] = (int)$row['total_tasks'];
             }
             //Count unsuccessfull Tasks
@@ -1369,16 +1417,19 @@ class AppKernelControllerProvider extends BaseControllerProvider
                 $problemSize = explode('.', $row['reporternickname']);
                 $problemSize = (int)$problemSize[count($problemSize) - 1];
 
-                if (!array_key_exists($resource, $results))
+                if (!array_key_exists($resource, $results)) {
                     continue;
-                if (!array_key_exists($appKer, $results[$resource]))
+                }
+                if (!array_key_exists($appKer, $results[$resource])) {
                     continue;
+                }
 
-                if (!array_key_exists($problemSize, $results[$resource][$appKer]))
+                if (!array_key_exists($problemSize, $results[$resource][$appKer])) {
                     $results[$resource][$appKer][$problemSize] = array(
                         "succ" => 0,
                         "unsucc" => 0,
                     );
+                }
                 $results[$resource][$appKer][$problemSize]["unsucc"] = (int)$row['total_tasks'];
                 //print "\tproblemSize:".$problemSize."\n";
             }
@@ -1392,15 +1443,17 @@ class AppKernelControllerProvider extends BaseControllerProvider
                     $succ = 0;
                     $resultsTMP = array();
                     foreach ($row2 as $problemSize => $row) {
-                        if (!in_array($problemSize, $problemSizes))
+                        if (!in_array($problemSize, $problemSizes)) {
                             continue;
+                        }
 
                         if ($showAppKer) {
 
                             $unsuccessfull_tasks = '';
-                            if (!($showUnsuccessfulTasksDetails || $showSuccessfulTasksDetails))
+                            if (!($showUnsuccessfulTasksDetails || $showSuccessfulTasksDetails)) {
                                 $unsuccessfull_tasks = 'Select "Show Details of Unsuccessful Tasks"
 or "Show Details of Successful Tasks" options to see details on tasks';
+                            }
 
                             if ($showUnsuccessfulTasksDetails) {
                                 if ((int)$row["unsucc"] > 0) {
@@ -1418,14 +1471,16 @@ or "Show Details of Successful Tasks" options to see details on tasks';
                                         $task_id = $row2['instance_id'];
                                         $unsuccessfull_tasks = $unsuccessfull_tasks .
                                             "<a href=\"#\" onclick=\"javascript:new XDMoD.AppKernel.InstanceWindow({instanceId:$task_id});\">#$task_id</a> ";
-                                        if ($icount % 10 == 0)
+                                        if ($icount % 10 == 0) {
                                             $unsuccessfull_tasks = $unsuccessfull_tasks . '<br/>';
+                                        }
                                         $icount += 1;
                                     }
                                     $unsuccessfull_tasks = $unsuccessfull_tasks . '<br/>';
                                     //var_dump($sqlres);
-                                } else
+                                } else {
                                     $unsuccessfull_tasks = $unsuccessfull_tasks . 'There is no unsuccessful runs.<br/>';
+                                }
                             }
                             if ($showSuccessfulTasksDetails) {
                                 if ((int)$row["succ"] > 0) {
@@ -1443,12 +1498,14 @@ or "Show Details of Successful Tasks" options to see details on tasks';
                                         $task_id = $row2['instance_id'];
                                         $unsuccessfull_tasks = $unsuccessfull_tasks .
                                             "<a href=\"#\" onclick=\"javascript:new XDMoD.AppKernel.InstanceWindow({instanceId:$task_id});\">#$task_id</a> ";
-                                        if ($icount % 10 == 0)
+                                        if ($icount % 10 == 0) {
                                             $unsuccessfull_tasks = $unsuccessfull_tasks . '<br/>';
+                                        }
                                         $icount += 1;
                                     }
-                                } else
+                                } else {
                                     $unsuccessfull_tasks = $unsuccessfull_tasks . 'There is no successful runs.<br/>';
+                                }
                             }
                             $resultsTMP[$problemSize] = array(
                                 "resource" => $resource,
@@ -1469,8 +1526,9 @@ or "Show Details of Successful Tasks" options to see details on tasks';
                     //var_dump($resultsTMP);
 
                     foreach ($problemSizes as $problemSize) {
-                        if (array_key_exists($problemSize, $resultsTMP))
+                        if (array_key_exists($problemSize, $resultsTMP)) {
                             $results2[] = $resultsTMP[$problemSize];
+                        }
                     }
 
                     if ($succ + $unsucc > 0) {

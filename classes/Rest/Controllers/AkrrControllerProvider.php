@@ -1,6 +1,6 @@
 <?php
 
-namespace NewRest\Controllers;
+namespace Rest\Controllers;
 
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
@@ -40,46 +40,46 @@ class AkrrControllerProvider extends BaseControllerProvider
 
         // SETUP: the routes this controller will manage.
         $controller
-            ->get("$root/token", '\NewRest\Controllers\AkrrControllerProvider::getToken');
+            ->get("$root/token", '\Rest\Controllers\AkrrControllerProvider::getToken');
 
         $controller
-            ->get("$root/resources", '\NewRest\Controllers\AkrrControllerProvider::getResources');
+            ->get("$root/resources", '\Rest\Controllers\AkrrControllerProvider::getResources');
 
         $controller
-            ->get("$root/kernels", '\NewRest\Controllers\AkrrControllerProvider::getKernels');
+            ->get("$root/kernels", '\Rest\Controllers\AkrrControllerProvider::getKernels');
 
 
         $controller
-            ->get("$root/tasks/scheduled", '\NewRest\Controllers\AkrrControllerProvider::getTasks');
+            ->get("$root/tasks/scheduled", '\Rest\Controllers\AkrrControllerProvider::getTasks');
         $controller
-            ->post("$root/tasks/scheduled", '\NewRest\Controllers\AkrrControllerProvider::createTask');
+            ->post("$root/tasks/scheduled", '\Rest\Controllers\AkrrControllerProvider::createTask');
         $controller
-            ->put("$root/tasks/scheduled/{id}", '\NewRest\Controllers\AkrrControllerProvider::updateTask')
+            ->put("$root/tasks/scheduled/{id}", '\Rest\Controllers\AkrrControllerProvider::updateTask')
             ->convert('id', $idConverter);
         $controller
-            ->delete("$root/tasks/scheduled/{id}", '\NewRest\Controllers\AkrrControllerProvider::deleteTask')
-            ->convert('id', $idConverter);
-
-        $controller
-            ->get("$root/walltime", '\NewRest\Controllers\AkrrControllerProvider::getWalltime');
-
-        $controller
-            ->post("$root/walltime", '\NewRest\Controllers\AkrrControllerProvider::createWalltime');
-
-        $controller
-            ->put("$root/walltime", '\NewRest\Controllers\AkrrControllerProvider::updateWalltime');
-        $controller
-            ->delete("$root/walltime/{id}", '\NewRest\Controllers\AkrrControllerProvider::deleteWalltime')
+            ->delete("$root/tasks/scheduled/{id}", '\Rest\Controllers\AkrrControllerProvider::deleteTask')
             ->convert('id', $idConverter);
 
         $controller
-            ->get("$root/tasks/active", '\NewRest\Controllers\AkrrControllerProvider::getActiveTasks');
+            ->get("$root/walltime", '\Rest\Controllers\AkrrControllerProvider::getWalltime');
+
         $controller
-            ->put("$root/tasks/active/{id}", '\NewRest\Controllers\AkrrControllerProvider::updateActiveTask')
+            ->post("$root/walltime", '\Rest\Controllers\AkrrControllerProvider::createWalltime');
+
+        $controller
+            ->put("$root/walltime", '\Rest\Controllers\AkrrControllerProvider::updateWalltime');
+        $controller
+            ->delete("$root/walltime/{id}", '\Rest\Controllers\AkrrControllerProvider::deleteWalltime')
             ->convert('id', $idConverter);
 
         $controller
-            ->delete("$root/tasks/active/{id}", '\NewRest\Controllers\AkrrControllerProvider::deleteActiveTask')
+            ->get("$root/tasks/active", '\Rest\Controllers\AkrrControllerProvider::getActiveTasks');
+        $controller
+            ->put("$root/tasks/active/{id}", '\Rest\Controllers\AkrrControllerProvider::updateActiveTask')
+            ->convert('id', $idConverter);
+
+        $controller
+            ->delete("$root/tasks/active/{id}", '\Rest\Controllers\AkrrControllerProvider::deleteActiveTask')
             ->convert('id', $idConverter);
     }
 
@@ -102,8 +102,9 @@ class AkrrControllerProvider extends BaseControllerProvider
     {
         return $app
             ->json(
-                $this->_call($request, '/token', 'GET', false, false),
-                200)
+                $this->call($request, '/token', 'GET', false, false),
+                200
+            )
             ->setTtl(60);
     }
 
@@ -128,8 +129,9 @@ class AkrrControllerProvider extends BaseControllerProvider
     public function getResources(Request $request, Application $app)
     {
         return $app->json(
-            $this->_call($request, '/resources'),
-            200);
+            $this->call($request, '/resources'),
+            200
+        );
     }
 
     /**
@@ -154,8 +156,9 @@ class AkrrControllerProvider extends BaseControllerProvider
     public function getKernels(Request $request, Application $app)
     {
         return $app->json(
-            $this->_call($request, '/kernels'),
-            200);
+            $this->call($request, '/kernels'),
+            200
+        );
     }
 
     /**
@@ -188,8 +191,9 @@ class AkrrControllerProvider extends BaseControllerProvider
     public function getTasks(Request $request, Application $app)
     {
         return $app->json(
-            $this->_call($request, '/scheduled_tasks'),
-            200);
+            $this->call($request, '/scheduled_tasks'),
+            200
+        );
     }
 
     /**
@@ -217,15 +221,16 @@ class AkrrControllerProvider extends BaseControllerProvider
             'group_id'
         ));
 
-        $data = $this->_cleanUpData($data);
+        $data = $this->cleanUpData($data);
 
         $appKernel = $data['app_kernel'];
         unset($data['app_kernel']);
         $data['app'] = $appKernel;
 
         return $app->json(
-            $this->_call($request, '/scheduled_tasks', 'POST', $data),
-            200);
+            $this->call($request, '/scheduled_tasks', 'POST', $data),
+            200
+        );
     }
 
     /**
@@ -250,11 +255,12 @@ class AkrrControllerProvider extends BaseControllerProvider
             'repeat_in'
         ));
 
-        $data = $this->_cleanUpData($data);
+        $data = $this->cleanUpData($data);
 
         return $app->json(
-            $this->_call($request, "/scheduled_tasks/$id", 'POST', $data),
-            200);
+            $this->call($request, "/scheduled_tasks/$id", 'POST', $data),
+            200
+        );
     }
 
     /**
@@ -273,8 +279,9 @@ class AkrrControllerProvider extends BaseControllerProvider
     {
 
         return $app->json(
-            $this->_call($request, "/scheduled_tasks/$id", 'DELETE'),
-            200);
+            $this->call($request, "/scheduled_tasks/$id", 'DELETE'),
+            200
+        );
     }
 
     /**
@@ -305,8 +312,9 @@ class AkrrControllerProvider extends BaseControllerProvider
     {
 
         return $app->json(
-            $this->_call($request, '/walltime'),
-            200);
+            $this->call($request, '/walltime'),
+            200
+        );
     }
 
     /**
@@ -332,7 +340,7 @@ class AkrrControllerProvider extends BaseControllerProvider
             'comments'
         ));
 
-        $data = $this->_cleanUpData($data);
+        $data = $this->cleanUpData($data);
 
         $resource = $data['resource'];
         $appKernel = $data['app_kernel'];
@@ -340,8 +348,9 @@ class AkrrControllerProvider extends BaseControllerProvider
         unset($data['app_kernel']);
 
         return $app->json(
-            $this->_call($request, "/walltime/$resource/$appKernel", 'POST', $data),
-            200);
+            $this->call($request, "/walltime/$resource/$appKernel", 'POST', $data),
+            200
+        );
     }
 
     /**
@@ -361,7 +370,7 @@ class AkrrControllerProvider extends BaseControllerProvider
             'comments'
         ));
 
-        $data = $this->_cleanUpData($data);
+        $data = $this->cleanUpData($data);
 
         $resource = $data['resource'];
         $appKernel = $data['app_kernel'];
@@ -369,8 +378,9 @@ class AkrrControllerProvider extends BaseControllerProvider
         unset($data['app_kernel']);
 
         return $app->json(
-            $this->_call($request, "/walltime/$resource/$appKernel", 'POST', $data),
-            200);
+            $this->call($request, "/walltime/$resource/$appKernel", 'POST', $data),
+            200
+        );
     }
 
     /**
@@ -389,8 +399,9 @@ class AkrrControllerProvider extends BaseControllerProvider
     public function deleteWalltime(Request $request, Application $app, $id)
     {
         return $app->json(
-            $this->_call($request, "/walltime/$id", 'DELETE'),
-            200);
+            $this->call($request, "/walltime/$id", 'DELETE'),
+            200
+        );
     }
 
     /**
@@ -434,8 +445,9 @@ class AkrrControllerProvider extends BaseControllerProvider
     {
 
         return $app->json(
-            $this->_call($request, '/active_tasks'),
-            200);
+            $this->call($request, '/active_tasks'),
+            200
+        );
     }
 
     /**
@@ -458,11 +470,12 @@ class AkrrControllerProvider extends BaseControllerProvider
             'next_check_time'
         ));
 
-        $data = $this->_cleanUpData($data);
+        $data = $this->cleanUpData($data);
 
         return $app->json(
-            $this->_call($request, "/active_tasks/$id", 'PUT', $data),
-            200);
+            $this->call($request, "/active_tasks/$id", 'PUT', $data),
+            200
+        );
     }
 
     /**
@@ -481,8 +494,9 @@ class AkrrControllerProvider extends BaseControllerProvider
     public function deleteActiveTask(Request $request, Application $app, $id)
     {
         return $app->json(
-            $this->_call($request, "/active_tasks/$id", 'DELETE'),
-            200);
+            $this->call($request, "/active_tasks/$id", 'DELETE'),
+            200
+        );
     }
 
     /**
@@ -492,7 +506,7 @@ class AkrrControllerProvider extends BaseControllerProvider
      * @param array $data
      * @return array that was passed in, only "clean".
      */
-    private function _cleanUpData(array $data)
+    private function cleanUpData(array $data)
     {
         if (isset($data)) {
             unset($data['token']);
@@ -505,7 +519,7 @@ class AkrrControllerProvider extends BaseControllerProvider
     /**
      * A convenience method that reduces the amount of boilerplate required to wire up an end point in this controller.
      * It handles: token management and base url management ( aka. host, port and end point of the AKRR REST API )
-     * before passing control on to the _callAPI method.
+     * before passing control on to the callAPI method.
      *
      * @param Request $request that will be used to gather the information required to complete the requested action.
      * @param string $path to the unique AKRR REST endpoint that is to be called.
@@ -517,31 +531,37 @@ class AkrrControllerProvider extends BaseControllerProvider
      * @throws HttpInvalidParamException
      * @throws \Exception
      */
-    private function _call(Request $request, $path, $method = 'GET', $data = null, $useToken = true)
+    private function call(Request $request, $path, $method = 'GET', $data = null, $useToken = true)
     {
-        if (!isset($path)) throw new HttpInvalidParamException('A path is required for the requested operation.');
-        if (!isset($method)) throw new HttpInvalidParamException('A method is required for the requested operation.');
+        if (!isset($path)) {
+            throw new HttpInvalidParamException('A path is required for the requested operation.');
+        }
+        if (!isset($method)) {
+            throw new HttpInvalidParamException('A method is required for the requested operation.');
+        }
 
-        $baseUrl = $this->_getUrl();
+        $baseUrl = $this->getUrl();
         $url = "$baseUrl$path";
 
         if ($useToken) {
 
             if (!isset($this->token)) {
-                $results = $this->_call($request, '/token', 'GET', false, false);
+                $results = $this->call($request, '/token', 'GET', false, false);
                 if (isset($results) && isset($results['data']) && isset($results['data']['token'])) {
                     $this->token = $results['data']['token'];
                 }
             }
-            if (!isset($this->token)) throw new HttpException('Unable to retrieve the required information. Unable to process request.');
+            if (!isset($this->token)) {
+                throw new HttpException('Unable to retrieve the required information. Unable to process request.');
+            }
 
-            $curlResult = $this->_callAPI($url, $this->token, null, $method, $data);
+            $curlResult = $this->callAPI($url, $this->token, null, $method, $data);
         } else {
 
             $username = \xd_utilities\getConfiguration('akrr', 'username');
             $password = \xd_utilities\getConfiguration('akrr', 'password');
 
-            $curlResult = $this->_callAPI($url, $username, $password, $method, $data, $useToken);
+            $curlResult = $this->callAPI($url, $username, $password, $method, $data, $useToken);
         }
 
 
@@ -555,7 +575,7 @@ class AkrrControllerProvider extends BaseControllerProvider
      * @throws Exception if the settings file is not readable.
      * @throws \Exception if there is a problem retrieving data from the settings file.
      */
-    private function _getUrl()
+    private function getUrl()
     {
         $host = \xd_utilities\getConfiguration('akrr', 'host');
         $port = \xd_utilities\getConfiguration('akrr', 'port');
@@ -578,15 +598,15 @@ class AkrrControllerProvider extends BaseControllerProvider
      *     authentication.
      * @return array
      */
-    private function _callAPI(
+    private function callAPI(
         $path,
         $username,
         $password,
         $method = 'GET',
         $data = false,
         $useToken = true
-    )
-    {
+    ) {
+    
 
         $url = $path;
 
@@ -626,9 +646,9 @@ class AkrrControllerProvider extends BaseControllerProvider
             curl_setopt($curl, CURLOPT_USERPWD, sprintf("%s:%s", $username, $password));
         }
 
-        curl_setopt($curl, CURLOPT_UNRESTRICTED_AUTH, TRUE);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
+        curl_setopt($curl, CURLOPT_UNRESTRICTED_AUTH, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
 
         curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
@@ -656,6 +676,4 @@ class AkrrControllerProvider extends BaseControllerProvider
 
         return $result;
     }
-
-
 }
