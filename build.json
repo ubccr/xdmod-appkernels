@@ -12,6 +12,11 @@
             "#/\\.#"
         ]
     },
+    "commands": {
+        "pre_build": [
+            "find . -type f -name .eslintrc.json -delete"
+        ]
+    },
     "file_maps": {
         "data": [
             "appkernel",
