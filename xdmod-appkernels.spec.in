@@ -63,6 +63,10 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/cron.d/%{name}
 
 %changelog
+* Wed Nov 07 2018 Ryan A. Rathsam <ryanrath@buffalo.edu> 8.0.0-1.0
+- Miscellaneous
+    - Update for compatibility with Open XDMoD 8.0.0
+
 * Thu Mar 01 2018 Jeffrey T. Palmer <jtpalmer@buffalo.edu> 7.5.0-1.0
 - Features
     - Added PDF export support
