@@ -91,5 +91,10 @@ EOT
         );
 
         $this->saveIniConfig($akConf, 'portal_settings', 'appkernels');
+        
+        // Add tab on portal
+        $aclConfig = new AclConfig($this->console);
+        $aclConfig->handle();
+
     }
 }
