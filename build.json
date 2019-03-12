@@ -41,7 +41,8 @@
             "configuration/setup.json": "setup.d/appkernels.json",
             "configuration/rest.d": "rest.d",
             "configuration/assets.d": "assets.d",
-            "configuration/modules.d/appkernels.json": "modules.d/appkernels.json"
+            "configuration/modules.d/appkernels.json": "modules.d/appkernels.json",
+            "configuration/linker.d/appkernels.json": "linker.d/appkernels.json"
         },
         "etc/crond": {
             "configuration/cron.conf": "xdmod-appkernels"
