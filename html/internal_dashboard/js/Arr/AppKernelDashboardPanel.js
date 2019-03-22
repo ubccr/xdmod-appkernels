@@ -28,9 +28,6 @@ XDMoD.Arr.AppKernelDashboardPanel = Ext.extend(Ext.ux.GroupTabPanel, {
             },
             {
                 items: [new XDMoD.Arr.WalltimePanel()]
-            },
-            {
-                items: [new XDMoD.Arr.AppKerPerformanceMapPanel()]
             }
         ];
         var active_tab="appkernel_perfmap";

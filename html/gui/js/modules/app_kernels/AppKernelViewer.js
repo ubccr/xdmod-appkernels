@@ -717,16 +717,24 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
 
         // Update the selected tree node when the panel is activated.
         this.on('activate', function (panel) {
+            var token = CCR.tokenize(document.location.hash);
 
+            // If we've received the activate event but the token does not specify
+            // us as the subtab then exit.
+            if (token.subtab && token.subtab !== this.id) {
+                return;
+            }
             // If the tree is already loading, replace the "load"
             // handler.  Otherwise, the node can be selected
             // immediately.
             if (this.tree.getLoader().isLoading()) {
+
                 this.tree.loader.un('load', this.selectFirstNode, this);
 
                 this.tree.loader.on('load', function () {
                     this.selectAppKernelFromUrl(panel);
                 }, this, { single: true });
+
             } else {
                 this.selectAppKernelFromUrl(panel);
             }
@@ -1271,6 +1279,15 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
      * Select the first node in the tree if none are selected.
      */
     selectFirstNode: function () {
+
+        var token = CCR.tokenize(document.location.hash);
+
+        // If we've received the activate event but the token does not specify
+        // us as the subtab then exit.
+        if (token.subtab && token.subtab !== this.id) {
+            return;
+        }
+
         var sm = this.tree.getSelectionModel();
         var node = sm.getSelectedNode();
 
@@ -1494,7 +1511,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             this.getDurationSelector().setValues(start, end);
         }
 
-        if (token.subtab === panel.id) {
+        if (token.subtab === panel.id  && kernel_id) {
             this.selectAppKernel(kernel_id);
         } else {
             this.selectFirstNode();

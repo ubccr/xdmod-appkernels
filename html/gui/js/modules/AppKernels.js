@@ -92,7 +92,13 @@ Ext.extend(XDMoD.Module.AppKernels, XDMoD.PortalModule, {
                 });
                 panel.groupTabPanel.add(this.appKernelNotificationPanel);
                 break;
-
+            case 'app_kernel_performance_map':
+                this.appKernelPerformanceMapPanel = new XDMoD.Arr.AppKerPerformanceMapPanel({
+                    id: 'app_kernel_performance_map',
+                    title: 'Performance Map'
+                });
+                panel.groupTabPanel.add(this.appKernelPerformanceMapPanel);
+                break;
             default:
                 break;
             } // switch ( moduleName )
@@ -163,7 +169,32 @@ Ext.extend(XDMoD.Module.AppKernels, XDMoD.PortalModule, {
 
 
         Ext.apply(this, {
-            items: [this.groupTabPanel]
+            items: [this.groupTabPanel],
+            listeners: {
+
+                /**
+                 * This event fires when the tab has been `activated`, a.k.a
+                 * selected by the user clicking on the tab or by having
+                 * `app_kernels` identifier included in the url hash. Specifically
+                 * we're looking to see if we need to activate a `subTab`.
+                 */
+                activate: function () {
+                    if (this.subTab !== undefined) {
+                        var currentlyActive = this.groupTabPanel.getActiveTab();
+                        if (currentlyActive && currentlyActive.id === this.subTab) {
+                            // If it's the same activeTab then we need to force
+                            // fire the 'activate' event.
+                            currentlyActive.fireEvent('activate', currentlyActive);
+                        } else {
+                            this.groupTabPanel.suspendEvents(false);
+                            this.groupTabPanel.setActiveTab(this.subTab);
+                            this.groupTabPanel.resumeEvents();
+                        }
+
+                        this.subTab = undefined;
+                    }
+                }
+            }
         });
         
         XDMoD.Module.AppKernels.superclass.initComponent.apply(this, arguments);

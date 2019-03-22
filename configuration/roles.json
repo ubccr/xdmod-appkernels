@@ -9,7 +9,8 @@
                     "permitted_modules": [
                         "app_kernel_viewer",
                         "app_kernel_explorer",
-                        "app_kernel_notification"
+                        "app_kernel_notification",
+                        "app_kernel_performance_map"
                     ],
                     "javascriptClass": "XDMoD.Module.AppKernels",
                     "javascriptReference": "CCR.xdmod.ui.appKernels",

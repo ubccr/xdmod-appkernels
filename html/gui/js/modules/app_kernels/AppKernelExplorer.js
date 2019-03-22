@@ -1003,11 +1003,24 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
             chartStore.baseParams.controller_module = self.getReportCheckbox().getModule();
 
+            // While we're still pre-load make sure to mask the appropriate
+            // component so that the User knows that we're retrieving data.
+            view.el.mask('Loading...');
         }, this); //chartStore.on('beforeload'
 
         // ---------------------------------------------------------
 
         chartStore.on('load', function (chartStore) {
+            // Now that we're done loading, make sure to unmask the appropriate
+            // component so that the User knows that we're done.
+            view.el.unmask();
+
+            // Ensure that we unmask the main interface once we're done loading
+            // too.
+            var viewer = CCR.xdmod.ui.Viewer.getViewer();
+            if (viewer.el) {
+                viewer.el.unmask();
+            }
 
             if (chartStore.getCount() != 1) {
                 return;
@@ -1033,7 +1046,6 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 reportGeneratorMeta.included_in_report);
 
             highChartPanel.on('resize', onResize, this);
-
         }, this); //chartStore.on('load'
 
         // ---------------------------------------------------------
