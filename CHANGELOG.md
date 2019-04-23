@@ -1,7 +1,7 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
-## 2019-04-23
+## 2019-04-23 v8.1.0
 
 - Bug Fixes
     - Fix App Kernels tab in internal dashboard ([\#48](https://github.com/ubccr/xdmod-appkernels/pull/48))
