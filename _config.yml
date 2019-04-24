@@ -29,26 +29,27 @@ github_url: https://github.com/ubccr/xdmod-appkernels
 xdmod_module_name: Application Kernels
 latest_version: "8.1"
 version_list:
-    - "8.1"
-    - "8.0"
+  - "8.1"
+  - "8.0"
 
 defaults:
-    -
-        scope:
-            path: "8.1"
-            type: "pages"
-        values:
-            layout: "page"
-            version: "8.1"
-            menu_markdown: "8.1/menu.md"
-    -
-        scope:
-            path: "8.0"
-            type: "pages"
-        values:
-            layout: "page"
-            version: "8.0"
-            menu_markdown: "8.0/menu.md"
+  -
+    scope:
+      path: "8.1"
+      type: "pages"
+    values:
+      layout: "page"
+      version: "8.1"
+      style: "effervescence"
+      tocversion: "v8_1toc"
+  -
+    scope:
+      path: "8.0"
+      type: "pages"
+    values:
+      layout: "page"
+      version: "8.0"
+      menu_markdown: "8.0/menu.md"
 
 # Build settings
 markdown: kramdown

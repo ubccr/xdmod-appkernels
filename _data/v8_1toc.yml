@@ -1,0 +1,36 @@
+toc:
+  - title: About
+    subfolderitems:
+      - page: Overview
+        url: /8.1/ak-overview.html
+  - title: Download
+    subfolderitems:
+      - page: Open XDMoD module
+        url: https://github.com/ubccr/xdmod-appkernels/releases/latest
+      - page: AKRR package
+        url: https://github.com/ubccr/akrr/releases/latest
+  - title: Installing
+    subfolderitems:
+      - page: Installation Guide
+        url: /8.1/ak-install.html
+        subsubfolderitems:
+          - page: RPM Installation Guide
+            url: /8.1/ak-install-rpm.html
+          - page: Source Installation Guide
+            url: /8.1/ak-install-source.html
+      - page: Configuration Guide
+        url: /8.1/ak-configuration.html
+      - page: Database Guide
+        url: /8.1/ak-databases.html
+  - title: Using
+    subfolderitems:
+      - page: Command Reference
+        url: /8.1/ak-commands.html
+      - page: Ingestor Guide
+        url: /8.1/ak-ingestor.html
+  - title: Developing
+    subfolderitems:
+      - page: Open XDMoD Module
+        url: https://github.com/ubccr/xdmod-appkernels
+      - page: AKRR
+        url: https://github.com/ubccr/akrr
