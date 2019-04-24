@@ -1,3 +1,3 @@
 ---
-redirect_to: /7.5/ak-install-rpm.html
+redirect_to: /8.1/ak-install-rpm.html
 ---

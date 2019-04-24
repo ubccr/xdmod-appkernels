@@ -1,3 +1,3 @@
 ---
-redirect_to: /7.5/ak-commands.html
+redirect_to: /8.1/ak-commands.html
 ---

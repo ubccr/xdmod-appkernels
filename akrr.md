@@ -1,3 +1,3 @@
 ---
-redirect_to: /7.5/akrr.html
+redirect_to: /8.1/akrr.html
 ---
