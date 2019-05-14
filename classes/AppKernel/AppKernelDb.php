@@ -106,6 +106,7 @@ class AppKernelDb
             : $configSection);
 
         $this->db = DB::factory($configSection);
+        $this->modwDB = DB::factory('database');
         $this->logger = $logger !== NULL ? $logger : \Log::singleton('null');
     }  // __construct()
 
@@ -401,18 +402,12 @@ class AppKernelDb
                 $access_to_some_resource=true;
                 
                 //get all associated organization
-                $organizations=array();
-                if(in_array("cd",$roles))
-                    $organizations=array_merge($organizations,$user->getOrganizationCollection("cd"));
-                if(in_array("cs",$roles))
-                    $organizations=array_merge($organizations,$user->getOrganizationCollection("cs"));
-               
-                $organizations[]=$user->getPrimaryOrganization();
-                $organizations[]=$user->getActiveOrganization();
+                $organizations = array(
+                    $user->getOrganizationID()
+                );
                 
                 #get resource_id for all associated resources
-                $c=new \Compliance();
-                $rr=$c->getResourceListing(date_format(date_sub(date_create(), date_interval_create_from_date_string("90 days")),'Y-m-d'),date_format(date_create(),'Y-m-d'));
+                $rr=$this->getResourceListing(date_format(date_sub(date_create(), date_interval_create_from_date_string("90 days")),'Y-m-d'),date_format(date_create(),'Y-m-d'));
                 
                 $organizations_resources_id=array();
                 foreach($rr as $r){
@@ -435,6 +430,95 @@ class AppKernelDb
 
         return $resources;
     }  // getResources()
+
+    public function getResourceListing($start_date = null, $end_date = null, $resource_flag = 'all') {
+
+        // Order by descending end_date and processors
+
+        $ts = "";
+
+        // Resources which have no end date are considered still active so use the max date
+        // possible. Resources are sorted in order of decreasing end date so this will keep active
+        // resources at the top of the list.
+
+        $m = "CASE WHEN rf.end_date IS NULL THEN '9999-12-31' ELSE rf.end_date END";
+
+        $query_params = array();
+
+        if (isset($start_date) && isset($end_date)) {
+
+            /*
+
+            Account for ALL resources (in other words, an overlap between the supplied timeframe and the resource timeframe)
+
+            S(t)                         E(t)
+            |----------------------------|
+            |------------------------|
+            S(r)                     E(r)
+
+
+            (t): Supplied timeframe
+            (r): A resource
+
+            Overlap exists when S(r) <= E(t) AND E(r) >= S(t)
+
+            */
+
+            $ts .= " AND rf.start_date <= :ts_start_date_lte AND ($m) >= :ts_end_date_gte";
+
+            $query_params[':ts_start_date_lte'] = $end_date;
+            $query_params[':ts_end_date_gte'] = $start_date;
+
+        }
+
+        $query = "
+        SELECT
+        rf.code,
+        rf.organization_id,
+        rf.id,
+        rt.description,
+        rt.abbrev,
+        CASE
+        WHEN rf.end_date IS NULL THEN 'N/A'
+        ELSE DATE_FORMAT(rf.end_date, '%Y-%m-%d')
+        END AS official_end_date,
+        $m AS resource_end_date,
+        DATE_FORMAT(rf.start_date, '%Y-%m-%d') AS resource_start_date,
+        CASE
+        WHEN rs.processors IS NULL THEN 0
+        ELSE rs.processors
+        END AS processors
+        FROM
+        modw.resourcefact AS rf,
+        modw.resourcespecs rs,
+        modw.resourcetype AS rt
+        WHERE
+        rf.id = rs.resource_id
+        AND rf.resourcetype_id = rt.id
+        AND rt.abbrev IN ('HPC', 'HTC', 'DIC', 'Vis', 'Disk', 'Cloud')
+        AND rf.code NOT LIKE 'TG%'
+        $ts
+        AND UNIX_TIMESTAMP(:start_date_lte) >= rs.start_date_ts
+        AND (
+            rs.end_date_ts IS NULL
+            OR UNIX_TIMESTAMP(:end_date_gte) <= rs.end_date_ts
+            )
+        ORDER BY
+            rs.processors DESC,
+            resource_end_date DESC,
+            rf.code DESC"
+        ;
+
+        $query_params[':start_date_lte'] = $end_date;
+        $query_params[':end_date_gte'] = $end_date;
+
+        //print $query.'<br /><br />';
+
+        $resources = $this->modwDB->query($query, $query_params);
+
+        return $resources;
+
+    }//getResourceListing
 
     // --------------------------------------------------------------------------------
 

@@ -2,6 +2,7 @@
     "appkernels": {
         "portal": {
             "js": [
+                "gui/lib/extjs/examples/ux/ColumnHeaderGroup.js",
                 "gui/js/modules/AppKernels.js",
                 "gui/js/modules/app_kernels/AppKernelViewer.js",
                 "gui/js/modules/app_kernels/AppKernelExplorer.js",
