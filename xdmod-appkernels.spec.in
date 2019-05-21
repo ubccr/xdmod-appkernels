@@ -4,14 +4,14 @@ Release:       __RELEASE__%{?dist}
 Summary:       Application kernels module for Open XDMoD
 URL:           http://appkernels.xdmod.org/ak-install.html
 Vendor:        Center for Computational Research, University at Buffalo
-Packager:      Jeffrey T. Palmer <jtpalmer@buffalo.edu>
+Packager:      XDMoD <ccr-xdmod-list@listserv.buffalo.edu>
 Group:         Applications/Internet
 License:       LGPLv3+
 Source:        %{name}-%{version}__PRERELEASE__.tar.gz
 BuildRoot:     %(mktemp -ud %{_tmppath}/%{name}-%{version}__PRERELEASE__-%{release}-XXXXXX)
 BuildArch:     noarch
 BuildRequires: php-cli
-Requires:      xdmod >= 8.0.0, xdmod <= 8.1.0
+Requires:      xdmod >= 8.5.0, xdmod < 8.6.0
 
 %description
 This package provides application kernel support for Open XDMoD. The
@@ -56,6 +56,7 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %attr(0440,apache,xdmod) %{_sysconfdir}/xdmod/*.d/appkernels.ini
 %config(noreplace) %{_sysconfdir}/xdmod/assets.d/appkernels*.json
 %config(noreplace) %{_sysconfdir}/xdmod/internal_dashboard.d/appkernels*.json
+%config(noreplace) %{_sysconfdir}/xdmod/linker.d/appkernels.json
 %config(noreplace) %{_sysconfdir}/xdmod/roles.d/appkernels*.json
 %config(noreplace) %{_sysconfdir}/xdmod/setup.d/appkernels*.json
 %config(noreplace) %{_sysconfdir}/xdmod/rest.d/akrr.json
@@ -64,52 +65,23 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/cron.d/%{name}
 
 %changelog
-* Wed Nov 07 2018 Ryan A. Rathsam <ryanrath@buffalo.edu> 8.0.0-1.0
-- Miscellaneous
-    - Update for compatibility with Open XDMoD 8.0.0
-
-* Thu Mar 01 2018 Jeffrey T. Palmer <jtpalmer@buffalo.edu> 7.5.0-1.0
-- Features
-    - Added PDF export support
-- Bug Fixes
-    - Fixed report generator and ingestion cron scripts
-    - Fixed loading mask when no data is present
-    - Added missing files
-* Thu Sep 21 2017 Jeffrey T. Palmer <jtpalmer@buffalo.edu> 7.0.0-1.0
-- Bug Fixes
-    - Fixed various compatibility issues with PHP 7
-    - Fixed issue that allowed incompatible versions of XDMoD and this module
-      to be installed when installing via RPM
-- Miscellaneous
-    - Updated for compatibility with Open XDMoD 7.0.0
-    - Improved development workflow
-    - Improved quality assurance
-
-* Thu May 11 2017 Jeffrey T. Palmer <jtpalmer@buffalo.edu> 6.6.0-1.0
-- Miscellaneous
-    - Updated for compatibility with Open XDMoD 6.6.0
-    - Cleaned up old and/or unused code
-    - Improved quality assurance
-
-* Tue Jan 10 2017 Jeffrey T. Palmer <jtpalmer@buffalo.edu> 6.5.0-1.0
-- Spun this module out from the Open XDMoD repository.
-* Wed Sep 21 2016 Jeffrey T. Palmer <jtpalmer@buffalo.edu> 6.0.0-1.0
-- Updated for compatibility with Open XDMoD 6.0.0.
-* Tue May 24 2016 Jeffrey T. Palmer <jtpalmer@buffalo.edu> 5.6.0-1.0
-- Features
-    - Added ability to select the 29th-31st of a month as a monthly report
-      delivery day.
-        - For months that don't have these days, reports scheduled for those
-          days will be delivered on the last day of the month.
-- Bug Fixes
-    - Fixed Reports tab not appearing for some authorized users.
-    - Reduced user authorization requirements for showing certain data.
-    - Removed "." from tab labels.
-    - Removed non-functional x-y swap from tabs.
-* Fri Dec 18 2015 Jeffrey T. Palmer <jtpalmer@buffalo.edu> 5.5.0-1.0
-- Bug Fixes
-    - Fixed handling of whitespace in XML parsing
-    - Incorrect database credentials were being used in the app kernel
-      performance map
-* Wed Aug 19 2015 Jeffrey T. Palmer <jtpalmer@buffalo.edu> 5.0.0-1.0
+* Tue Apr 23 2019 XDMoD <ccr-xdmod-list@listserv.buffalo.edu> 8.1.0-1.0
+- Release 8.1.0.
+* Wed Nov 07 2018 XDMoD <ccr-xdmod-list@listserv.buffalo.edu> 8.0.0-1.0
+- Release 8.0.0.
+* Thu Mar 01 2018 XDMoD <ccr-xdmod-list@listserv.buffalo.edu>7.5.0-1.0
+- Release 7.5.0.
+* Thu Sep 21 2017 XDMoD <ccr-xdmod-list@listserv.buffalo.edu>7.0.0-1.0
+- Release 7.0.0.
+* Thu May 11 2017 XDMoD <ccr-xdmod-list@listserv.buffalo.edu>6.6.0-1.0
+- Release 6.6.0.
+* Tue Jan 10 2017 XDMoD <ccr-xdmod-list@listserv.buffalo.edu>6.5.0-1.0
+- Release 6.5.0.
+* Wed Sep 21 2016 XDMoD <ccr-xdmod-list@listserv.buffalo.edu>6.0.0-1.0
+- Release 6.0.0.
+* Tue May 24 2016 XDMoD <ccr-xdmod-list@listserv.buffalo.edu>5.6.0-1.0
+- Release 5.6.0.
+* Fri Dec 18 2015 XDMoD <ccr-xdmod-list@listserv.buffalo.edu>5.5.0-1.0
+- Release 5.5.0.
+* Wed Aug 19 2015 XDMoD <ccr-xdmod-list@listserv.buffalo.edu> 5.0.0-1.0
 - Initial public release
