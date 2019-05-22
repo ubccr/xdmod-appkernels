@@ -28,5 +28,7 @@ before_install: git clone --depth=1 --branch="v1" https://github.com/ubccr/xdmod
 # Delegate the installation step to the shared Travis installation script
 install: .qa/travis/install.sh
 
+before_script: .qa/style/install.sh ./
+
 # Delegate the build step to the shared Travis build script
 script: .qa/travis/build.sh

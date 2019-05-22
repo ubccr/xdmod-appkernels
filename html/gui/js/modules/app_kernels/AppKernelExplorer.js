@@ -10,15 +10,11 @@
 * Contains the code for the App Kernel Explorer
 *
 */
-
+/* global XDMoD, Ext, CCR */
 
 XDMoD.Module.AppKernels.AppKernelExplorer = function (config) {
-
     XDMoD.Module.AppKernels.AppKernelExplorer.superclass.constructor.call(this, config);
-
 };
-
-// ===========================================================================
 
 Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
@@ -36,7 +32,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 showAggregationUnit: false
             }
 
-        }, //durationSelector
+        }, // durationSelector
 
         exportMenu: true,
         printButton: true,
@@ -48,82 +44,64 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
     font_size: 3,
     swap_xy: false,
 
-    // ------------------------------------------------------------------
-
     getSelectedResourceIds: function () {
-
         var resources = [];
         var selNodes = this.resourcesTree.getChecked();
 
         Ext.each(selNodes, function (node) {
-            if (!node.disabled) resources.push(node.id);
+            if (!node.disabled) {
+                resources.push(node.id);
+            }
         });
 
         return resources;
-
-    }, //getSelectedResourceIds
-
-    // ------------------------------------------------------------------
+    }, // getSelectedResourceIds
 
     getSelectedPUCounts: function () {
-
         var nodes = [];
         var selNodes = this.pusTree.getChecked();
 
         Ext.each(selNodes, function (node) {
-            if (!node.disabled) nodes.push(node.id);
+            if (!node.disabled) {
+                nodes.push(node.id);
+            }
         });
 
         return nodes;
-
-    }, //getSelectedPUCounts
-
-    // ------------------------------------------------------------------
+    }, // getSelectedPUCounts
 
     getExpandedAppKernels: function () {
-
         var aks = [];
 
         this.metricsTree.root.cascade(function (node) {
-
             if (node.isExpanded()) {
                 aks.push(node.id);
             }
-
         }, this);
 
         return aks;
-
-    }, //getExpandedAppKernels
-
-    // ------------------------------------------------------------------
+    }, // getExpandedAppKernels
 
     getSelectedMetrics: function () {
-
         var metrics = [];
 
         var selNodes = this.metricsTree.getChecked();
 
         Ext.each(selNodes, function (node) {
-            if (!node.disabled) metrics.push(node.id);
+            if (!node.disabled) {
+                metrics.push(node.id);
+            }
         });
 
         return metrics;
-
-    }, //getSelectedMetrics
-
-    // ------------------------------------------------------------------
+    }, // getSelectedMetrics
 
     initComponent: function () {
-
         var self = this;
 
         var chartScale = 1;
-        var chartThumbScale = 0.45;
         var chartWidth = 740;
         var chartHeight = 345;
-
-        // ---------------------------------------------------------
 
         self.on('duration_change', function (d) {
             var start_time = self.getDurationSelector().getStartDate() / 1000.0;
@@ -131,18 +109,18 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
             self.metricsTree.getRootNode().cascade(function (n) {
                 var enabled = (start_time <= n.attributes.end_ts && n.attributes.end_ts <= end_time) ||
                     (n.attributes.start_ts <= end_time && end_time <= n.attributes.end_ts);
-                if (enabled) n.enable();
-                else n.disable();
-                //if(!enabled)n.setText(n.text+'*');
-
+                if (enabled) {
+                    n.enable();
+                } else {
+                    n.disable();
+                }
                 return true;
             });
+            /* eslint-disable no-use-before-define */
             reloadResources.call(this);
             reloadChart.call(this, 150);
-
-        }); //self.on('duration_change', ...
-
-        // ---------------------------------------------------------
+            /* eslint-enable no-use-before-define */
+        }); // self.on('duration_change', ...
 
         var resourcesStore = new CCR.xdmod.CustomJsonStore({
 
@@ -161,10 +139,9 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
             listeners: {
 
-                'load': {
+                load: {
 
                     fn: function (tstore) {
-
                         if (tstore.getCount() <= 0) {
                             return;
                         }
@@ -177,32 +154,25 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                             id: 'resources',
                             children: Ext.util.JSON.decode(tstore.getAt(0).get('nodes'))
 
-                        }); //root
+                        }); // root
 
                         this.resourcesTree.setRootNode(root);
                         this.resourcesTree.render();
                         root.expand();
-
-                    }, //fn
-
+                    }, // fn
                     scope: this
-
-                } //load
-
-            } //listeners
-
-        }); //resourcesStore
-
-        // ---------------------------------------------------------
+                } // load
+            } // listeners
+        }); // resourcesStore
 
         var getBaseParams = function () {
-
             var selectedResourceIds = this.getSelectedResourceIds();
             var selectedPUCounts = this.getSelectedPUCounts();
             var selectedMetrics = this.getSelectedMetrics();
             var expandedAppKernels = this.getExpandedAppKernels();
 
             var baseParams = {};
+            // eslint-disable-next-line no-use-before-define
             baseParams.show_change_indicator = toggleChangeIndicator.pressed ? 'y' : 'n';
             baseParams.show_title = 'n';
             baseParams.start_date = self.getDurationSelector().getStartDate().format('Y-m-d');
@@ -219,32 +189,25 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
             baseParams.show_title = 'y';
 
             return baseParams;
-
-        }; //getBaseParams
-
-        // ---------------------------------------------------------
+        }; // getBaseParams
 
         var reloadResources = function () {
-
             Ext.apply(resourcesStore.baseParams, getBaseParams.call(this));
             resourcesStore.load();
-
-        }; //reloadResources
-
-        // ---------------------------------------------------------
+        }; // reloadResources
 
         var suppressResourceCheckTrackCall = false;
 
         var resoucesTreeCheckChange = function (node, checked) {
-
-            if (suppressResourceCheckTrackCall == false)
-               XDMoD.TrackEvent('App Kernel Explorer', 'Clicked a checkbox in the Resources tree', Ext.encode({item: node.getPath('text'), checked: checked}));
-
+            if (suppressResourceCheckTrackCall === false) {
+                XDMoD.TrackEvent('App Kernel Explorer', 'Clicked a checkbox in the Resources tree', Ext.encode({
+                    item: node.getPath('text'),
+                    checked: checked
+                }));
+            }
+            // eslint-disable-next-line no-use-before-define
             reloadChart.call(this);
-
-        }; //resoucesTreeCheckChange
-
-        // ---------------------------------------------------------
+        }; // resoucesTreeCheckChange
 
         this.resourcesTree = new Ext.tree.TreePanel({
 
@@ -255,7 +218,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
             animate: false,
             enableDD: false,
             region: 'north',
-            //height: 200,
+            // height: 200,
 
             root: {
                 nodeType: 'async',
@@ -276,65 +239,65 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                     scope: this,
 
                     handler: function () {
-
                         XDMoD.TrackEvent('App Kernel Explorer', 'Clicked on the uncheck all tool in the Resources tree');
                         suppressResourceCheckTrackCall = true;
 
                         this.resourcesTree.un('checkchange', resoucesTreeCheckChange, this);
                         var lastNode = null;
-                         var selectAll = true;
-                        this.resourcesTree.getRootNode().cascade(function(n) {
+                        var selectAll = true;
+                        this.resourcesTree.getRootNode().cascade(function (n) {
                             var ui = n.getUI();
-                            if(ui.isChecked()) selectAll=false;
+                            if (ui.isChecked()) {
+                                selectAll = false;
+                            }
                             lastNode = n;
-                         });
+                        });
 
-                         if(selectAll){
-                           XDMoD.TrackEvent('App Kernel Explorer', 'Checking all items in the Resources tree');
-                            this.resourcesTree.getRootNode().cascade(function(n) {
-                              var ui = n.getUI();
-                              if(!ui.isChecked()) ui.toggleCheck(true);
-                              lastNode = n;
+                        if (selectAll) {
+                            XDMoD.TrackEvent('App Kernel Explorer', 'Checking all items in the Resources tree');
+                            this.resourcesTree.getRootNode().cascade(function (n) {
+                                var ui = n.getUI();
+                                if (!ui.isChecked()) {
+                                    ui.toggleCheck(true);
+                                }
+                                lastNode = n;
                             });
-                         }
-                         else{
-                           XDMoD.TrackEvent('App Kernel Explorer', 'Clearing all checked items in the Resources tree');
-                            this.resourcesTree.getRootNode().cascade(function(n) {
-                               var ui = n.getUI();
-                               if(ui.isChecked()) ui.toggleCheck(false);
-                               lastNode = n;
+                        } else {
+                            XDMoD.TrackEvent('App Kernel Explorer', 'Clearing all checked items in the Resources tree');
+                            this.resourcesTree.getRootNode().cascade(function (n) {
+                                var ui = n.getUI();
+                                if (ui.isChecked()) {
+                                    ui.toggleCheck(false);
+                                }
+                                lastNode = n;
                             });
-                         }
+                        }
 
-                        if (lastNode) resoucesTreeCheckChange.call(this, lastNode, false);
+                        if (lastNode) {
+                            resoucesTreeCheckChange.call(this, lastNode, false);
+                        }
                         this.resourcesTree.on('checkchange', resoucesTreeCheckChange, this);
 
                         suppressResourceCheckTrackCall = false;
-
-                    } //handler
+                    } // handler
 
                 },
 
                 {
-
                     id: 'refresh',
                     qtip: 'Refresh',
                     hidden: true,
                     scope: this,
                     handler: reloadResources
-
                 }
 
-            ], //tools
+            ], // tools
 
             margins: '0 0 0 0',
             border: false,
             split: true,
             flex: 1.5
-
-        }); //this.resourcesTree
-
-        // ---------------------------------------------------------
+        }); // this.resourcesTree
 
         this.resourcesTree.on('checkchange', resoucesTreeCheckChange, this);
 
@@ -355,10 +318,9 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
             listeners: {
 
-                'load': {
+                load: {
 
                     fn: function (tstore) {
-
                         if (tstore.getCount() <= 0) {
                             return;
                         }
@@ -371,53 +333,43 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                             id: 'nodes',
                             children: Ext.util.JSON.decode(tstore.getAt(0).get('nodes'))
 
-                        }); //root
+                        }); // root
 
                         this.pusTree.setRootNode(root);
                         this.pusTree.render();
 
                         root.expand();
-
-                    }, //fn
+                    }, // fn
 
                     scope: this
-
-                } //load
-
-            } //listeners
-
-        }); //pusStore
-
-        // ---------------------------------------------------------
+                } // load
+            } // listeners
+        }); // pusStore
 
         var reloadPUs = function () {
-
             Ext.apply(pusStore.baseParams, getBaseParams.call(this));
             pusStore.load();
-
-        }; //reloadPUs
-
-        // ---------------------------------------------------------
+        }; // reloadPUs
 
         var suppressPUsCheckTrackCall = false;
 
         var pusTreeCheckChange = function (node, checked) {
-
-            if (suppressPUsCheckTrackCall == false)
-               XDMoD.TrackEvent('App Kernel Explorer', 'Clicked a checkbox in the Processing Units tree', Ext.encode({item: node.getPath('text'), checked: checked}));
+            if (suppressPUsCheckTrackCall === false) {
+                XDMoD.TrackEvent('App Kernel Explorer', 'Clicked a checkbox in the Processing Units tree', Ext.encode({
+                    item: node.getPath('text'),
+                    checked: checked
+                }));
+            }
 
             reloadResources.call(this);
-            //reloadMetrics.call(this);
+            // eslint-disable-next-line no-use-before-define
             reloadChart.call(this);
-
-        }; //pusTreeCheckChange
-
-        // ---------------------------------------------------------
+        }; // pusTreeCheckChange
 
         this.pusTree = new Ext.tree.TreePanel({
 
             flex: 1,
-            title: "Processing Units",
+            title: 'Processing Units',
             id: 'tree_pus_' + this.id,
             useArrows: true,
             autoScroll: true,
@@ -443,74 +395,75 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                     scope: this,
 
                     handler: function () {
-
                         XDMoD.TrackEvent('App Kernel Explorer', 'Clicked on the uncheck all tool in the Processing Units tree');
                         suppressPUsCheckTrackCall = true;
 
                         this.pusTree.un('checkchange', pusTreeCheckChange, this);
                         var lastNode = null;
 
-                         var selectAll = true;
+                        var selectAll = true;
 
-                           this.pusTree.getRootNode().cascade(function(n) {
-                              var ui = n.getUI();
-                              if(ui.isChecked()) selectAll=false;
-                              lastNode = n;
-                           });
+                        this.pusTree.getRootNode().cascade(function (n) {
+                            var ui = n.getUI();
+                            if (ui.isChecked()) {
+                                selectAll = false;
+                            }
+                            lastNode = n;
+                        });
 
-                           if(selectAll){
-                             XDMoD.TrackEvent('App Kernel Explorer', 'Checking all items in the Processing Units tree');
-                              this.pusTree.getRootNode().cascade(function(n) {
+                        if (selectAll) {
+                            XDMoD.TrackEvent('App Kernel Explorer', 'Checking all items in the Processing Units tree');
+                            this.pusTree.getRootNode().cascade(function (n) {
                                 var ui = n.getUI();
-                                if(!ui.isChecked()) ui.toggleCheck(true);
+                                if (!ui.isChecked()) {
+                                    ui.toggleCheck(true);
+                                }
                                 lastNode = n;
-                              });
-                           }
-                           else{
-                             XDMoD.TrackEvent('App Kernel Explorer', 'Clearing all checked items in the Processing Units tree');
-                              this.pusTree.getRootNode().cascade(function(n) {
-                                 var ui = n.getUI();
-                                 if(ui.isChecked()) ui.toggleCheck(false);
-                                 lastNode = n;
-                              });
-                           }
+                            });
+                        } else {
+                            XDMoD.TrackEvent('App Kernel Explorer', 'Clearing all checked items in the Processing Units tree');
+                            this.pusTree.getRootNode().cascade(function (n) {
+                                var ui = n.getUI();
+                                if (ui.isChecked()) {
+                                    ui.toggleCheck(false);
+                                }
+                                lastNode = n;
+                            });
+                        }
 
-                        if (lastNode) pusTreeCheckChange.call(this, lastNode, false);
+                        if (lastNode) {
+                            pusTreeCheckChange.call(this, lastNode, false);
+                        }
                         this.pusTree.on('checkchange', pusTreeCheckChange, this);
 
                         suppressPUsCheckTrackCall = false;
-
-                    } //handler
+                    } // handler
 
                 },
 
                 {
-
                     id: 'refresh',
                     qtip: 'Refresh',
                     scope: this,
                     hidden: true,
                     handler: reloadPUs
-
                 }
 
-            ], //tools
+            ], // tools
 
             margins: '0 0 0 0',
             border: false,
 
             listeners: {
 
-                'checkchange': {
+                checkchange: {
                     fn: pusTreeCheckChange,
                     scope: this
                 }
 
-            } //listeners
+            } // listeners
 
-        }); //this.pusTree
-
-        // ---------------------------------------------------------
+        }); // this.pusTree
 
         this.pusTree.on('checkchange', pusTreeCheckChange, this);
 
@@ -531,10 +484,9 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
             listeners: {
 
-                'load': {
+                load: {
 
                     fn: function (tstore) {
-
                         if (tstore.getCount() <= 0) {
                             return;
                         }
@@ -547,46 +499,37 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                             id: 'app_kernels',
                             children: Ext.util.JSON.decode(tstore.getAt(0).get('nodes'))
 
-                        }); //root
+                        }); // root
 
                         this.metricsTree.setRootNode(root);
                         this.metricsTree.render();
                         root.expand();
-
-                    }, //fn
+                    }, // fn
 
                     scope: this
-
-                }
-            } //listeners
-
-        }); //metricsStore
-
-        // ---------------------------------------------------------
+                } // load
+            } // listeners
+        }); // metricsStore
 
         var reloadMetrics = function () {
-
             Ext.apply(metricsStore.baseParams, getBaseParams.call(this));
             metricsStore.load();
-
-        }; //reloadMetrics
-
-        // ---------------------------------------------------------
+        }; // reloadMetrics
 
         var suppressMetricCheckTrackCall = false;
 
         var metricsTreeCheckChange = function (node, checked) {
-
-            if (suppressMetricCheckTrackCall == false)
-               XDMoD.TrackEvent('App Kernel Explorer', 'Clicked a checkbox in the Metrics tree', Ext.encode({item: node.getPath('text'), checked: checked}));
+            if (suppressMetricCheckTrackCall === false) {
+                XDMoD.TrackEvent('App Kernel Explorer', 'Clicked a checkbox in the Metrics tree', Ext.encode({
+                    item: node.getPath('text'),
+                    checked: checked
+                }));
+            }
 
             reloadResources.call(this);
-            //reloadPUs.call(this);
+            // eslint-disable-next-line no-use-before-define
             reloadChart.call(this);
-
-        }; //metricsTreeCheckChange
-
-        // ---------------------------------------------------------
+        }; // metricsTreeCheckChange
 
         this.metricsTree = new Ext.tree.TreePanel({
 
@@ -607,7 +550,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 draggable: false,
                 id: 'app_kernels'
 
-            }, //root
+            }, // root
 
             rootVisible: false,
             containerScroll: true,
@@ -621,7 +564,6 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                     scope: this,
 
                     handler: function () {
-
                         XDMoD.TrackEvent('App Kernel Explorer', 'Clicked on the uncheck all tool in the Metrics tree');
                         suppressMetricCheckTrackCall = true;
 
@@ -630,54 +572,55 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
                         var selectAll = true;
 
-                        this.metricsTree.getRootNode().cascade(function(n) {
-                         var ui = n.getUI();
-                         if(ui.isChecked()) selectAll=false;
-                         lastNode = n;
+                        this.metricsTree.getRootNode().cascade(function (n) {
+                            var ui = n.getUI();
+                            if (ui.isChecked()) {
+                                selectAll = false;
+                            }
+                            lastNode = n;
                         });
 
-                        if(selectAll){
-                         XDMoD.TrackEvent('App Kernel Explorer', 'Checking all (rendered) items in Metrics tree');
-                         this.metricsTree.getRootNode().cascade(function(n) {
-                           var ui = n.getUI();
-                           if(!ui.isChecked()) ui.toggleCheck(true);
-                           lastNode = n;
-                         });
+                        if (selectAll) {
+                            XDMoD.TrackEvent('App Kernel Explorer', 'Checking all (rendered) items in Metrics tree');
+                            this.metricsTree.getRootNode().cascade(function (n) {
+                                var ui = n.getUI();
+                                if (!ui.isChecked()) {
+                                    ui.toggleCheck(true);
+                                }
+                                lastNode = n;
+                            });
+                        } else {
+                            XDMoD.TrackEvent('App Kernel Explorer', 'Clearing all (rendered) checked items in Metrics tree');
+                            this.metricsTree.getRootNode().cascade(function (n) {
+                                var ui = n.getUI();
+                                if (ui.isChecked()) {
+                                    ui.toggleCheck(false);
+                                }
+                                lastNode = n;
+                            });
                         }
-                        else{
-                         XDMoD.TrackEvent('App Kernel Explorer', 'Clearing all (rendered) checked items in Metrics tree');
-                         this.metricsTree.getRootNode().cascade(function(n) {
-                            var ui = n.getUI();
-                            if(ui.isChecked()) ui.toggleCheck(false);
-                            lastNode = n;
-                         });
+                        if (lastNode) {
+                            metricsTreeCheckChange.call(this, lastNode, false);
                         }
-                        if (lastNode) metricsTreeCheckChange.call(this, lastNode, false);
                         this.metricsTree.on('checkchange', metricsTreeCheckChange, this);
                         suppressMetricCheckTrackCall = false;
-
-                    } //handler
-
+                    } // handler
                 },
-
                 {
-
                     id: 'refresh',
                     qtip: 'Refresh',
                     scope: this,
                     hidden: true,
                     handler: reloadMetrics
-
                 }
-
-            ], //tools
+            ], // tools
 
             margins: '0 0 0 0',
             border: false,
 
             listeners: {
 
-                'checkchange': {
+                checkchange: {
                     fn: metricsTreeCheckChange,
                     scope: this
                 },
@@ -688,31 +631,27 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                         var end_time = self.getDurationSelector().getEndDate() / 1000.0;
                         var enabled = (start_time <= n.attributes.end_ts && n.attributes.end_ts <= end_time) ||
                             (n.attributes.start_ts <= end_time && end_time <= n.attributes.end_ts);
-                        if (enabled) n.enable();
-                        else n.disable();
+                        if (enabled) {
+                            n.enable();
+                        } else {
+                            n.disable();
+                        }
                     },
                     scope: this
                 },
 
-               expandnode: function(n) {
+                expandnode: function (n) {
+                    XDMoD.TrackEvent('App Kernel Explorer', 'Expanded item in Metrics tree', n.getPath('text'));
+                }, // expandnode
 
-                  XDMoD.TrackEvent('App Kernel Explorer', 'Expanded item in Metrics tree', n.getPath('text'));
-
-               },//expandnode
-
-               collapsenode: function(n) {
-
-                  XDMoD.TrackEvent('App Kernel Explorer', 'Collapsed item in Metrics tree', n.getPath('text'));
-
-               }//collapsenode
-
-            }, //listeners
+                collapsenode: function (n) {
+                    XDMoD.TrackEvent('App Kernel Explorer', 'Collapsed item in Metrics tree', n.getPath('text'));
+                } // collapsenode
+            }, // listeners
 
             flex: 5
 
-        }); //this.metricsTree
-
-        // ---------------------------------------------------------
+        }); // this.metricsTree
 
         this.metricsTree.on('checkchange', metricsTreeCheckChange, this);
 
@@ -729,32 +668,21 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 scope: this,
 
                 change: function (t, n, o) {
-
-                    if (n != o) {
-
+                    if (n !== o) {
                         XDMoD.TrackEvent('App Kernel Explorer', 'Updated chart title', t.getValue());
+                        // eslint-disable-next-line no-use-before-define
                         reloadChart.call(this);
-
                     }
-
-                }, //change
+                }, // change
 
                 specialkey: function (t, e) {
-
-                    if (t.isValid(false) && e.getKey() == e.ENTER) {
-
-                        //XDMoD.TrackEvent('App Kernel Explorer', 'Updated chart title', t.getValue());
+                    if (t.isValid(false) && e.getKey() === e.ENTER) {
+                        // eslint-disable-next-line no-use-before-define
                         reloadChart.call(this);
-
                     }
-
-                } //specialkey
-
-            } //listeners
-
-        }); //this.chartTitleField
-
-        // ---------------------------------------------------------
+                } // specialkey
+            } // listeners
+        }); // this.chartTitleField
 
         this.legendTypeComboBox = new Ext.form.ComboBox({
 
@@ -795,7 +723,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
                 ]
 
-            }), //store
+            }), // store
 
             disabled: false,
             value: this.legend_type,
@@ -807,20 +735,15 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
                 scope: this,
 
-                'select': function (combo, record, index) {
-
-                    XDMoD.TrackEvent('App Kernel Explorer', 'Updated legend placement', Ext.encode({legend_type: record.get('id')}));
+                select: function (combo, record, index) {
+                    XDMoD.TrackEvent('App Kernel Explorer', 'Updated legend placement', Ext.encode({ legend_type: record.get('id') }));
 
                     this.legend_type = record.get('id');
+                    // eslint-disable-next-line no-use-before-define
                     reloadChart.call(this);
-
-                } //select
-
-            } //listeners
-
-        }); //this.legendTypeComboBox
-
-        // ---------------------------------------------------------
+                } // select
+            } // listeners
+        }); // this.legendTypeComboBox
 
         this.fontSizeSlider = new Ext.slider.SingleSlider({
 
@@ -837,20 +760,15 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
                 scope: this,
 
-                'change': function (t, n, o) {
-
-                    XDMoD.TrackEvent('App Kernel Explorer', 'Used the font size slider', Ext.encode({font_size: t.getValue()}));
+                change: function (t, n, o) {
+                    XDMoD.TrackEvent('App Kernel Explorer', 'Used the font size slider', Ext.encode({ font_size: t.getValue() }));
 
                     this.font_size = t.getValue();
+                    // eslint-disable-next-line no-use-before-define
                     reloadChart.call(this);
-
-                } //change
-
-            } //listeners
-
-        }); //this.fontSizeSlider
-        
-        // ---------------------------------------------------------
+                } // change
+            } // listeners
+        }); // this.fontSizeSlider
 
         this.northPanel = new Ext.Panel({
 
@@ -865,9 +783,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
             items: [this.resourcesTree, this.pusTree],
             flex: 4
 
-        }); //this.northPanel
-
-        // ---------------------------------------------------------
+        }); // this.northPanel
 
         var leftPanel = new Ext.Panel({
 
@@ -915,7 +831,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
                         ]
 
-                    }] //items
+                    }] // items
 
                 },
 
@@ -938,11 +854,9 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
                 }
 
-            ] //items
+            ] // items
 
-        }); //leftPanel
-
-        // ---------------------------------------------------------
+        }); // leftPanel
 
         var chartStore = new CCR.xdmod.CustomJsonStore({
 
@@ -980,21 +894,22 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 method: 'POST',
                 url: 'controllers/data_explorer.php'
 
-            }) //proxy
+            }) // proxy
 
-        }); //chartStore
-
-        // ---------------------------------------------------------
+        }); // chartStore
 
         chartStore.on('beforeload', function () {
-
-            if (!self.getDurationSelector().validate()) return;
+            if (!self.getDurationSelector().validate()) {
+                return;
+            }
+            // eslint-disable-next-line no-use-before-define
             highChartPanel.un('resize', onResize, this);
 
+            // eslint-disable-next-line no-use-before-define
             maximizeScale.call(this);
             Ext.apply(chartStore.baseParams, getBaseParams.call(this));
 
-            chartStore.baseParams.timeframe_label = self.getDurationSelector().getDurationLabel(),
+            chartStore.baseParams.timeframe_label = self.getDurationSelector().getDurationLabel();
             chartStore.baseParams.show_guide_lines = 'y';
             chartStore.baseParams.scale = 1;
             chartStore.baseParams.format = 'hc_jsonstore';
@@ -1005,14 +920,15 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
             // While we're still pre-load make sure to mask the appropriate
             // component so that the User knows that we're retrieving data.
+            // eslint-disable-next-line no-use-before-define
             view.el.mask('Loading...');
-        }, this); //chartStore.on('beforeload'
+        }, this); // chartStore.on('beforeload'
 
-        // ---------------------------------------------------------
-
+        // eslint-disable-next-line no-shadow
         chartStore.on('load', function (chartStore) {
             // Now that we're done loading, make sure to unmask the appropriate
             // component so that the User knows that we're done.
+            // eslint-disable-next-line no-use-before-define
             view.el.unmask();
 
             // Ensure that we unmask the main interface once we're done loading
@@ -1022,14 +938,14 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 viewer.el.unmask();
             }
 
-            if (chartStore.getCount() != 1) {
+            if (chartStore.getCount() !== 1) {
                 return;
             }
 
             var selectedResourceIds = this.getSelectedResourceIds();
             var selectedMetrics = this.getSelectedMetrics();
             var noData = selectedResourceIds.length === 0 || selectedMetrics.length === 0;
-
+            // eslint-disable-next-line no-use-before-define
             chartViewPanel.getLayout().setActiveItem(noData ? 1 : 0);
 
             self.getExportMenu().setDisabled(noData);
@@ -1044,11 +960,9 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 reportGeneratorMeta.start_date,
                 reportGeneratorMeta.end_date,
                 reportGeneratorMeta.included_in_report);
-
+            // eslint-disable-next-line no-use-before-define
             highChartPanel.on('resize', onResize, this);
-        }, this); //chartStore.on('load'
-
-        // ---------------------------------------------------------
+        }, this); // chartStore.on('load'
 
         var reloadChartFunc = function () {
             chartStore.load();
@@ -1060,17 +974,6 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
             reloadChartTask.delay(delay || 2000);
         };
 
-        var chartViewTemplate = new Ext.XTemplate(
-            '<tpl for=".">',
-            '<center>',
-            '<map id="Map{random_id}" name="Map{random_id}">{chart_map}</map>',
-            '<img class="xd-img" src="{chart_url}" usemap="#Map{random_id}"/>',
-            '</center>',
-            '</tpl>'
-        );
-
-        // ---------------------------------------------------------
-
         var assistPanel = new CCR.xdmod.ui.AssistPanel({
 
             region: 'center',
@@ -1080,18 +983,14 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
             graphic: 'gui/images/ak_explorer_instructions.png',
             userManualRef: 'app+kernel+explorer'
 
-        }); //assistPanel
-
-        // ---------------------------------------------------------
+        }); // assistPanel
 
         var highChartPanel = new CCR.xdmod.ui.HighChartPanel({
 
             id: 'hc-panel' + this.id,
             store: chartStore
 
-        }); //highChartPanel
-
-        // ---------------------------------------------------------
+        }); // highChartPanel
 
         var chartViewPanel = new Ext.Panel({
 
@@ -1108,49 +1007,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 assistPanel
             ]
 
-        }); //chartViewPanel
-
-        // ---------------------------------------------------------
-
-        //self.getDurationSelector().dateSlider.region = 'south';
-
-        var datasheetTab = new Ext.Panel({
-            title: 'Datasheet'
-        });
-
-        var detailsTab = new Ext.Panel({
-            title: 'Details'
-        });
-
-        var glossaryTab = new Ext.Panel({
-            title: 'Glossary'
-        });
-
-        var southTabPanel = new Ext.TabPanel({
-
-            activeTab: 0,
-            region: 'center',
-            items: [datasheetTab, detailsTab, glossaryTab]
-
-        }); //southTabPanel
-
-        // ---------------------------------------------------------
-
-        var southView = new Ext.Panel({
-
-            hideTitle: true,
-            split: true,
-            collapsible: true,
-            header: false,
-            collapseMode: 'mini',
-            region: 'south',
-            height: 250,
-            layout: 'border',
-            items: [southTabPanel]
-
-        }); //southView
-
-        // ---------------------------------------------------------
+        }); // chartViewPanel
 
         var view = new Ext.Panel({
 
@@ -1160,12 +1017,9 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
             border: true,
             items: [chartViewPanel]
 
-        }); //view
-
-        // ---------------------------------------------------------
+        }); // view
 
         self.on('print_clicked', function () {
-
             var parameters = chartStore.baseParams;
 
             parameters.scale = 1;
@@ -1175,8 +1029,10 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
             var params = '';
 
-            for (i in parameters) {
-                params += i + '=' + parameters[i] + '&';
+            for (var i in parameters) {
+                if (parameters.hasOwnProperty(i)) {
+                    params += i + '=' + parameters[i] + '&';
+                }
             }
 
             params = params.substring(0, params.length - 1);
@@ -1189,22 +1045,15 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 html: '<img src="/controllers/data_explorer.php?' + params + '" />'
 
             });
-
-        }); //self.on('print_clicked',...
-
-        // ---------------------------------------------------------
+        }); // self.on('print_clicked',...
 
         self.on('export_option_selected', function (opts) {
-
             var parameters = chartStore.baseParams;
 
             Ext.apply(parameters, opts);
 
-            CCR.invokePost("controllers/data_explorer.php", parameters);
-
-        }); //self.on('export_option_selected', …
-
-        // ---------------------------------------------------------
+            CCR.invokePost('controllers/data_explorer.php', parameters);
+        }); // self.on('export_option_selected', …
 
         var toggleChangeIndicator = new Ext.Button({
 
@@ -1220,43 +1069,27 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
             pressed: true,
             tooltip: 'When this option is checked, each app kernel data series plot will show an exclamation point icon whenever a change has occurred in the execution environment of the app kernel (library version, compiler version, etc).'
 
-        }); //toggleChangeIndicator
-
-        // ---------------------------------------------------------
+        }); // toggleChangeIndicator
 
         function reloadAll() {
-
             reloadResources.call(this);
             reloadPUs.call(this);
             reloadMetrics.call(this);
             reloadChart.call(this, 150);
-
-        } //reloadAll
-
-        // ---------------------------------------------------------
+        } // reloadAll
 
         this.on('render', reloadAll, this, {
             single: true
         });
 
-        // ---------------------------------------------------------
-
         function maximizeScale() {
-
             chartWidth = chartViewPanel.getWidth();
             chartHeight = chartViewPanel.getHeight() - (chartViewPanel.tbar ? chartViewPanel.tbar.getHeight() : 0);
-
-        } //maximizeScale
-
-        // ---------------------------------------------------------
+        } // maximizeScale
 
         function onResize(t) {
-
             maximizeScale.call(this);
-
-        } //onResize
-
-        // ---------------------------------------------------------
+        } // onResize
 
         Ext.apply(this, {
 
@@ -1272,10 +1105,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
             items: [leftPanel, view]
 
-        }); //Ext.apply
+        }); // Ext.apply
 
         XDMoD.Module.AppKernels.AppKernelExplorer.superclass.initComponent.apply(this, arguments);
-
-    } //initComponent
-
-}); //XDMoD.Module.AppKernels.AppKernelExplorer
+    } // initComponent
+}); // XDMoD.Module.AppKernels.AppKernelExplorer

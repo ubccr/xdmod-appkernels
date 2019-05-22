@@ -1,3 +1,4 @@
+/* global Ext, XDMoD, CCR, window */
 Ext.namespace('XDMoD.Modules.SummaryPortlets');
 
 /**
@@ -39,38 +40,38 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
     tools: [
         {
             id: 'help',
-            qtip: `
-            <ul>
-                <li style="padding-top:6px;margin-bottom:6px;">
-                    <span style="width:20px;background:#ff0000;display:inline-block">&nbsp;</span>
-                    <span><b>Failed Runs</b></span>
-                    <ul>
-                        <li style="margin-left:6px;">A run in which the app kernel failed to complete successfully.</li>
-                    </ul>
-                </li>
-                <li style="margin-top:6px;margin-bottom:6px;">
-                    <span style="width: 20px;background:#ffb336;display:inline-block">&nbsp;</span>
-                    <span><b>Under Performing Runs</b></span>
-                    <ul>
-                        <li style="margin-left:6px;">A run in which the app kernel completed successfully but performed below the established control region.</li>
-                    </ul>
-                </li>
-                <li style="margin-top:6px;margin-bottom:6px;">
-                    <span style="width: 20px;background:#50b432;display:inline-block ">&nbsp;</span>
-                    <span><b>In Control Runs</b></span>
-                    <ul>
-                        <li style="margin-left:6px;">A run in which the app kernel completed successfully and performed within the established control region.</li>
-                    </ul>
-                </li>
-                <li style="margin-top:6px;padding-bottom:6px;">
-                    <span style="width: 20px;background:#3c86ff;display:inline-block">&nbsp;</span>
-                    <span><b>Over Performing Runs</b></span>
-                    <ul>
-                        <li style="margin-left:6px;">A run in which the app kernel completed successfully and performed better than the established control region.</li>
-                    </ul>
-                </li>
-            </ul>
-            `,
+            qtip: [
+                '<ul>',
+                '<li style="padding-top:6px;margin-bottom:6px;">',
+                '<span style="width:20px;background:#ff0000;display:inline-block">&nbsp;</span>',
+                '<span><b>Failed Runs</b></span>',
+                '<ul>',
+                '<li style="margin-left:6px;">A run in which the app kernel failed to complete successfully.</li>',
+                '</ul>',
+                '</li>',
+                '<li style="margin-top:6px;margin-bottom:6px;">',
+                '<span style="width: 20px;background:#ffb336;display:inline-block">&nbsp;</span>',
+                '<span><b>Under Performing Runs</b></span>',
+                '<ul>',
+                '<li style="margin-left:6px;">A run in which the app kernel completed successfully but performed below the established control region.</li>',
+                '</ul>',
+                '</li>',
+                '<li style="margin-top:6px;margin-bottom:6px;">',
+                '<span style="width: 20px;background:#50b432;display:inline-block ">&nbsp;</span>',
+                '<span><b>In Control Runs</b></span>',
+                '<ul>',
+                '<li style="margin-left:6px;">A run in which the app kernel completed successfully and performed within the established control region.</li>',
+                '</ul>',
+                '</li>',
+                '<li style="margin-top:6px;padding-bottom:6px;">',
+                '<span style="width: 20px;background:#3c86ff;display:inline-block">&nbsp;</span>',
+                '<span><b>Over Performing Runs</b></span>',
+                '<ul>',
+                '<li style="margin-left:6px;">A run in which the app kernel completed successfully and performed better than the established control region.</li>',
+                '</ul>',
+                '</li>',
+                '</ul>'
+            ].join(' '),
             qwidth: 60
         }
     ],
@@ -85,7 +86,7 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
         this.height = this.width * aspectRatio;
 
         var dateRanges = CCR.xdmod.ui.DurationToolbar.getDateRanges();
-        for ( var i = 0; i < dateRanges.length; i++ ) {
+        for (var i = 0; i < dateRanges.length; i++) {
             var dateRange = dateRanges[i];
             if (dateRange.text === this.config.timeframe) {
                 this.config.start_date = this.formatDate(dateRange.start);
@@ -115,16 +116,16 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
                 url: XDMoD.REST.url + '/app_kernels/performance_map/raw'
             }),
             baseParams: {
-                'start_date': this.config.start_date,
-                'end_date': this.config.end_date
+                start_date: this.config.start_date,
+                end_date: this.config.end_date
             },
             listeners: {
-                load: function() {
+                load: function () {
                     // Make sure that once we're loaded we remove this portlets
                     // mask. This was added during the `afterrender` event.
                     self.el.unmask();
                 },
-                exception: function() {
+                exception: function () {
                     // refresh the grid view so that we can apply the empty text.
                     self.grid.getView().refresh();
 
@@ -171,12 +172,21 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
              * @returns {string} for an svg rect element
              */
             var rect = function (id, title, msg, width, x, height, red, green, blue) {
-                var xValue = `${x}%`;
+                var xValue = x + '%';
                 if (Ext.isChrome) {
-                    xValue = `calc(${x}% + 1px)`;
+                    xValue = 'calc(' + x + '% + 1px)';
                 }
-                return `<rect id="${id}" width="${width}%" height="${height}" x="${xValue}" style="fill:rgb(${red}, ${green}, ${blue}); stroke-width:1; stroke:rgb(0,0,0)" ext:qtitle="${title}" ext:qtip="${msg}" ext:qwidth="120" />`;
-
+                return [
+                    '<rect id="' + id + '"',
+                    'width="' + width + '%"',
+                    'height="' + height + '"',
+                    'x="' + xValue + '"',
+                    'style="fill:rgb(' + red + ',' + green + ',' + blue + ');',
+                    'stroke-width:1; stroke:rgb(0,0,0)" ',
+                    'ext:qtitle="' + title + '"',
+                    'ext:qtip="' + msg + '"',
+                    'ext:qwidth="120" />'
+                ].join(' ');
             };
 
             var height = 20;
@@ -185,7 +195,7 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
             if (total > 0) {
                 var contents = [
                     '<div style="width: 100%;">',
-                    `<svg width="100%" height="${height}">`
+                    '<svg width="100%" height="' + height + '">'
                 ];
 
                 var input = {
@@ -220,11 +230,11 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
                 };
 
                 var sum = 0;
-                for ( var id in input ) {
+                for (var id in input) {
                     if (input.hasOwnProperty(id)) {
                         var runs = input[id].runs;
                         var percentage = total > 0 ? Math.round(((runs / total) * 100)) : 0;
-                        var msg = `${percentage}% - ( ${runs} / ${total} )`;
+                        var msg = percentage + '% - ( ' + (runs / total) + ' )';
 
                         contents.push(
                             rect(id, input[id].title, msg, percentage, sum, height, input[id].red, input[id].green, input[id].blue)
@@ -239,15 +249,16 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
             } else {
                 // If we don't have any runs then just output a simple message
                 // to let the user know what's up.
+                // eslint-disable-next-line block-scoped-var
                 contents = [
-                    `<div style="width:100%; height: ${height};">`,
+                    '<div style="width:100%; height: ' + height + ';">',
                     '<span style="font-weight: bold">No Data Found!</span>',
                     '</div>'
                 ];
-
             }
 
-            return contents.join("\n");
+            // eslint-disable-next-line block-scoped-var
+            return contents.join(' ');
         }; // var valueRenderer = function (value, metaData, record) {
 
         /**
@@ -301,7 +312,7 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
                     var record = grid.getStore().getAt(rowIndex);
 
                     var info = {
-                        start_date:self.config.start_date,
+                        start_date: self.config.start_date,
                         end_date: self.config.end_date,
                         resource: record.get('resource'),
                         app_kernel: record.get('app_kernel')
@@ -358,15 +369,18 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
      * @param {Date} startDate
      * @param {Date} endDate
      */
-    updateTitle: function(startDate, endDate) {
-        this.setTitle(`${this.titleBase} - ` +
-            `${startDate}` +
-            ` to ` +
-            `${endDate}`);
+    updateTitle: function (startDate, endDate) {
+        this.setTitle(
+            this.titleBase + ' - ' +
+            startDate +
+            ' to ' +
+            endDate);
     }, // updateTitle: function(startDate, endDate) {
 
-    formatDate: function(date) {
-        return `${date.getFullYear()}-${("" + (date.getMonth() + 1)).padStart(2, '0')}-${("" + date.getDate()).padStart(2, '0')}`
+    formatDate: function (date) {
+        return date.getFullYear() + '-' +
+            ('' + (date.getMonth() + 1)).padStart(2, '0') + '-' +
+            ('' + date.getDate()).padStart(2, '0');
     } // formatDate: function(date) {
 
 }); // XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portlet, {

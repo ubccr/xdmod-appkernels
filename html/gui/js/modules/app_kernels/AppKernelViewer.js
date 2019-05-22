@@ -1,3 +1,4 @@
+/* global XDMoD, CCR, Ext, document, jQuery */
 /**
  * This class contains functionality for the App Kernels tab.
  *
@@ -31,7 +32,7 @@ Ext.apply(XDMoD.Module.AppKernels.AppKernelViewer, {
      * @param {Number} kernel_id The selected kernel_id.
      */
     selectChildAppKernelChart: function (metric_id, resource_id, kernel_id) {
-        if (metric_id == -1 || resource_id == -1 || kernel_id == -1) {
+        if (metric_id === -1 || resource_id === -1 || kernel_id === -1) {
             return;
         }
 
@@ -71,8 +72,8 @@ Ext.apply(XDMoD.Module.AppKernels.AppKernelViewer, {
             }
 
             if (
-                node.attributes.type == 'appkernel' &&
-                node.attributes.ak_id == kernel_id
+                node.attributes.type === 'appkernel' &&
+                node.attributes.ak_id === kernel_id
             ) {
                 var nodeToExpand = node.findChild('resource_id', resource_id);
 
@@ -98,8 +99,8 @@ Ext.apply(XDMoD.Module.AppKernels.AppKernelViewer, {
                     tree.getSelectionModel().select(nodeToSelect);
                 });
             } else if (
-                node.attributes.type == 'resource' &&
-                node.attributes.resource_id == resource_id
+                node.attributes.type === 'resource' &&
+                node.attributes.resource_id === resource_id
             ) {
                 var nodeToSelect = node.findChild('metric_id', metric_id, true);
 
@@ -112,10 +113,8 @@ Ext.apply(XDMoD.Module.AppKernels.AppKernelViewer, {
                 }
 
                 tree.getSelectionModel().select(nodeToSelect);
-            } else {
-                if (viewer.el) {
-                    viewer.el.unmask();
-                }
+            } else if (viewer.el) {
+                viewer.el.unmask();
             }
         });
     },
@@ -202,7 +201,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
     font_size: 3,
     swap_xy: false,
     showDateChooser: true,
-    current_hash:'',
+    current_hash: '',
     chartDataFields: [
         'hc_jsonstore',
         'title',
@@ -298,13 +297,12 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
     chartThumbScale: CCR.xdmod.ui.thumbChartScale,
     chartWidth: 740,
     chartHeight: 345,
-    leftPanelWidth:375,
+    leftPanelWidth: 375,
 
     /**
      * Initialize app kernel module.
      */
     initComponent: function () {
-
         var treeTb = new Ext.Toolbar({
             items: [
                 '->',
@@ -348,6 +346,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                 requestMethod: 'GET',
                 listeners: {
                     beforeload: function (loader, node, callback) {
+                        // eslint-disable-next-line no-param-reassign
                         loader.baseParams = XDMoD.REST.removeEmptyParameters({
                             ak: node.attributes.ak_id,
                             resource: node.attributes.resource_id,
@@ -469,13 +468,13 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
 
             // Is a single chart being displayed?
             var isChart =
-                n.attributes.type == 'units' ||
-                n.attributes.type == 'metric';
+                n.attributes.type === 'units' ||
+                n.attributes.type === 'metric';
 
             // Are multiple charts being displayed with the menu?
             var isMenu =
-                n.attributes.type == 'resource' ||
-                n.attributes.type == 'appkernel';
+                n.attributes.type === 'resource' ||
+                n.attributes.type === 'appkernel';
 
             // Delete the current chart if only one will be displayed.
             if (isChart && this.chart) {
@@ -498,7 +497,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
 
             this.updateDescriptionLarge(
                 chartStore,
-                n.attributes.type != 'appkernel'
+                n.attributes.type !== 'appkernel'
             );
 
             XDMoD.TrackEvent(
@@ -537,18 +536,17 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                 var id = r.get('random_id');
 
                 var task = new Ext.util.DelayedTask(function () {
-
                     // Calculate width and height depending on if
                     // multiple chart are displayed or just one.
                     var width =
                         isMenu ?
-                        CCR.xdmod.ui.thumbWidth * this.chartThumbScale :
-                        this.chartWidth * this.chartScale;
+                            CCR.xdmod.ui.thumbWidth * this.chartThumbScale :
+                            this.chartWidth * this.chartScale;
 
                     var height =
                         isMenu ?
-                        CCR.xdmod.ui.thumbHeight * this.chartThumbScale :
-                        this.chartHeight * this.chartScale;
+                            CCR.xdmod.ui.thumbHeight * this.chartThumbScale :
+                            this.chartHeight * this.chartScale;
 
                     var baseChartOptions = {
                         chart: {
@@ -558,7 +556,6 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                             animation: false,
                             events: {
                                 load: function (e) {
-
                                     // Check if an empty data set was
                                     // returned.  If not, display the
                                     // "no data" image.
@@ -587,8 +584,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                                 }
                             }
                         },
-                        plotOptions:{
-                            series:{
+                        plotOptions: {
+                            series: {
                                 animation: false,
                                 point: {
                                     events: {
@@ -686,7 +683,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
         });
 
         this.view = new Ext.DataView({
-            loadingText: "Loading...",
+            loadingText: 'Loading...',
             itemSelector: 'chart_thumb-wrap',
             style: 'overflow:auto',
             multiSelect: true,
@@ -728,13 +725,11 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             // handler.  Otherwise, the node can be selected
             // immediately.
             if (this.tree.getLoader().isLoading()) {
-
                 this.tree.loader.un('load', this.selectFirstNode, this);
 
                 this.tree.loader.on('load', function () {
                     this.selectAppKernelFromUrl(panel);
                 }, this, { single: true });
-
             } else {
                 this.selectAppKernelFromUrl(panel);
             }
@@ -855,8 +850,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             scope: this,
             iconCls: 'exclamation',
             toggleHandler: function (b) {
-               XDMoD.TrackEvent('App Kernels', 'Clicked on ' + b.getText(), Ext.encode({pressed: b.pressed}));
-               this.reloadChartStore();
+                XDMoD.TrackEvent('App Kernels', 'Clicked on ' + b.getText(), Ext.encode({ pressed: b.pressed }));
+                this.reloadChartStore();
             },
             pressed: false,
             tooltip: 'For each app kernel plot, show an exclamation point icon whenever a change has occurred in the execution environment (library version, compiler version, etc).'
@@ -869,8 +864,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             scope: this,
             iconCls: '',
             toggleHandler: function (b) {
-               XDMoD.TrackEvent('App Kernels', 'Clicked on ' + b.getText(), Ext.encode({pressed: b.pressed}));
-               this.reloadChartStore();
+                XDMoD.TrackEvent('App Kernels', 'Clicked on ' + b.getText(), Ext.encode({ pressed: b.pressed }));
+                this.reloadChartStore();
             },
             pressed: true,
             tooltip: 'Show the running average values as a dashed line on the chart. The running average is the linear average of the last five values.'
@@ -883,8 +878,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             scope: this,
             iconCls: '',
             toggleHandler: function (b) {
-               XDMoD.TrackEvent('App Kernels', 'Clicked on ' + b.getText(), Ext.encode({pressed: b.pressed}));
-               this.reloadChartStore();
+                XDMoD.TrackEvent('App Kernels', 'Clicked on ' + b.getText(), Ext.encode({ pressed: b.pressed }));
+                this.reloadChartStore();
             },
             pressed: true,
             tooltip: 'Show a band on the chart representing the values of the running average considered "In Control" at any given time. <br>A control region is picked to be first few points in a dataset and updated whenever an execution environment change is detected by the app kernel system. The control band then is calculated by clustering the control region into two sets based on the median and then finding the average of each set. The two averages define the control band.'
@@ -897,8 +892,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             scope: this,
             iconCls: '',
             toggleHandler: function (b) {
-               XDMoD.TrackEvent('App Kernels', 'Clicked on ' + b.getText(), Ext.encode({pressed: b.pressed}));
-               this.reloadChartStore();
+                XDMoD.TrackEvent('App Kernels', 'Clicked on ' + b.getText(), Ext.encode({ pressed: b.pressed }));
+                this.reloadChartStore();
             },
             pressed: true,
             tooltip: 'Show a red interval on the plot when the control value falls below -0.5, indicating an out of control (worse than expected) running average, and a green interval when the control value is greater than 0, indicating a better than control (better than expected) running average. Other running average values are considered "In Control"'
@@ -911,8 +906,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             scope: this,
             iconCls: '',
             toggleHandler: function (b) {
-               XDMoD.TrackEvent('App Kernels', 'Clicked on ' + b.getText(), Ext.encode({pressed: b.pressed}));
-               this.reloadChartStore();
+                XDMoD.TrackEvent('App Kernels', 'Clicked on ' + b.getText(), Ext.encode({ pressed: b.pressed }));
+                this.reloadChartStore();
             },
             pressed: false,
             listeners: {
@@ -927,7 +922,6 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                     this.toggleControlZones.show();
                     this.toggleRunningAverages.show();
                     this.toggleControlInterval.show();
-
                 },
                 hide: function () {
                     this.toggleDiscreteControls.hide();
@@ -952,8 +946,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             scope: this,
             iconCls: '',
             toggleHandler: function (b) {
-               XDMoD.TrackEvent('App Kernels', 'Clicked on ' + b.getText(), Ext.encode({pressed: b.pressed}));
-               this.reloadChartStore();
+                XDMoD.TrackEvent('App Kernels', 'Clicked on ' + b.getText(), Ext.encode({ pressed: b.pressed }));
+                this.reloadChartStore();
             },
             hidden: true,
             pressed: false,
@@ -969,13 +963,13 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             listeners: {
                 scope: this,
                 change: function (t, n, o) {
-                    if (n != o) {
+                    if (n !== o) {
                         XDMoD.TrackEvent('App Kernels', 'Updated title', t.getValue());
                         this.reloadChartStore();
                     }
                 },
                 specialkey: function (t, e) {
-                    if (t.isValid(false) && e.getKey() == e.ENTER) {
+                    if (t.isValid(false) && e.getKey() === e.ENTER) {
                         XDMoD.TrackEvent('App Kernels', 'Updated title', t.getValue());
                         this.reloadChartStore();
                     }
@@ -1023,7 +1017,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             listeners: {
                 scope: this,
                 select: function (combo, record, index) {
-                    XDMoD.TrackEvent('App Kernels', 'Updated legend placement', Ext.encode({legend_type: record.get('id')}));
+                    XDMoD.TrackEvent('App Kernels', 'Updated legend placement', Ext.encode({ legend_type: record.get('id') }));
 
                     this.legend_type = record.get('id');
                     this.reloadChartStore(2000);
@@ -1042,7 +1036,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             listeners: {
                 scope: this,
                 change: function (t, n, o) {
-                    XDMoD.TrackEvent('App Kernels', 'Used the font size slider', Ext.encode({font_size: t.getValue()}));
+                    XDMoD.TrackEvent('App Kernels', 'Used the font size slider', Ext.encode({ font_size: t.getValue() }));
 
                     this.font_size = t.getValue();
                     this.reloadChartStore(2000);
@@ -1131,15 +1125,16 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
 
             var thumbWidth = CCR.xdmod.ui.thumbWidth * this.chartThumbScale;
 
-            var portalWidth = viewer.getWidth()-this.leftPanelWidth;
+            var portalWidth = viewer.getWidth() - this.leftPanelWidth;
 
-            portalWidth = portalWidth - (CCR.xdmod.ui.scrollBarWidth - CCR.xdmod.ui.thumbPadding / 2);
+            // eslint-disable-next-line no-mixed-operators
+            portalWidth -= (CCR.xdmod.ui.scrollBarWidth - CCR.xdmod.ui.thumbPadding / 2);
 
-            if(portalWidth<50.0){
-                portalWidth=this.chartWidth;
+            if (portalWidth < 50.0) {
+                portalWidth = this.chartWidth;
             }
 
-            var portalColumnsCount = Math.max(1, Math.round(portalWidth / thumbWidth) );
+            var portalColumnsCount = Math.max(1, Math.round(portalWidth / thumbWidth));
 
             thumbWidth = portalWidth / portalColumnsCount;
             thumbWidth -= CCR.xdmod.ui.thumbPadding;
@@ -1212,7 +1207,6 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             if (node.childNodes.length > 0) {
                 tree.expandPath(path, null, expander);
             } else {
-
                 // Delay the expansion so the child nodes are ready.
                 new Ext.util.DelayedTask(function () {
                     tree.expandPath(path, null, expander);
@@ -1279,7 +1273,6 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
      * Select the first node in the tree if none are selected.
      */
     selectFirstNode: function () {
-
         var token = CCR.tokenize(document.location.hash);
 
         // If we've received the activate event but the token does not specify
@@ -1299,15 +1292,15 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
         var root = this.tree.getRootNode();
 
         if (root.hasChildNodes()) {
-            var selected=false;
+            var selected = false;
             for (var i = 0; i < root.childNodes.length; i++) {
-                if(root.childNodes[i].disabled===false){
+                if (root.childNodes[i].disabled === false) {
                     sm.select(root.childNodes[i]);
-                    selected=true;
+                    selected = true;
                     break;
                 }
             }
-            if(selected===false){
+            if (selected === false) {
                 sm.select(root.childNodes[0]);
             }
         } else {
@@ -1342,7 +1335,6 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
      * @param {Ext.tree.TreeNode} n The selected tree node.
      */
     getParameters: function (n) {
-
         var parameters = {
             show_change_indicator: this.toggleChangeIndicator.pressed ? 'y' : 'n',
             collected: n.attributes.collected,
@@ -1354,7 +1346,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             swap_xy: this.swap_xy
         };
 
-        if (n.attributes.type == 'units') {
+        if (n.attributes.type === 'units') {
             parameters.num_proc_units = n.attributes.num_proc_units;
             parameters.metric = n.attributes.metric_id;
             parameters.resource = n.attributes.resource_id;
@@ -1369,7 +1361,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             parameters.show_control_zones = this.toggleControlZones.pressed ? 'y' : 'n';
             parameters.show_running_averages = this.toggleRunningAverages.pressed ? 'y' : 'n';
             parameters.show_control_interval = this.toggleControlInterval.pressed ? 'y' : 'n';
-        } else if (n.attributes.type == 'metric') {
+        } else if (n.attributes.type === 'metric') {
             parameters.metric = n.attributes.metric_id;
             parameters.resource = n.attributes.resource_id;
             parameters.ak = n.attributes.ak_id;
@@ -1378,7 +1370,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             parameters.show_title = 'y';
             parameters.width = this.chartWidth * this.chartScale;
             parameters.height = this.chartHeight * this.chartScale;
-        } else if (n.attributes.type == 'resource') {
+        } else if (n.attributes.type === 'resource') {
             parameters.resource = n.attributes.resource_id;
             parameters.ak = n.attributes.ak_id;
             parameters.width = CCR.xdmod.ui.thumbWidth * this.chartThumbScale;
@@ -1387,8 +1379,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             parameters.format = 'session_variable';
             parameters.thumbnail = 'y';
             parameters.show_guide_lines = 'n';
-            parameters.font_size = parameters.font_size - 3;
-        } else if (n.attributes.type == 'appkernel') {
+            parameters.font_size -= 3;
+        } else if (n.attributes.type === 'appkernel') {
             parameters.ak = n.attributes.ak_id;
             parameters.metric = 'Wall Clock Time';
             parameters.width = CCR.xdmod.ui.thumbWidth * this.chartThumbScale;
@@ -1397,7 +1389,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             parameters.format = 'session_variable';
             parameters.thumbnail = 'y';
             parameters.show_guide_lines = 'n';
-            parameters.font_size = parameters.font_size - 3;
+            parameters.font_size -= 3;
         }
 
         return parameters;
@@ -1416,7 +1408,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
         // This will allow the user to selected a time period that
         // contains to data for the ak and then select a time period
         // where there is data for the ak.
-        if (this.selectedNode&&(!n || n.disabled)) {
+        if (this.selectedNode && (!n || n.disabled)) {
+            // eslint-disable-next-line no-param-reassign
             n = this.selectedNode;
         } else {
             this.selectedNode = n;
@@ -1438,24 +1431,24 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             '?kernel=' + n.id +
             '&start=' + start +
             '&end=' + end;
-        this.current_hash=token
+        this.current_hash = token;
         Ext.History.add(token, true);
 
         this.images.setTitle(n.getPath('text'));
 
-        if (n.attributes.type == 'units') {
+        if (n.attributes.type === 'units') {
             this.toggleControlPlot.show();
         } else {
             this.toggleControlPlot.hide();
         }
 
         var isChart =
-            n.attributes.type == 'units' ||
-            n.attributes.type == 'metric';
+            n.attributes.type === 'units' ||
+            n.attributes.type === 'metric';
 
         var isMenu =
-            n.attributes.type == 'resource' ||
-            n.attributes.type == 'appkernel';
+            n.attributes.type === 'resource' ||
+            n.attributes.type === 'appkernel';
 
         XDMoD.TrackEvent(
             'App Kernels',
@@ -1485,10 +1478,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
             }
 
             this.chartStore.load({ params: parameters });
-        } else {
-            if (viewer.el) {
-                viewer.el.unmask();
-            }
+        } else if (viewer.el) {
+            viewer.el.unmask();
         }
         this.updateEnabledNodes();
     },
@@ -1507,11 +1498,11 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
         var start = viewer.getParameterByName('start', token.content);
         var end = viewer.getParameterByName('end', token.content);
 
-        if (start !== "" && end !== "") {
+        if (start !== '' && end !== '') {
             this.getDurationSelector().setValues(start, end);
         }
 
-        if (token.subtab === panel.id  && kernel_id) {
+        if (token.subtab === panel.id && kernel_id) {
             this.selectAppKernel(kernel_id);
         } else {
             this.selectFirstNode();

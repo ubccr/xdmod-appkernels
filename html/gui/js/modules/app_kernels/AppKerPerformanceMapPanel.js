@@ -1,3 +1,4 @@
+/* global Ext, XDMoD, CCR, document, window */
 /**
  * ARR active tasks grid.
  *
@@ -13,14 +14,8 @@ XDMoD.Arr.AppKerPerformanceMapStore = Ext.extend(Ext.data.JsonStore, {
         url: 'app_kernels/performance_map',
         method: 'GET'
     }),
-
-    listeners: {
-        exception: function (misc) {
-            console.log(misc);
-        }
-    },
-
     constructor: function (config) {
+        // eslint-disable-next-line no-param-reassign
         config = config || {};
 
         Ext.apply(config, {
@@ -37,23 +32,23 @@ XDMoD.Arr.AppKerPerformanceMapGrid = Ext.extend(Ext.grid.GridPanel, {
     listeners: {
         viewready: function () {
             this.store.load();
-            console.log('viewready');
         }
     },
     colorStyles: {
-        'W': 'style="background-color:white;"',
-        'F': 'style="background-color:#FFB0C4;"',
-        'U': 'style="background-color:#F7FE2E;"',
-        'O': 'style="background-color:#FE9A2E;"',
-        'C': 'style="background-color:#81BEF7;"',
-        'N': 'style="background-color:#B0FFC5;"',
-        'R': 'style="background-color:#F781F3;"'
+        W: 'style="background-color:white;"',
+        F: 'style="background-color:#FFB0C4;"',
+        U: 'style="background-color:#F7FE2E;"',
+        O: 'style="background-color:#FE9A2E;"',
+        C: 'style="background-color:#81BEF7;"',
+        N: 'style="background-color:#B0FFC5;"',
+        R: 'style="background-color:#F781F3;"'
     },
     rendererForCell: function (value) {
-        if (value != ' ' && value != '') {
+        if (value !== ' ' && value !== '') {
             var v = value.split('/');
-            for (var i = 1; i < v.length; i++)
+            for (var i = 1; i < v.length; i++) {
                 v[i] = parseInt(v[i], 10);
+            }
             if (v[0] in this.colorStyles) {
                 return '<div class="x-grid3-cell-inner" ' + this.colorStyles[v[0]] + '"><span style="color:black;">' + value + '</span></div>';
             }
@@ -61,7 +56,6 @@ XDMoD.Arr.AppKerPerformanceMapGrid = Ext.extend(Ext.grid.GridPanel, {
         return value || 0;
     },
     metaDataChanged: function () {
-        console.log('metaDataChanged');
         var newColumns = [{
             header: 'Resource',
             dataIndex: 'resource',
@@ -78,17 +72,23 @@ XDMoD.Arr.AppKerPerformanceMapGrid = Ext.extend(Ext.grid.GridPanel, {
             width: 50
         }];
         var nLocked = newColumns.length;
+        /* eslint-disable block-scoped-var */
         for (var i = nLocked; i < this.store.fields.getCount(); i++) {
             var value = this.store.fields.itemAt(i).name;
             var m_date = value.split('/');
-            if (value.indexOf('Failed') >= 0)
+            if (value.indexOf('Failed') >= 0) {
                 continue;
-            if (value.indexOf('InControl') >= 0)
+            }
+
+            if (value.indexOf('InControl') >= 0) {
                 continue;
-            if (value.indexOf('OutOfControl') >= 0)
+            }
+            if (value.indexOf('OutOfControl') >= 0) {
                 continue;
-            if (value.indexOf('IDs') >= 0)
+            }
+            if (value.indexOf('IDs') >= 0) {
                 continue;
+            }
 
             var day = m_date[2];
 
@@ -103,6 +103,7 @@ XDMoD.Arr.AppKerPerformanceMapGrid = Ext.extend(Ext.grid.GridPanel, {
                 width: 40
             });
         }
+        /* eslint-enable block-scoped-var */
         var newColModel = new Ext.grid.ColumnModel({
             defaults: {
                 sortable: false
@@ -112,29 +113,35 @@ XDMoD.Arr.AppKerPerformanceMapGrid = Ext.extend(Ext.grid.GridPanel, {
 
         this.dateGroup[0].length = 1;
 
-        var monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        /* eslint-disable block-scoped-var, no-redeclare */
         for (var i = nLocked; i < this.store.fields.getCount(); i++) {
             var value = this.store.fields.itemAt(i).name;
             var m_date = value.split('/');
-            if (value.indexOf('IDs') >= 0) continue;
+            if (value.indexOf('IDs') >= 0) {
+                continue;
+            }
 
-            var monthYear = monthNames[parseInt(m_date[1]) - 1] + ", " + m_date[0];
+            var monthYear = monthNames[parseInt(m_date[1], 10) - 1] + ', ' + m_date[0];
 
-            if (this.dateGroup[0][this.dateGroup[0].length - 1].header == monthYear)
+            if (this.dateGroup[0][this.dateGroup[0].length - 1].header === monthYear) {
                 this.dateGroup[0][this.dateGroup[0].length - 1].colspan++;
-            else
+            } else {
                 this.dateGroup[0].push({
                     header: monthYear,
                     colspan: 1,
                     align: 'center'
                 });
+            }
         }
+        /* eslint-enable block-scoped-var, no-redeclare */
         newColModel.rows = this.dateGroup;
 
         this.reconfigure(this.store, newColModel);
     },
 
     constructor: function (config) {
+        // eslint-disable-next-line no-param-reassign
         config = config || {};
 
         this.store = new Ext.data.JsonStore({
@@ -145,12 +152,12 @@ XDMoD.Arr.AppKerPerformanceMapGrid = Ext.extend(Ext.grid.GridPanel, {
             })
         });
 
-        this.store.on("metadatachanged", this.metaDataChanged, this);
-        this.store.on("datachanged", this.metaDataChanged, this);
-        this.store.on("reconfigure", this.metaDataChanged, this);
+        this.store.on('metadatachanged', this.metaDataChanged, this);
+        this.store.on('datachanged', this.metaDataChanged, this);
+        this.store.on('reconfigure', this.metaDataChanged, this);
 
         this.dateGroup = [[{
-            header: "",
+            header: '',
             colspan: 3,
             align: 'center'
         }]];
@@ -201,9 +208,9 @@ XDMoD.Arr.AppKerPerformanceMapPanel = function (config) {
 
 Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
     title: 'Performance Map',
-    resourcesList: ["blacklight", "edge", "edge12core", "lonestar4", "kraken", "trestles", "gordon", "stampede"],
+    resourcesList: ['blacklight', 'edge', 'edge12core', 'lonestar4', 'kraken', 'trestles', 'gordon', 'stampede'],
     problemSizeList: [1, 2, 4, 8, 16],
-    appKerList: ["xdmod.app.astro.enzo", "xdmod.app.chem.gamess", "xdmod.app.chem.nwchem", "xdmod.app.md.namd", "xdmod.benchmark.hpcc", "xdmod.benchmark.io.ior", "xdmod.benchmark.io.mpi-tile-io", "xdmod.benchmark.mpi.imb", "xdmod.benchmark.graph.graph500", "xdmod.bundle"],
+    appKerList: ['xdmod.app.astro.enzo', 'xdmod.app.chem.gamess', 'xdmod.app.chem.nwchem', 'xdmod.app.md.namd', 'xdmod.benchmark.hpcc', 'xdmod.benchmark.io.ior', 'xdmod.benchmark.io.mpi-tile-io', 'xdmod.benchmark.mpi.imb', 'xdmod.benchmark.graph.graph500', 'xdmod.bundle'],
     legend:
         'Each day summarized in table cell as pair of a symbol and a number.' +
         'Symbol represent the status of last application kernel execution on that day and number' +
@@ -225,22 +232,24 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
     initComponent: function () {
         var appKerPerformanceMapGrid = new XDMoD.Arr.AppKerPerformanceMapGrid({
             scope: this,
-            region: "center"
+            region: 'center'
         });
 
         this.appKerPerformanceMapGrid = appKerPerformanceMapGrid;
 
         var resourceChildren = [];
+        /* eslint-disable block-scoped-var */
         for (var i = 0; i < this.resourcesList.length; i++) {
             var resource = this.resourcesList[i];
+            /* eslint-enable block-scoped-var */
             resourceChildren.push({
                 text: resource,
                 nick: resource,
-                type: "resource",
+                type: 'resource',
                 checked: true,
-                iconCls: "resource",
+                iconCls: 'resource',
                 leaf: true
-            })
+            });
         }
 
         this.resourcesTree = new Ext.tree.TreePanel({
@@ -266,34 +275,41 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
                 qtip: 'De-select all selected resources.',
                 scope: this,
                 handler: function () {
+                    // eslint-disable-next-line no-use-before-define
                     this.resourcesTree.un('checkchange', reloadAll, this);
                     var lastNode = null;
                     var selectAll = true;
 
                     this.resourcesTree.getRootNode().cascade(function (n) {
                         var ui = n.getUI();
-                        if (ui.isChecked())
+                        if (ui.isChecked()) {
                             selectAll = false;
+                        }
                         lastNode = n;
                     });
 
                     if (selectAll) {
                         this.resourcesTree.getRootNode().cascade(function (n) {
                             var ui = n.getUI();
-                            if (!ui.isChecked())
+                            if (!ui.isChecked()) {
                                 ui.toggleCheck(true);
+                            }
                             lastNode = n;
                         });
                     } else {
                         this.resourcesTree.getRootNode().cascade(function (n) {
                             var ui = n.getUI();
-                            if (ui.isChecked())
+                            if (ui.isChecked()) {
                                 ui.toggleCheck(false);
+                            }
                             lastNode = n;
                         });
                     }
-                    if (lastNode)
+                    if (lastNode) {
+                        // eslint-disable-next-line no-use-before-define
                         reloadAll.call(this);
+                    }
+                    // eslint-disable-next-line no-use-before-define
                     this.resourcesTree.on('checkchange', reloadAll, this);
                 }
             }, {
@@ -301,6 +317,7 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
                 qtip: 'Refresh',
                 hidden: true,
                 scope: this,
+                // eslint-disable-next-line no-use-before-define
                 handler: reloadAll
             }],
             margins: '0 0 0 0',
@@ -310,21 +327,23 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
         });
 
         var problemSizeChildren = [];
+        /* eslint-disable block-scoped-var, no-redeclare */
         for (var i = 0; i < this.problemSizeList.length; i++) {
             var nodesSize = this.problemSizeList[i];
+            /* eslint-enable block-scoped-var */
             problemSizeChildren.push({
                 text: String(nodesSize),
-                qtip: (nodesSize == 1) ? nodesSize + "node" : nodesSize + "nodes",
-                type: "node",
+                qtip: (nodesSize === 1) ? nodesSize + 'node' : nodesSize + 'nodes',
+                type: 'node',
                 checked: true,
-                iconCls: "node",
+                iconCls: 'node',
                 leaf: true
             });
         }
 
         this.problemSizesTree = new Ext.tree.TreePanel({
             flex: 0.5,
-            title: "Problem Size (Cores or Nodes)",
+            title: 'Problem Size (Cores or Nodes)',
             id: 'tree_nodes_' + this.id,
             useArrows: true,
             autoScroll: true,
@@ -344,34 +363,42 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
                 qtip: 'De-select all selected resources.',
                 scope: this,
                 handler: function () {
+                    // eslint-disable-next-line no-use-before-define
                     this.problemSizesTree.un('checkchange', reloadAll, this);
                     var lastNode = null;
                     var selectAll = true;
 
                     this.problemSizesTree.getRootNode().cascade(function (n) {
                         var ui = n.getUI();
-                        if (ui.isChecked())
+                        if (ui.isChecked()) {
                             selectAll = false;
+                        }
                         lastNode = n;
                     });
 
                     if (selectAll) {
                         this.problemSizesTree.getRootNode().cascade(function (n) {
                             var ui = n.getUI();
-                            if (!ui.isChecked())
+                            if (!ui.isChecked()) {
                                 ui.toggleCheck(true);
+                            }
                             lastNode = n;
                         });
                     } else {
                         this.problemSizesTree.getRootNode().cascade(function (n) {
                             var ui = n.getUI();
-                            if (ui.isChecked())
+                            if (ui.isChecked()) {
                                 ui.toggleCheck(false);
+                            }
                             lastNode = n;
                         });
                     }
-                    if (lastNode)
+
+                    if (lastNode) {
+                        // eslint-disable-next-line no-use-before-define
                         reloadAll.call(this);
+                    }
+                    // eslint-disable-next-line no-use-before-define
                     this.problemSizeTree.on('checkchange', reloadAll, this);
                 }
             }, {
@@ -379,24 +406,26 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
                 qtip: 'Refresh',
                 hidden: true,
                 scope: this,
+                // eslint-disable-next-line no-use-before-define
                 handler: reloadAll
             }],
             rootVisible: false,
             containerScroll: true,
             margins: '0 0 0 0',
-            border: false,
-            flex: 2
+            border: false
         });
 
         var appKerChildren = [];
+        /* eslint-disable block-scoped-var, no-redeclare */
         for (var i = 0; i < this.appKerList.length; i++) {
             var appker = this.appKerList[i];
+            /* eslint-enable block-scoped-var */
             appKerChildren.push({
                 text: appker,
                 nick: appker,
-                type: "app_kernel",
+                type: 'app_kernel',
                 checked: true,
-                iconCls: "appkernel",
+                iconCls: 'appkernel',
                 leaf: true
             });
         }
@@ -422,34 +451,42 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
                 qtip: 'De-select all selected resources.',
                 scope: this,
                 handler: function () {
+                    // eslint-disable-next-line no-use-before-define
                     this.appKerTree.un('checkchange', reloadAll, this);
                     var lastNode = null;
                     var selectAll = true;
 
                     this.appKerTree.getRootNode().cascade(function (n) {
                         var ui = n.getUI();
-                        if (ui.isChecked())
+                        if (ui.isChecked()) {
                             selectAll = false;
+                        }
                         lastNode = n;
                     });
 
                     if (selectAll) {
                         this.appKerTree.getRootNode().cascade(function (n) {
                             var ui = n.getUI();
-                            if (!ui.isChecked())
+                            if (!ui.isChecked()) {
                                 ui.toggleCheck(true);
+                            }
                             lastNode = n;
                         });
                     } else {
                         this.appKerTree.getRootNode().cascade(function (n) {
                             var ui = n.getUI();
-                            if (ui.isChecked())
+                            if (ui.isChecked()) {
                                 ui.toggleCheck(false);
+                            }
                             lastNode = n;
                         });
                     }
-                    if (lastNode)
+
+                    if (lastNode) {
+                        // eslint-disable-next-line no-use-before-define
                         reloadAll.call(this);
+                    }
+                    // eslint-disable-next-line no-use-before-define
                     this.appKerTree.on('checkchange', reloadAll, this);
                 }
             }, {
@@ -457,6 +494,7 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
                 qtip: 'Refresh',
                 hidden: true,
                 scope: this,
+                // eslint-disable-next-line no-use-before-define
                 handler: reloadAll
             }],
             rootVisible: false,
@@ -522,10 +560,11 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
             title: 'Description',
             height: 130,
             html: this.legend
-        });
-        //commentsPanel
+        }); // commentsPanel
+
         this.appKerPerformanceMapGrid.getSelectionModel().on('cellselect', function (sm, rowIdx, colIndex) {
-            /*populate detailed view pannele with arr job ids*/
+            /* populate detailed view pannele with arr job ids */
+            // eslint-disable-next-line no-shadow
             var i;
             var j;
 
@@ -534,38 +573,41 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
             var record = sm.grid.getStore().getAt(rowIdx);
 
             var dataIndexAll = [dataIndex];
-            //if columns with resource or appkernel name is selected show all jobs for the queried period
+            // if columns with resource or appkernel name is selected show all jobs for the queried period
             if (colIndex <= 2) {
                 dataIndexAll = [];
                 for (j = 3; j < record.fields.getCount(); j++) {
                     var key = record.fields.getKey(record.fields.itemAt(j));
-                    if (key.indexOf('Failed') >= 0)
+                    if (key.indexOf('Failed') >= 0) {
                         continue;
-                    if (key.indexOf('InControl') >= 0)
+                    }
+                    if (key.indexOf('InControl') >= 0) {
                         continue;
-                    if (key.indexOf('OutOfControl') >= 0)
+                    }
+                    if (key.indexOf('OutOfControl') >= 0) {
                         continue;
+                    }
                     dataIndexAll.push(key);
                 }
             }
-            //pack jobs
+            // pack jobs
             var iStatus;
             var statuses = ['F', 'U', 'N', 'O', 'C', 'R'];
             var ref = {
-                'F': 'failedJobs',
-                'U': 'underPerformingJobs',
-                'N': 'inControlJobs',
-                'O': 'overPerformingJobs',
-                'C': 'controlJobs',
-                'R': 'noControlInfoJobs'
+                F: 'failedJobs',
+                U: 'underPerformingJobs',
+                N: 'inControlJobs',
+                O: 'overPerformingJobs',
+                C: 'controlJobs',
+                R: 'noControlInfoJobs'
             };
             var jobsIDs = {
-                'F': '',
-                'U': '',
-                'N': '',
-                'O': '',
-                'C': '',
-                'R': ''
+                F: '',
+                U: '',
+                N: '',
+                O: '',
+                C: '',
+                R: ''
             };
 
             for (j = dataIndexAll.length - 1; j >= 0; j--) {
@@ -582,8 +624,9 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
                             return b - a;
                         });
                         for (i = 0; i < runs.length; i++) {
-                            if (jobsIDs[statuses[iStatus]] !== '')
+                            if (jobsIDs[statuses[iStatus]] !== '') {
                                 jobsIDs[statuses[iStatus]] += ', ';
+                            }
                             jobsIDs[statuses[iStatus]] += '<a href="#" onclick="javascript:var iw=new XDMoD.AppKernel.InstanceWindow({instanceId:' + runs[i] + '});iw.show()">' + runs[i] + '</a>';
                         }
                     }
@@ -609,8 +652,7 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
             region: 'center',
             items: [this.appKerPerformanceMapGrid, this.commentsPanel],
             border: true
-        });
-        //viewPanel
+        }); // viewPanel
 
         this.durationToolbar = new CCR.xdmod.ui.DurationToolbar({
             id: 'duration_selector_' + this.id,
@@ -618,9 +660,10 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
             showRefresh: true,
             showAggregationUnit: false,
             handler: function () {
+                // eslint-disable-next-line no-use-before-define
                 reloadAll.call(this);
             },
-            scope: this //also scope of handle
+            scope: this // also scope of handle
         });
 
         this.durationToolbar.dateSlider.region = 'south';
@@ -628,12 +671,12 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
         function exportFunction(format) {
             var parameters = appKerPerformanceMapGrid.store.baseParams;
 
-            parameters['format'] = format;
+            parameters.format = format;
 
-            CCR.invokePost("controllers/arr_controller.php", parameters, {
+            CCR.invokePost('controllers/arr_controller.php', parameters, {
                 checkDashboardUser: true
             });
-        };
+        }
         var exportButton = new Ext.Button({
             id: 'export_button_' + this.id,
             text: 'Export',
@@ -659,14 +702,14 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
         };
 
         this.appKerPerformanceMapGrid.store.on('beforeload', function () {
-            if (!this.durationToolbar.validate())
+            if (!this.durationToolbar.validate()) {
                 return;
+            }
 
             var baseParams = {};
             Ext.apply(baseParams, getBaseParams.call(this));
 
             this.appKerPerformanceMapGrid.store.baseParams = baseParams;
-
         }, this);
 
         this.appKerPerformanceMapGrid.store.on('load', function () {
@@ -681,7 +724,6 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
                     this.resource = undefined;
                     this.app_kernel = undefined;
                 }
-
             }
 
             // Ensure that we unmask the main interface once we're done loading.
@@ -731,11 +773,9 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
                     }
                 }
             }
-        });
-        //Ext.apply
+        }); // Ext.apply
 
         XDMoD.Arr.AppKerPerformanceMapPanel.superclass.initComponent.apply(this, arguments);
-    }//initComponent
+    } // initComponent
 });
-//XDMoD.Arr.AppKerPerformanceMapPanel
-
+// XDMoD.Arr.AppKerPerformanceMapPanel
