@@ -14,6 +14,9 @@
                 "internal_dashboard/js/AppKernel/InstanceStore.js",
                 "internal_dashboard/js/Arr/ErrorMessageStore.js",
                 "internal_dashboard/js/Arr/ErrorMessagePanel.js"
+            ],
+            "css": [
+                "gui/lib/extjs/extjs/examples/ColumnHeaderGroup.css"
             ]
         },
         "internal_dashboard": {
