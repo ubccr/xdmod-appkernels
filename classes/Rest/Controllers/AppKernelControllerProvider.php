@@ -1,6 +1,7 @@
 <?php
 namespace Rest\Controllers;
 
+use DataWarehouse\Access\MetricExplorer;
 use DateTime;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -1633,8 +1634,7 @@ or "Show Details of Successful Tasks" options to see details on tasks';
                 'end_date' => $endDate,
                 'resource' => $resources,
                 'appKer' => $appKernels,
-                'problemSize' => $problemSizes,
-                'user_organization' => $user->getOrganizationID()
+                'problemSize' => $problemSizes
             ));
 
             // The columns that we're going to be retrieving from the PerformanceMap and ultimately

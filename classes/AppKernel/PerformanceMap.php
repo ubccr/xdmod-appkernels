@@ -82,7 +82,6 @@ class PerformanceMap
 
         $this->controlThreshold=$options['controlThreshold'];
         $this->controlThresholdCoeff=$options['controlThresholdCoeff'];
-        $this->userOrganization = isset($options['user_organization']) ? $options['user_organization'] : null;
 
         //get AK short names
         $pdo = DB::factory('appkernel');
@@ -110,37 +109,17 @@ class PerformanceMap
         $sql = 'SELECT akr.resource_id, akr.resource, akr.nickname FROM mod_appkernel.resource akr';
         $params = array();
 
-        // If a userOrganization has been provided then we need to filter the available resources
-        // by this value.
-        if (isset($this->userOrganization)) {
-            $sql = <<<SQL
-        SELECT
-            akr.resource_id,
-            akr.resource,
-            akr.nickname
-        FROM mod_appkernel.resource akr
-        JOIN modw.resourcefact rf ON rf.id = akr.xdmod_resource_id
-        JOIN moddb.Users u ON rf.organization_id = :organization_id
-SQL;
-            $params[':organization_id'] = $this->userOrganization;
-        } elseif(isset($this->resource)) {
+        if(isset($this->resource)) {
             $quotedResourceIds = array_reduce(
-                $this->resource,
+                $this->resource['data'],
                 function ($carry, $item) use($pdo) {
-                    $carry[] = $pdo->quote($item);
+                    $carry[] = $pdo->quote($item['id']);
                     return $carry;
                 },
                 array()
             );
-            $sql = <<<SQL
-        SELECT
-            akr.resource_id,
-            akr.resource,
-            akr.nickname
-        FROM mod_appkernel.resource akr
-        WHERE akr.xdmod_resource_id IN ($quotedResourceIds)
-SQL;
-
+            $sql = "SELECT akr.resource_id, akr.resource, akr.nickname FROM mod_appkernel.resource akr " .
+                   "WHERE akr.xdmod_resource_id IN (" . implode(', ', $quotedResourceIds) . ')';
         }
 
         $sqlres_tasdb=$pdo->query($sql, $params);
@@ -522,19 +501,6 @@ SQL;
         $rec_dates[] = $run_date->format('Y/m/d');
 
         //get appKer instances
-
-        //get information from /tas-db1
-        //resource_id
-        $resource_ids = array();
-        $sql = "SELECT resource_id,resource,nickname
-                FROM resource
-                ORDER BY resource_id ASC;";
-        $sqlres_tasdb = $pdo->query($sql);
-        foreach ($sqlres_tasdb as $row) {
-            $resource_ids[$row['nickname']] = $row['resource_id'];
-        }
-        //app_kernel
-
         $sql = "SELECT ak_id,num_units,ak_def_id,name FROM app_kernel ORDER BY ak_id ASC;";
         $sqlres_tasdb = $pdo->query($sql);
 
@@ -669,7 +635,7 @@ SQL;
             $problemSize = end(explode('.', $row['reporternickname']));
             $collected = $row['collected'];
 
-            $resource_id = arrayValue($resource, $resource_ids);
+            $resource_id = arrayValue($resource, $this->resource_ids);
             $ak_id = null;
             if (array_key_exists($appKer, $ak_ids) && array_key_exists($problemSize, $ak_ids[$appKer])) {
                 $ak_id = $ak_ids[$appKer][$problemSize];
@@ -677,7 +643,7 @@ SQL;
 
             // Proceed with filtering the values...
             if ((!isset($ak_id)) ||
-                (isset($this->resource) && !array_key_exists($resource, $this->resource_ids)) ||
+                (isset($this->resource_ids) && !array_key_exists($resource, $this->resource_ids)) ||
                 (isset($this->appKer) && !in_array($this->ak_shortnames[$appKer], $this->appKer)) ||
                 (isset($this->problemSize) && !in_array($problemSize, $this->problemSize))
             ) {
