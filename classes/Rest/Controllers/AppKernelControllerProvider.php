@@ -1604,12 +1604,19 @@ or "Show Details of Successful Tasks" options to see details on tasks';
 
         $resources = $this->getStringParam($request, 'resources', false);
         if (strpos($resources, self::DEFAULT_DELIM) !== false) {
-            $resources = $user->getResources(
-                explode(self::DEFAULT_DELIM, $resources)
+            $resources = MetricExplorer::getDimensionValues(
+                $user,
+                'resource',
+                array('Jobs'),
+                0,
+                null,
+                null,
+                null,
+                false
             );
         }
 
-        $appKernels =  $this->getStringParam($request, 'app_kernels', false);
+        $appKernels = $this->getStringParam($request, 'app_kernels', false);
         if (strpos($appKernels, self::DEFAULT_DELIM) !== false) {
             $appKernels = explode(self::DEFAULT_DELIM, $appKernels);
         }

@@ -123,6 +123,24 @@ class PerformanceMap
         JOIN moddb.Users u ON rf.organization_id = :organization_id
 SQL;
             $params[':organization_id'] = $this->userOrganization;
+        } elseif(isset($this->resource)) {
+            $quotedResourceIds = array_reduce(
+                $this->resource,
+                function ($carry, $item) use($pdo) {
+                    $carry[] = $pdo->quote($item);
+                    return $carry;
+                },
+                array()
+            );
+            $sql = <<<SQL
+        SELECT
+            akr.resource_id,
+            akr.resource,
+            akr.nickname
+        FROM mod_appkernel.resource akr
+        WHERE akr.xdmod_resource_id IN ($quotedResourceIds)
+SQL;
+
         }
 
         $sqlres_tasdb=$pdo->query($sql, $params);
@@ -562,6 +580,22 @@ SQL;
 
 SQL;
             $params[':organization_id'] = $this->userOrganization;
+        } elseif (isset($this->resource_ids)) {
+            $resourceIds = implode(', ', $this->resource_ids);
+            $sql = <<<SQL
+        SELECT aki.ak_id,
+               aki.collected,
+               aki.resource_id,
+               aki.instance_id,
+               aki.status,
+               aki.controlStatus
+        FROM mod_appkernel.ak_instance aki
+        WHERE aki.collected      >= :start_date AND
+              aki.collected      <  :end_date   AND
+              aki.resource_id IN ($resourceIds)
+        ORDER BY aki.collected ASC;
+SQL;
+
         }
 
         $rows = $pdo->query($sql, $params);
@@ -643,7 +677,7 @@ SQL;
 
             // Proceed with filtering the values...
             if ((!isset($ak_id)) ||
-                (isset($this->resource) && !in_array($resource, $this->resource)) ||
+                (isset($this->resource) && !array_key_exists($resource, $this->resource_ids)) ||
                 (isset($this->appKer) && !in_array($this->ak_shortnames[$appKer], $this->appKer)) ||
                 (isset($this->problemSize) && !in_array($problemSize, $this->problemSize))
             ) {
