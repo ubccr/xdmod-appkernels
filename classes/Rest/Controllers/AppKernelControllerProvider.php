@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Exception;
 use CCR\DB;
 use AppKernel\Report;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 /**
  * Class AppKernelControllerProvider
@@ -1595,7 +1596,16 @@ or "Show Details of Successful Tasks" options to see details on tasks';
      */
     public function getRawPerformanceMap(Request $request, Application $app)
     {
-        $user = $this->authorize($request, array(ROLE_ID_CENTER_DIRECTOR, ROLE_ID_CENTER_STAFF));
+        $user = $this->authorize($request);
+
+        // We need to ensure that only Center Director / Center Staff users are authorized to
+        // utilize this endpoint. Note, we do not utilize the `requirements` parameter of the above
+        // `authorize` call because it utilizes `XDUser::hasAcls` which only checks if the user has
+        // *all* of the supplied acls, not any of the supplied acls.
+        if (!$user->hasAcl(ROLE_ID_CENTER_DIRECTOR) ||
+            !$user->hasAcl(ROLE_ID_CENTER_STAFF)) {
+            throw  new UnauthorizedHttpException('xdmod', "Unable to complete action. User is not authorized.");
+        }
 
         $startDate = $this->getStringParam($request, 'start_date', true);
         if ($startDate !== null) {
