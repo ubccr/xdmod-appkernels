@@ -1584,14 +1584,18 @@ or "Show Details of Successful Tasks" options to see details on tasks';
      * Retrieves the raw numeric values for the AppKernel Performance Map. This endpoint provides
      * the data for `CenterReportCardPortlet.js`
      *
+     * **NOTE:** This function will throw an UnauthorizedException if the user making the request
+     * does not have the Center Director or Center Staff acl.
+     *
      * @param Request     $request
      * @param Application $app
      * @return JsonResponse
      * @throws Exception if there is a problem instantiating \DateTime objects.
+     * @throws Exception if the user making the request is not a Center [Director|Staff]
      */
     public function getRawPerformanceMap(Request $request, Application $app)
     {
-        $user = $this->authorize($request);
+        $user = $this->authorize($request, array(ROLE_ID_CENTER_DIRECTOR, ROLE_ID_CENTER_STAFF));
 
         $startDate = $this->getStringParam($request, 'start_date', true);
         if ($startDate !== null) {
@@ -1601,20 +1605,6 @@ or "Show Details of Successful Tasks" options to see details on tasks';
         $endDate = $this->getStringParam($request, 'end_date', true);
         if ($endDate !== null) {
             $endDate = new \DateTime($endDate);
-        }
-
-        $resources = $this->getStringParam($request, 'resources', false);
-        if (strpos($resources, self::DEFAULT_DELIM) !== false) {
-            $resources = MetricExplorer::getDimensionValues(
-                $user,
-                'resource',
-                array('Jobs'),
-                0,
-                null,
-                null,
-                null,
-                false
-            );
         }
 
         $appKernels = $this->getStringParam($request, 'app_kernels', false);
@@ -1632,7 +1622,7 @@ or "Show Details of Successful Tasks" options to see details on tasks';
             $perfMap = new \AppKernel\PerformanceMap(array(
                 'start_date' => $startDate,
                 'end_date' => $endDate,
-                'resource' => $resources,
+                'resource' => $user->getResources(),
                 'appKer' => $appKernels,
                 'problemSize' => $problemSizes
             ));
