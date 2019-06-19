@@ -112,7 +112,7 @@ class PerformanceMap
         if(isset($this->resource)) {
             $quotedResourceIds = array_reduce(
                 $this->resource['data'],
-                function ($carry, $item) use( $pdo) {
+                function ($carry, $item) use ($pdo) {
                     $carry[] = $pdo->quote($item['id']);
                     return $carry;
                 },
