@@ -16,7 +16,7 @@
                 "internal_dashboard/js/Arr/ErrorMessagePanel.js"
             ],
             "css": [
-                "gui/lib/extjs/extjs/examples/ColumnHeaderGroup.css"
+                "gui/lib/extjs/examples/ux/css/ColumnHeaderGroup.css"
             ]
         },
         "internal_dashboard": {
