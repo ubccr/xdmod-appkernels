@@ -1602,8 +1602,7 @@ or "Show Details of Successful Tasks" options to see details on tasks';
         // utilize this endpoint. Note, we do not utilize the `requirements` parameter of the above
         // `authorize` call because it utilizes `XDUser::hasAcls` which only checks if the user has
         // *all* of the supplied acls, not any of the supplied acls.
-        if (!$user->hasAcl(ROLE_ID_CENTER_DIRECTOR) &&
-            !$user->hasAcl(ROLE_ID_CENTER_STAFF)) {
+        if ( ! ( $user->hasAcl(ROLE_ID_CENTER_DIRECTOR) ||  $user->hasAcl(ROLE_ID_CENTER_STAFF) ) ) {
             throw  new UnauthorizedHttpException('xdmod', "Unable to complete action. User is not authorized.");
         }
 
