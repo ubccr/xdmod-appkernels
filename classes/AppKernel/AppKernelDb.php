@@ -431,7 +431,16 @@ class AppKernelDb
         return $resources;
     }  // getResources()
 
-    public function getResourceListing($start_date = null, $end_date = null, $resource_flag = 'all') {
+    /**
+     * This function has been lifted from the XSEDE Modules Compliance class so that AppKernels can
+     * be used by Open Source Users. Retrieves a list of resources filtered by the optionally provided
+     * `$start_date` and `$end_date`
+     *
+     * @param string|null $start_date
+     * @param string|null $end_date
+     * @return mixed
+     */
+    public function getResourceListing($start_date = null, $end_date = null) {
 
         // Order by descending end_date and processors
 
@@ -473,35 +482,35 @@ class AppKernelDb
 
         $query = "
         SELECT
-        rf.code,
-        rf.organization_id,
-        rf.id,
-        rt.description,
-        rt.abbrev,
-        CASE
-        WHEN rf.end_date IS NULL THEN 'N/A'
-        ELSE DATE_FORMAT(rf.end_date, '%Y-%m-%d')
-        END AS official_end_date,
-        $m AS resource_end_date,
-        DATE_FORMAT(rf.start_date, '%Y-%m-%d') AS resource_start_date,
-        CASE
-        WHEN rs.processors IS NULL THEN 0
-        ELSE rs.processors
-        END AS processors
+            rf.code,
+            rf.organization_id,
+            rf.id,
+            rt.description,
+            rt.abbrev,
+            CASE
+                WHEN rf.end_date IS NULL THEN 'N/A'
+                ELSE DATE_FORMAT(rf.end_date, '%Y-%m-%d')
+            END AS official_end_date,
+            $m AS resource_end_date,
+            DATE_FORMAT(rf.start_date, '%Y-%m-%d') AS resource_start_date,
+            CASE
+            WHEN rs.processors IS NULL THEN 0
+            ELSE rs.processors
+            END AS processors
         FROM
-        modw.resourcefact AS rf,
-        modw.resourcespecs rs,
-        modw.resourcetype AS rt
+            modw.resourcefact AS rf,
+            modw.resourcespecs rs,
+            modw.resourcetype AS rt
         WHERE
-        rf.id = rs.resource_id
+            rf.id = rs.resource_id
         AND rf.resourcetype_id = rt.id
         AND rt.abbrev IN ('HPC', 'HTC', 'DIC', 'Vis', 'Disk', 'Cloud')
         AND rf.code NOT LIKE 'TG%'
         $ts
         AND UNIX_TIMESTAMP(:start_date_lte) >= rs.start_date_ts
         AND (
-            rs.end_date_ts IS NULL
-            OR UNIX_TIMESTAMP(:end_date_gte) <= rs.end_date_ts
+                   rs.end_date_ts IS NULL
+                OR UNIX_TIMESTAMP(:end_date_gte) <= rs.end_date_ts
             )
         ORDER BY
             rs.processors DESC,
@@ -512,12 +521,7 @@ class AppKernelDb
         $query_params[':start_date_lte'] = $end_date;
         $query_params[':end_date_gte'] = $end_date;
 
-        //print $query.'<br /><br />';
-
-        $resources = $this->modwDB->query($query, $query_params);
-
-        return $resources;
-
+        return $this->modwDB->query($query, $query_params);
     }//getResourceListing
 
     // --------------------------------------------------------------------------------
