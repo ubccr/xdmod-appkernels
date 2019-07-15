@@ -2,15 +2,21 @@
     "appkernels": {
         "portal": {
             "js": [
+                "gui/lib/extjs/examples/ux/ColumnHeaderGroup.js",
                 "gui/js/modules/AppKernels.js",
                 "gui/js/modules/app_kernels/AppKernelViewer.js",
                 "gui/js/modules/app_kernels/AppKernelExplorer.js",
                 "gui/js/modules/app_kernels/AppKernelNotificationPanel.js",
+                "gui/js/modules/app_kernels/AppKerPerformanceMapPanel.js",
+                "gui/js/modules/summary/CenterReportCardPortlet.js",
                 "internal_dashboard/js/AppKernel/InstancePanel.js",
                 "internal_dashboard/js/AppKernel/InstanceWindow.js",
                 "internal_dashboard/js/AppKernel/InstanceStore.js",
                 "internal_dashboard/js/Arr/ErrorMessageStore.js",
                 "internal_dashboard/js/Arr/ErrorMessagePanel.js"
+            ],
+            "css": [
+                "gui/lib/extjs/examples/ux/css/ColumnHeaderGroup.css"
             ]
         },
         "internal_dashboard": {
@@ -22,7 +28,6 @@
                 "js/Arr/AppKerSuccessRateStore.js",
                 "js/Arr/AppKerSuccessRateGrid.js",
                 "js/Arr/AppKerSuccessRatePanel.js",
-                "js/Arr/AppKerPerformanceMapPanel.js",
                 "js/Arr/StatusPanel.js",
                 "js/Arr/ErrorMessageStore.js",
                 "js/Arr/ErrorMessagePanel.js",

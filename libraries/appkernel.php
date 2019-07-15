@@ -15,8 +15,14 @@ function implode_smart($a){
     }
     return $s;
 }
+
 /**
- * @return value from assosiative array @param $a for key @param $k, if key does not exists return @param $d 
+ * Retrieve the value for $k in $a, if $a has a key $k. Else, $d is returned by default.
+ * @param mixed      $k the key to be retrieved.
+ * @param array      $a the array to retrieve from.
+ * @param null|mixed $d the default value to be returned if $k is not found.
+ *
+ * @return mixed value for $k if $k is present in $a else $d.
  */
 function arrayValue($k,$a,$d=null)
 {

@@ -19,6 +19,13 @@ class PerformanceMap
     public $appKer; /** @param string[]|null*/
     public $problemSize; /** @param string[]|null*/
 
+    /**
+     * The organization id of the user who is requesting data from this object.
+     *
+     * @var int
+     */
+    public $userOrganization;
+
     public $perfMap;
 
     public $ak_shortnames;
@@ -99,10 +106,25 @@ class PerformanceMap
         $this->ak_def_ids=$ak_def_ids;
 
         //get resource_ids
+        $sql = 'SELECT akr.resource_id, akr.resource, akr.nickname FROM mod_appkernel.resource akr';
+        $params = array();
+
+        if(isset($this->resource)) {
+            $quotedResourceIds = array_reduce(
+                $this->resource['data'],
+                function ($carry, $item) use ($pdo) {
+                    $carry[] = $pdo->quote($item['id']);
+                    return $carry;
+                },
+                array()
+            );
+            $sql = "SELECT akr.resource_id, akr.resource, akr.nickname FROM mod_appkernel.resource akr " .
+                   "WHERE akr.xdmod_resource_id IN (" . implode(', ', $quotedResourceIds) . ')';
+        }
+
+        $sqlres_tasdb=$pdo->query($sql, $params);
+
         $resource_ids=array();
-        $sql = "SELECT resource_id,resource,nickname
-                FROM resource;";
-        $sqlres_tasdb=$pdo->query($sql);
         foreach($sqlres_tasdb as $row)
         {
             $resource_ids[$row['nickname']]=$row['resource_id'];
@@ -121,8 +143,6 @@ class PerformanceMap
 
 
         $this->perfMap=$this->getMap();
-        //print_r($this->perfMap);
-        //print_r($this->appKer);
     }
     /**
      * Generate html-report with performance map table
@@ -145,18 +165,11 @@ class PerformanceMap
 
         $runsStatus=$this->perfMap['runsStatus'];
         $rec_dates=$this->perfMap['rec_dates'];
-        $controlThreshold=$this->controlThreshold*$this->controlThresholdCoeff;
 
         //print table
         $tdStyle_Resource='style=""';
-        $tdStyle_AppKer='style="""';
         $tdStyle_ProblemSize='style=""';
         $tdStyle_Day='style="" align="center"';
-
-        $tdStyle_Day_Empty='style="background-color:white;"';
-        $tdStyle_Day_Good='style="background-color:#B0FFC5;"';
-        $tdStyle_Day_Warning='style="background-color:#FFFF99;"';
-        $tdStyle_Day_Error='style="background-color:#FFB0C4;"';
 
         $tdStyle=array(
             ' '=>'style="background-color:white;"',
@@ -168,16 +181,9 @@ class PerformanceMap
             'R'=>'style="background-color:#F781F3;"'
         );
 
-        //'<div class="x-grid3-cell-inner" style="background-color:#FFB0C4;"><span style="color:red;">' + value + '</span></div>';
-        //'<div class="x-grid3-cell-inner" style="background-color:#FFFF99;"><span style="color:brown;">' + value + '</span></div>';
-        //'<div class="x-grid3-cell-inner" style="background-color:#B0FFC5;"><span style="color:green;">' + value + '</span></div>';
         $message='';
         $message.='<h3>Table 3. Performance Heat Map of All App Kernels on Each System</h3>';
 
-        /*$message.='<b>KEY</b>: For each day a triplet of integers are used to represent the status of a given application kernel run for each node size.
-The first integer is the number of successful runs, the second the number of out of control runs, and the third the number of failed runs.
-Color coding is as follows:  <font '.$tdStyle_Day_Error.'>RED</font> - failed run, <font '.$tdStyle_Day_Warning.'>YELLOW</font> - out of
-control, <font '.$tdStyle_Day_Good.'>GREEN</font> - no out of control or failed run.';*/
         $message.='<b>KEY</b>: Each day is summarized in a table cell as pair of a symbol and a number. The symbol represents the status of last application kernel'
                 . ' execution on that day and the number shows the total number of runs. Each cell is colored according to the status of last application kernel run.'
                 . ' The description of the codes are: <br/><br/>'
@@ -202,7 +208,6 @@ control, <font '.$tdStyle_Day_Good.'>GREEN</font> - no out of control or failed 
         $totalColumns=1+count($rec_dates)+1;
 
         //body
-        $headerCount=0;
         foreach ($runsStatus as $resource => $val0)
         {
             //table header
@@ -231,8 +236,6 @@ control, <font '.$tdStyle_Day_Good.'>GREEN</font> - no out of control or failed 
             $message.='</tr>';
 
             $message.='<tr>';
-            //$message.='<td '.$tdStyle_Resource.'>Resource</td>';
-            //$message.='<td '.$tdStyle_AppKer.'>App Kernel</td>';
             $message.='<td '.$tdStyle_ProblemSize.'>Nodes</td>';
 
             foreach ($rec_dates as $rec_date)
@@ -260,8 +263,6 @@ control, <font '.$tdStyle_Day_Good.'>GREEN</font> - no out of control or failed 
                 {
                     $message.='<tr>';
                     $tag='perfMap_'.$resource.'_'.$appKer.'_'.$problemSize;
-                    //$message.='<td '.$tdStyle_Resource.'><a id="'.$tag.'">'.$resource.'</a></td>';
-                    //$message.='<td '.$tdStyle_AppKer.'>'.$this->ak_shortnames[$appKer].'</td>';
                     $message.='<td '.$tdStyle_ProblemSize.'><a id="'.$tag.'">'.$problemSize.'</a></td>';
                     foreach ($val2 as $rec_date => $taskStateGroup)
                     {
@@ -269,20 +270,6 @@ control, <font '.$tdStyle_Day_Good.'>GREEN</font> - no out of control or failed 
 
                         if($totalRuns>0)
                         {
-                            $inControlRuns=count($taskStateGroup->inControlRuns);
-                            $underPerformingRuns=count($taskStateGroup->underPerformingRuns);
-                            $overPerformingRuns=count($taskStateGroup->overPerformingRuns);
-                            $controlIntervalRuns=count($taskStateGroup->controlIntervalRuns);
-                            $noControlInfoRuns=count($taskStateGroup->noControlInfoRuns);
-                            $failedRuns=count($taskStateGroup->failedRuns);
-
-                            $inControlRunsID=end($taskStateGroup->inControlRuns);
-                            $underPerformingRunsID=end($taskStateGroup->underPerformingRuns);
-                            $overPerformingRunsID=end($taskStateGroup->overPerformingRuns);
-                            $controlIntervalRunsID=end($taskStateGroup->controlIntervalRuns);
-                            $noControlInfoRunsID=end($taskStateGroup->noControlInfoRuns);
-                            $failedRunsID=end($taskStateGroup->failedRuns);
-
                             $last_task=end($taskStateGroup->tasks);
                             $message.="<td {$tdStyle[$last_task->summary]}>";
                             $message.="<a href=\"{$web_address}{$last_task->id}\">";
@@ -478,12 +465,6 @@ control, <font '.$tdStyle_Day_Good.'>GREEN</font> - no out of control or failed 
         $message.='Number of out of control runs: <b>'. $outOfControlRuns.'</b><br/>';
         $message.='Number of runs within threshold: <b>'. $inControlRuns.'</b><br/>';
 
-        //$message.='<h2>Performance Map<h2/>';
-
-        //$message.='<table border="1" cellspacing="0" style="">';
-        //table header
-        //$message.='<tr>';
-        //$message.='</table>';
         $result=array(
             'message'=>$message,
             'messageTable'=>$messageTable,
@@ -509,138 +490,213 @@ control, <font '.$tdStyle_Day_Good.'>GREEN</font> - no out of control or failed 
         $run_date = clone $this->start_date;
         $day_interval = new DateInterval('P1D');
 
-        while ($run_date<=$end_date)
-        {
-            $rec_dates[]=$run_date->format('Y/m/d');
+        while ($run_date <= $end_date) {
+            $rec_dates[] = $run_date->format('Y/m/d');
             $run_date->add($day_interval);
         }
         //prep arrays for table
-        $runsStatus=array();
-        /*foreach ($resources as $resource) {
-            foreach ($appKers as $appKer) {
-                foreach ($problemSizes as $problemSize) {
-                    foreach ($rec_dates as $rec_date) {
-                        $runsStatus[$resource][$appKer][$problemSize][$rec_date]=array();
-                    }
-                }
-            }
-        }*/
+        $runsStatus = array();
+
         //add one more day for ranges
-        $rec_dates[]=$run_date->format('Y/m/d');
-        $end_date_not_included = $run_date->format('Y/m/d');
+        $rec_dates[] = $run_date->format('Y/m/d');
 
         //get appKer instances
+        $sql = "SELECT ak_id,num_units,ak_def_id,name FROM app_kernel ORDER BY ak_id ASC;";
+        $sqlres_tasdb = $pdo->query($sql);
 
-        //get information from /tas-db1
-        //resource_id
-        $resource_ids=array();
-        $sql = "SELECT resource_id,resource,nickname
-                FROM resource
-                ORDER BY resource_id ASC;";
-        $sqlres_tasdb=$pdo->query($sql);
-        foreach($sqlres_tasdb as $row)
-        {
-            $resource_ids[$row['nickname']]=$row['resource_id'];
+        $ak_ids = array();
+        foreach ($sqlres_tasdb as $row) {
+            $ak_ids[$row['name']][$row['num_units']] = $row['ak_id'];
         }
-        //app_kernel
-        $ak_ids=array();
-        $sql = "SELECT ak_id,num_units,ak_def_id,name
-                FROM app_kernel
-                ORDER BY ak_id ASC;";
-        $sqlres_tasdb=$pdo->query($sql);
-        foreach($sqlres_tasdb as $row)
-        {
-            $ak_ids[$row['name']][$row['num_units']]=$row['ak_id'];
+
+        // Retrieve the control state
+        $sql = <<<SQL
+        SELECT aki.ak_id,
+               aki.collected,
+               aki.resource_id,
+               aki.instance_id,
+               aki.status,
+               aki.controlStatus
+        FROM mod_appkernel.ak_instance aki
+        WHERE aki.collected      >= :start_date AND
+              aki.collected      <  :end_date
+        ORDER BY aki.collected ASC;
+SQL;
+        $params = array(
+            ':start_date' => $start_date->format('Y/m/d'),
+            ':end_date' => $end_date->format('Y/m/d')
+        );
+
+        // If a userOrganization has been provided then filter the results on them.
+        if (isset($this->userOrganization)) {
+            $sql = <<<SQL
+        SELECT aki.ak_id,
+               aki.collected,
+               aki.resource_id,
+               aki.instance_id,
+               aki.status,
+               aki.controlStatus
+        FROM mod_appkernel.ak_instance aki
+        JOIN mod_appkernel.resource r ON aki.resource_id = r.resource_id
+        JOIN modw.resourcefact rf ON r.xdmod_resource_id = rf.id
+        WHERE aki.collected      >= :start_date AND
+              aki.collected      <  :end_date   AND
+              rf.organization_id =  :organization_id
+        ORDER BY aki.collected ASC;
+
+SQL;
+            $params[':organization_id'] = $this->userOrganization;
+        } elseif (isset($this->resource_ids)) {
+            $resourceIds = implode(', ', $this->resource_ids);
+            $sql = <<<SQL
+        SELECT aki.ak_id,
+               aki.collected,
+               aki.resource_id,
+               aki.instance_id,
+               aki.status,
+               aki.controlStatus
+        FROM mod_appkernel.ak_instance aki
+        WHERE aki.collected      >= :start_date AND
+              aki.collected      <  :end_date   AND
+              aki.resource_id IN ($resourceIds)
+        ORDER BY aki.collected ASC;
+SQL;
+
         }
-        $controlState=array();
-        $sql = "SELECT ak_id,collected,resource_id,instance_id,status,controlStatus
-                        FROM ak_instance
-                        WHERE '".$start_date->format('Y/m/d')."' <=collected AND  collected < '$end_date_not_included'
-                        ORDER BY collected ASC;";
-        $sqlres_tasdb=$pdo->query($sql);
-        foreach($sqlres_tasdb as $row)
-        {
-            $controlState[$row['resource_id']][$row['ak_id']][$row['collected']]=$row['controlStatus'];
+
+        $rows = $pdo->query($sql, $params);
+
+        $controlState = array();
+        foreach ($rows as $row) {
+            $controlState[$row['resource_id']][$row['ak_id']][$row['collected']] = $row['controlStatus'];
+        }
+
+        // Retrieve the main set of data used to create the map.
+        $sql = <<<SQL
+            SELECT
+              axi.instance_id,
+              axi.collected,
+              axi.resource,
+              axi.reporter,
+              axi.reporternickname,
+              axi.status
+            FROM mod_akrr.akrr_xdmod_instanceinfo AS axi
+            WHERE axi.collected >=  :start_date
+              AND axi.collected <   :end_date
+            ORDER BY axi.collected ASC;
+SQL;
+        $params = array(
+            ':start_date' => $start_date->format('Y/m/d'),
+            ':end_date' => $end_date->format('Y/m/d')
+
+        );
+
+        // If we have resource id's then we should additionally filter on them.
+        if (count($this->resource_ids) > 0) {
+
+            $quotedResources = implode(
+                ",",
+                array_map(
+                    function ($value) use ($arr_db) {
+                        return $arr_db->quote($value);
+                    },
+                    array_keys($this->resource_ids)
+                )
+            );
+
+            $sql = <<<SQL
+            SELECT
+              axi.instance_id,
+              axi.collected,
+              axi.resource,
+              axi.reporter,
+              axi.reporternickname,
+              axi.status
+            FROM mod_akrr.akrr_xdmod_instanceinfo AS axi
+            WHERE axi.collected >=  :start_date
+              AND axi.collected <   :end_date
+              AND axi.resource IN ( $quotedResources )
+            ORDER BY axi.collected ASC;
+SQL;
         }
 
         //get information from appkernel-db
-        $sql = "SELECT instance_id,collected,resource,reporter,reporternickname,status
-                 FROM mod_akrr.akrr_xdmod_instanceinfo
-                 WHERE '".$start_date->format('Y/m/d')."' <=collected AND  collected < '$end_date_not_included'
-                 ORDER BY collected ASC;";
-        $sqlres=$arr_db->query($sql);
+        $sqlres = $arr_db->query($sql, $params);
 
-        $taskStateGroupOptions=array(
-            'controlThreshold'=>$this->controlThreshold,
-            'controlThresholdCoeff'=>$this->controlThresholdCoeff,
+        $taskStateGroupOptions = array(
+            'controlThreshold' => $this->controlThreshold,
+            'controlThresholdCoeff' => $this->controlThresholdCoeff,
         );
-        foreach($sqlres as $row)
-        {
-            $rec_date=date_format(date_create($row['collected']),'Y/m/d');
-            $resource=$row['resource'];
-            $appKer=$row['reporter'];
-            $problemSize=end(explode('.', $row['reporternickname']));
-            $collected=$row['collected'];
 
-            $resource_id=arrayValue($resource,$resource_ids);
-            $ak_id=null;
-            if(array_key_exists($appKer,$ak_ids))
-               if(array_key_exists($problemSize,$ak_ids[$appKer]))
-                  $ak_id=$ak_ids[$appKer][$problemSize];
-            if($ak_id===null)continue;
+        foreach ($sqlres as $row) {
+            $rec_date = date_format(date_create($row['collected']), 'Y/m/d');
+            $resource = $row['resource'];
+            $appKer = $row['reporter'];
+            $problemSize = end(explode('.', $row['reporternickname']));
+            $collected = $row['collected'];
 
-            $task=new TaskState($taskStateGroupOptions);
-            $task->id=$row['instance_id'];
-            $task->collected=DateTime::createFromFormat('Y-m-d H:i:s',$row['collected']);
-            $task->status=intval($row['status']);
-            $task->controlStatus='undefined';
-
-            if((!is_null($resource_id)) && (!is_null($ak_id)))
-               if(array_key_exists($resource_id,$controlState))
-                  if(array_key_exists($ak_id,$controlState[$resource_id]))
-                     if(array_key_exists($collected,$controlState[$resource_id][$ak_id]))
-            {
-                $task->controlStatus=$controlState[$resource_id][$ak_id][$collected];
+            $resource_id = arrayValue($resource, $this->resource_ids);
+            $ak_id = null;
+            if (array_key_exists($appKer, $ak_ids) && array_key_exists($problemSize, $ak_ids[$appKer])) {
+                $ak_id = $ak_ids[$appKer][$problemSize];
             }
 
-            //filter the values
-            if($this->resource!=NULL)
-                if(!in_array($resource,$this->resource))
-                    continue;
-            if($this->appKer!=NULL)
-                if(!in_array($this->ak_shortnames[$appKer],$this->appKer))
-                    continue;
-            if($this->problemSize!=NULL)
-                if(!in_array($problemSize,$this->problemSize))
-                    continue;
-
-            //init entries in $runsStatus if needed
-            if(!array_key_exists($resource,$runsStatus))
-                $runsStatus[$resource]=array();
-            if(!array_key_exists($appKer,$runsStatus[$resource]))
-                $runsStatus[$resource][$appKer]=array();
-            if(!array_key_exists($problemSize,$runsStatus[$resource][$appKer]))
-            {
-                $runsStatus[$resource][$appKer][$problemSize]=array();
-                for($i=0;$i<count($rec_dates)-1;$i++)
-                    $runsStatus[$resource][$appKer][$problemSize][$rec_dates[$i]]=new TaskStateGroup($taskStateGroupOptions);
+            // Proceed with filtering the values...
+            if ((!isset($ak_id)) ||
+                (isset($this->resource_ids) && !array_key_exists($resource, $this->resource_ids)) ||
+                (isset($this->appKer) && !in_array($this->ak_shortnames[$appKer], $this->appKer)) ||
+                (isset($this->problemSize) && !in_array($problemSize, $this->problemSize))
+            ) {
+                continue;
             }
-            $runsStatus[$resource][$appKer][$problemSize][$rec_date]->add_task($task);
+
+            $task = new TaskState($taskStateGroupOptions);
+            $task->id = $row['instance_id'];
+            $task->collected = DateTime::createFromFormat('Y-m-d H:i:s', $row['collected']);
+            $task->status = intval($row['status']);
+            $task->controlStatus = 'undefined';
+
+            if (isset($resource_id)) {
+                if (isset($ak_id) &&
+                    array_key_exists($resource_id, $controlState) &&
+                    array_key_exists($ak_id, $controlState[$resource_id]) &&
+                    array_key_exists($collected, $controlState[$resource_id][$ak_id])) {
+                    $task->controlStatus = $controlState[$resource_id][$ak_id][$collected];
+                }
+
+                //init entries in $runsStatus if needed
+                if (!array_key_exists($resource, $runsStatus)) {
+                    $runsStatus[$resource] = array();
+                }
+
+                if (!array_key_exists($appKer, $runsStatus[$resource])) {
+                    $runsStatus[$resource][$appKer] = array();
+                }
+
+                if (!array_key_exists($problemSize, $runsStatus[$resource][$appKer])) {
+                    $runsStatus[$resource][$appKer][$problemSize] = array();
+                    for ($i = 0; $i < count($rec_dates) - 1; $i++) {
+                        $runsStatus[$resource][$appKer][$problemSize][$rec_dates[$i]] = new TaskStateGroup($taskStateGroupOptions);
+                    }
+                }
+
+                $runsStatus[$resource][$appKer][$problemSize][$rec_date]->add_task($task);
+            }
         }
 
         //sort
         ksort($runsStatus);
-        foreach ($runsStatus as $resource => $val1)
-        {
+        foreach ($runsStatus as $resource => $val1) {
+
             ksort($runsStatus[$resource]);
-            foreach ($runsStatus[$resource] as $appKer => $val2)
-            {
+            foreach ($runsStatus[$resource] as $appKer => $val2) {
+
                 ksort($runsStatus[$resource][$appKer]);
-                foreach ($runsStatus[$resource][$appKer] as $problemSize => $val3)
-                {
+                foreach ($runsStatus[$resource][$appKer] as $problemSize => $val3) {
+
                     ksort($runsStatus[$resource][$appKer][$problemSize]);
-                    foreach ($runsStatus[$resource][$appKer][$problemSize] as $d => $val4)
-                    {
+                    foreach ($runsStatus[$resource][$appKer][$problemSize] as $d => $val4) {
+
                         $runsStatus[$resource][$appKer][$problemSize][$d]->sort_by_collection_time();
                         $runsStatus[$resource][$appKer][$problemSize][$d]->process();
                     }
@@ -650,33 +706,60 @@ control, <font '.$tdStyle_Day_Good.'>GREEN</font> - no out of control or failed 
 
         //remove last date
         array_pop($rec_dates);
-        #print_r($runsStatus);
-        return array('rec_dates'=>$rec_dates,'runsStatus'=>$runsStatus);
+
+        return array(
+            'rec_dates' => $rec_dates,
+            'runsStatus' => $runsStatus
+        );
     }
+
+    /**
+     * Get the Performance Map data, formatted for display via the `Performance Map` tab web
+     * element.
+     *
+     * @return array formatted as:
+     * {
+     *     "success": boolean, ### always true.
+     *     "response": {
+     *         "metaData": {
+     *           ### Data meant for the ExtJS component that is responsible for displaying this
+     *           ### information.
+     *         },
+     *       "results": [
+     *           {
+     *               "resource":    string, ### The name of the resource the app kernel was run on.
+     *               "appKer":      string, ### The human friendly name of the app kernel run.
+     *               "problemSize": number, ### Number of nodes used.
+     *               "<date>":      string, ### Date this app kernel was run.
+     *               "<date>-IDs-F": [
+     *                   ### List of Failed Run Ids
+     *               ],
+     *               "<date>-IDs-U": [
+     *                   ### List of Under Performing Run Ids
+     *               ],
+     *               "<date>-IDs-N": [
+     *                   ### List of In Control Run Ids
+     *               ],
+     *               "<date>-IDs-O": [
+     *                   ### List of Over Performing Run Ids
+     *               ],
+     *               "<date>-IDs-C": [
+     *                   ### List of Control Interval Run Ids
+     *               ],
+     *               "<date>-IDs-R": [
+     *                   ### List of Run Ids with No Control Info
+     *               ]
+     *           }
+     *       ]
+     *     },
+     *     "count": number      ### Count of 'response'
+     * }
+     */
     public function getMapForWeb()
     {
-        $resources=NULL;
-        $appKers=NULL;
-        $problemSizes=NULL;
-        if($this->resource!==NULL){
-            $resources=$this->resource;
-        }
-        if($this->appKer!==NULL){
-            $appKers=array();
-            foreach ($this->appKer as $ak_short) {
-                if (array_key_exists($ak_short, $this->ak_fullnames)){
-                    $appKers[]=$this->ak_fullnames[$ak_short];
-                }else{
-                    $appKers[]=$ak_short;
-                }
-            }
-        }
-        if($this->problemSize!==NULL){
-            $problemSizes=$this->problemSize;
-        }
-
         $response = array();
-        //pack metaData
+
+        // Initialize the metaData to be returned.
         $response['metaData'] = array(
             'root' => 'response',
             'successProperty' => 'success',
@@ -687,6 +770,8 @@ control, <font '.$tdStyle_Day_Good.'>GREEN</font> - no out of control or failed 
                 array('name' => 'problemSize', 'type' => 'string'),
             )
         );
+
+        // Add additional metadata fields for each recorded date.
         foreach ($this->perfMap['rec_dates'] as $rec_date) {
             $response['metaData']['fields'][] = array('name' => $rec_date, 'type' => 'string');
             $response['metaData']['fields'][] = array('name' => $rec_date . '-IDs-F', 'type' => 'string');
@@ -696,81 +781,54 @@ control, <font '.$tdStyle_Day_Good.'>GREEN</font> - no out of control or failed 
             $response['metaData']['fields'][] = array('name' => $rec_date . '-IDs-C', 'type' => 'string');
             $response['metaData']['fields'][] = array('name' => $rec_date . '-IDs-R', 'type' => 'string');
         }
-        //pack results
-        $runsStatus=$this->perfMap['runsStatus'];
-        $results = array();
-        if($resources===NULL){
-            $resources=array_keys($runsStatus);
-        }
-        foreach ($resources as $resource) {
-            if($appKers===NULL){
-                $appKers=array_keys($runsStatus[$resource]);
-            }
-            foreach ($appKers as $appKer) {
-                if($problemSizes===NULL){
-                    $problemSizes=array_keys($runsStatus[$resource][$appKer]);
-                }
-                $appKer2 = $appKer;
-                if (array_key_exists($appKer, $this->ak_shortnames)){
-                    $appKer2 = $this->ak_shortnames[$appKer];
-                }
-                foreach ($problemSizes as $problemSize) {
-                    if(!array_key_exists($resource,$runsStatus)){
-                        $result[$rec_date] = ' ';
-                        continue;
-                    }
-                    if(!array_key_exists($appKer,$runsStatus[$resource])){
-                        $result[$rec_date] = ' ';
-                        continue;
-                    }
-                    if(!array_key_exists($problemSize,$runsStatus[$resource][$appKer])){
-                        $result[$rec_date] = ' ';
-                        continue;
-                    }
 
+        // Begin packing the results
+        $results = array();
+
+        $runsStatus=$this->perfMap['runsStatus'];
+        foreach($runsStatus as $resource => $runData) {
+            foreach($runData as $appKernel => $nodeCountData) {
+                // We default the value displayed for the user to the full style name.
+                // Ex. xdmod.benchmark.io.ior
+                // But we'd prefer to show them the `shortName`.
+                // Ex. IOR
+                $appKernelDisplay = $appKernel;
+                if (array_key_exists($appKernel, $this->ak_shortnames)) {
+                    $appKernelDisplay = $this->ak_shortnames[$appKernel];
+                }
+
+                foreach($nodeCountData as $problemSize => $problemSizeData) {
                     $result = array(
                         'resource' => $resource,
-                        'appKer' => $appKer2,
-                        'problemSize' => $problemSize,
+                        'appKer' => $appKernelDisplay,
+                        'problemSize' => $problemSize
                     );
-                    foreach ($this->perfMap['rec_dates'] as $rec_date) {
-                        if(!array_key_exists($resource,$runsStatus)){
+
+                    foreach($problemSizeData as $rec_date => $taskGroup) {
+                        $runs = count($taskGroup->tasks);
+                        if ($runs === 0) {
                             $result[$rec_date] = ' ';
                             continue;
                         }
-                        if(!array_key_exists($appKer,$runsStatus[$resource])){
-                            $result[$rec_date] = ' ';
-                            continue;
-                        }
-                        if(!array_key_exists($problemSize,$runsStatus[$resource][$appKer])){
-                            $result[$rec_date] = ' ';
-                            continue;
-                        }
-                        if(!array_key_exists($rec_date,$runsStatus[$resource][$appKer][$problemSize])){
-                            $result[$rec_date] = ' ';
-                            continue;
-                        }
-                        $tg=$runsStatus[$resource][$appKer][$problemSize][$rec_date];
-                        $nRuns = count($tg->tasks);
-                        if($nRuns===0){
-                            $result[$rec_date] = ' ';
-                            continue;
-                        }
-                        $result[$rec_date] = $tg->summary.'/'.$nRuns;
-                        $result[$rec_date . '-IDs-F'] = $tg->failedRuns;
-                        $result[$rec_date . '-IDs-U'] = $tg->underPerformingRuns;
-                        $result[$rec_date . '-IDs-N'] = $tg->inControlRuns;
-                        $result[$rec_date . '-IDs-O'] = $tg->overPerformingRuns;
-                        $result[$rec_date . '-IDs-C'] = $tg->controlIntervalRuns;
-                        $result[$rec_date . '-IDs-R'] = $tg->noControlInfoRuns;
+
+                        $result[$rec_date] = $taskGroup->summary . '/' . $runs;
+                        $result[$rec_date . '-IDs-F'] = $taskGroup->failedRuns;
+                        $result[$rec_date . '-IDs-U'] = $taskGroup->underPerformingRuns;
+                        $result[$rec_date . '-IDs-N'] = $taskGroup->inControlRuns;
+                        $result[$rec_date . '-IDs-O'] = $taskGroup->overPerformingRuns;
+                        $result[$rec_date . '-IDs-C'] = $taskGroup->controlIntervalRuns;
+                        $result[$rec_date . '-IDs-R'] = $taskGroup->noControlInfoRuns;
                     }
+
                     $results[] = $result;
-                }
-            }
-        }
+                } // foreach($nodeCountData as $problemSize => $problemSizeData) {
+            } // foreach($runData as $appKernel => $nodeCountData) {
+        } // foreach($runsStatus as $resource => $runData) {
+
         $response['success'] = true;
         $response['response'] = $results;
         $response['count'] = count($response['response']);
+
         return $response;
-    }
+    } // public function getMapForWeb()
 }

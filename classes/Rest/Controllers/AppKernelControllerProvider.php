@@ -1,16 +1,19 @@
 <?php
 namespace Rest\Controllers;
 
+use DataWarehouse\Access\MetricExplorer;
+use DateTime;
 use Silex\Application;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Response;
 
 use Exception;
-use XDUser;
 use CCR\DB;
 use AppKernel\Report;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 /**
  * Class AppKernelControllerProvider
@@ -29,6 +32,8 @@ class AppKernelControllerProvider extends BaseControllerProvider
     const TREENODE_UNITS = "units";
     const TREENODE_INSTANCE = "instance";
 
+    const DEFAULT_DELIM=',';
+
     /**
      * @see BaseControllerProvider::setupRoutes
      */
@@ -36,27 +41,30 @@ class AppKernelControllerProvider extends BaseControllerProvider
     {
 
         $root = $this->prefix;
+        $class = get_class($this);
 
-        $controller->get("$root/details", '\Rest\Controllers\AppKernelControllerProvider::getDetails');
-        $controller->get("$root/datasets", '\Rest\Controllers\AppKernelControllerProvider::getDatasets');
-        $controller->get("$root/plots", '\Rest\Controllers\AppKernelControllerProvider::getPlots');
-        $controller->get("$root/control_regions", '\Rest\Controllers\AppKernelControllerProvider::getControlRegions');
-        $controller->post("$root/control_regions", '\Rest\Controllers\AppKernelControllerProvider::createOrUpdateControlRegions')
-            ->value('update', false);
-        $controller->put("$root/control_regions", '\Rest\Controllers\AppKernelControllerProvider::createOrUpdateControlRegions')
-            ->value('update', true);
-        $controller->delete("$root/control_regions", '\Rest\Controllers\AppKernelControllerProvider::deleteControlRegions');
+        $controller->get("$root/details", "$class::getDetails");
+        $controller->get("$root/datasets", "$class::getDatasets");
+        $controller->get("$root/plots", "$class::getPlots");
+        $controller->get("$root/control_regions", "$class::getControlRegions");
+        $controller->post("$root/control_regions", "$class::createOrUpdateControlRegions")
+            ->value("update", false);
+        $controller->put("$root/control_regions", "$class::createOrUpdateControlRegions")
+            ->value("update", true);
+        $controller->delete("$root/control_regions", "$class::deleteControlRegions");
 
-        $controller->get("$root/notifications", '\Rest\Controllers\AppKernelControllerProvider::getNotifications');
-        $controller->put("$root/notifications", '\Rest\Controllers\AppKernelControllerProvider::putNotifications');
-        $controller->get("$root/notifications/default", '\Rest\Controllers\AppKernelControllerProvider::getDefaultNotifications');
-        $controller->get("$root/notifications/send", '\Rest\Controllers\AppKernelControllerProvider::sendNotification');
+        $controller->get("$root/notifications", "$class::getNotifications");
+        $controller->put("$root/notifications", "$class::putNotifications");
+        $controller->get("$root/notifications/default", "$class::getDefaultNotifications");
+        $controller->get("$root/notifications/send", "$class::sendNotification");
 
-        $controller->get("$root/resources", '\Rest\Controllers\AppKernelControllerProvider::getResources');
-        $controller->get("$root/app_kernels", '\Rest\Controllers\AppKernelControllerProvider::getAppKernels');
+        $controller->get("$root/resources", "$class::getResources");
+        $controller->get("$root/app_kernels", "$class::getAppKernels");
 
-        $controller->get("$root/performance_map", '\Rest\Controllers\AppKernelControllerProvider::getPerformanceMap');
-        $controller->get("$root/success_rate", '\Rest\Controllers\AppKernelControllerProvider::getAppKernelSuccessRate');
+        $controller->get("$root/performance_map", "$class::getPerformanceMap");
+        $controller->get("$root/success_rate", "$class::getAppKernelSuccessRate");
+
+        $controller->get("$root/performance_map/raw", "$class::getRawPerformanceMap");
     }
 
     /**
@@ -66,9 +74,9 @@ class AppKernelControllerProvider extends BaseControllerProvider
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param  Request $request The request used to make this call.
-     * @param  Application $app The router application.
-     * @return array Response data containing the following info:
+     * @param  Request     $request The request used to make this call.
+     * @param  Application $app     The router application.
+     * @return Response Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      * results: The requested information.
      * @throws Exception
@@ -217,14 +225,15 @@ class AppKernelControllerProvider extends BaseControllerProvider
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param  Request $request The request used to make this call.
-     * @param  Application $app The router application.
-     * @param  boolean $returnRawData (Optional) If true, returns the data
+     * @param Request     $request The request used to make this call.
+     * @param Application $app     The router application.
+     * @param boolean $returnRawData (Optional) If true, returns the data
      *                                    without converting it to a format.
      *                                    (Defaults to false.)
      * @return array                Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              results: The requested datasets.
+     * @throws Exception
      */
     public function getDatasets(Request $request, Application $app, $returnRawData = false)
     {
@@ -299,11 +308,9 @@ class AppKernelControllerProvider extends BaseControllerProvider
             {
 
         } elseif ($format == 'xls' || $format == 'csv' || $format == 'xml') {
-            $title = 'data';
             $exportedDatas = array();
             foreach ($datasetList as $result) {
                 $exportedDatas[] = $result->export();
-                $title = $result->akName . ': ' . $result->resourceName . ': ' . $result->metric;
             }
 
             $content = \DataWarehouse\ExportBuilder::export($exportedDatas, $format, $inline);
@@ -317,15 +324,16 @@ class AppKernelControllerProvider extends BaseControllerProvider
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param  Request $request The request used to make this call.
-     * @param  Application $app The router application.
-     * @return array                Response data containing the following info:
+     * @param Request     $request The request used to make this call.
+     * @param Application $app     The router application.
+     *
+     * @return Response response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              results: The requested plots.
+     * @throws Exception
      */
     public function getPlots(Request $request, Application $app)
     {
-        $thumbnail = $this->getBooleanParam($request, 'thumbnail', false, false);
         $show_title = $this->getBooleanParam($request, 'show_title', false, false);
         $width = $this->getFloatParam($request, 'width', false, 740);
         $height = $this->getFloatParam($request, 'height', false, 345);
@@ -336,6 +344,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
             false,
             true
         );
+
         $end_date = $this->convertDateTime(
             $this->getDateTimeFromUnixParam($request, 'end_time'),
             true,
@@ -351,11 +360,12 @@ class AppKernelControllerProvider extends BaseControllerProvider
         if ($legend_location === null || $legend_location == '') {
             $legend_location = 'bottom_center';
         }
+
         $font_size = $this->getStringParam($request, 'font_size');
         if ($font_size === null || $font_size == '') {
             $font_size = 'default';
         }
-        $show_guide_lines = $this->getBooleanParam($request, 'show_guide_lines', false, true);
+
         $inline = $this->getBooleanParam($request, 'inline', false, true);
         $show_change_indicator = $this->getBooleanParam($request, 'show_change_indicator', false, false);
         $show_control_plot = $this->getBooleanParam($request, 'show_control_plot', false, false);
@@ -396,7 +406,6 @@ class AppKernelControllerProvider extends BaseControllerProvider
             $chartPool = new \XDChartPool($user);
         }
 
-        $resourceDescription = '';
         $lastResult = new \AppKernel\Dataset('Empty App Kernel Dataset', -1, "", -1, "", -1, "", "", "", "");
         $hc = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
         $hc->setTitle($show_title ? 'Empty App Kernel Dataset' : null, $font_size);
@@ -477,7 +486,6 @@ class AppKernelControllerProvider extends BaseControllerProvider
                 }
             }
 
-            $resourceDescription = $result->resourceDescription;
             if ($format != 'params') {
                 $datasets = array($result);
 
@@ -572,9 +580,9 @@ class AppKernelControllerProvider extends BaseControllerProvider
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param  Request $request The request used to make this call.
-     * @param  Application $app The router application.
-     * @return array                Response data containing the following info:
+     * @param  Request     $request The request used to make this call.
+     * @param  Application $app     The router application.
+     * @return JsonResponse Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              results: The requested control regions.
      *                              count: The number of control regions.
@@ -599,11 +607,11 @@ class AppKernelControllerProvider extends BaseControllerProvider
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param  Request $request The request used to make this call.
-     * @param  Application $app The router application.
+     * @param  Request     $request The request used to make this call.
+     * @param  Application $app     The router application.
      * @param  boolean $update True if updating control regions. False if
      *                              creating control regions.
-     * @return array                Response data containing the following info:
+     * @return JsonResponse Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              message: A human-readable message about what occurred.
      */
@@ -663,9 +671,9 @@ class AppKernelControllerProvider extends BaseControllerProvider
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param  Request $request The request used to make this call.
-     * @param  Application $app The router application.
-     * @return array                Response data containing the following info:
+     * @param  Request     $request The request used to make this call.
+     * @param  Application $app     The router application.
+     * @return JsonResponse Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              message: A human-readable message about what occurred.
      */
@@ -712,8 +720,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
     /**
      * Retrieve information about e-mail notifications
      *
-     * @param  ?
-     * @return array                Response data containing the following info:
+     * @return JsonResponse Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              results: The requested information.
      */
@@ -759,8 +766,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
     /**
      * Save information about e-mail notifications
      *
-     * @param  ?
-     * @return array                Response data containing the following info:
+     * @return JsonResponse Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      */
     public function putNotifications(Request $request, Application $app)
@@ -787,7 +793,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
             );
 
             if (count($sqlres) == 0) {
-                $sqlres = $pdo->insert(
+                $pdo->insert(
                     'INSERT INTO mod_appkernel.report (user_id,send_report_daily,send_report_weekly,send_report_monthly,settings)
                                         VALUES (:user_id,:send_report_daily,:send_report_weekly,:send_report_monthly,:settings)',
                     array(
@@ -799,7 +805,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
                     )
                 );
             } else {
-                $sqlres = $pdo->execute(
+                $pdo->execute(
                     'UPDATE mod_appkernel.report
                                         SET send_report_daily=:send_report_daily,send_report_weekly=:send_report_weekly,
                                             send_report_monthly=:send_report_monthly,settings=:settings
@@ -825,6 +831,11 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
     /**
      * Get DefaultNotifications settings
+     *
+     * @param Request     $request
+     * @param Application $app
+     *
+     * @return JsonResponse
      */
     public function getDefaultNotifications(Request $request, Application $app)
     {
@@ -853,8 +864,9 @@ class AppKernelControllerProvider extends BaseControllerProvider
     /**
      * Send e-mail report
      *
-     * @param  ?
-     * @return array                Response data containing the following info:
+     * @param Request     $request
+     * @param Application $app
+     * @return JsonResponse|Response Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              results: The requested information.
      */
@@ -955,8 +967,9 @@ class AppKernelControllerProvider extends BaseControllerProvider
     /**
      * Send e-mail report
      *
-     * @param  ?
-     * @return array                Response data containing the following info:
+     * @param Request     $request
+     * @param Application $app
+     * @return JsonResponse Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              results: The requested information.
      */
@@ -984,9 +997,6 @@ class AppKernelControllerProvider extends BaseControllerProvider
             $report_param = json_decode($report_param, true);
 
             formatNotificationSettingsFromClient($report_param);
-            //print_r($report_param);
-            //throw new Exception(print_r($report_param,true));
-
 
             $report = new Report(array(
                 'start_date' => $start_date,
@@ -994,10 +1004,6 @@ class AppKernelControllerProvider extends BaseControllerProvider
                 'report_type' => $report_type,
                 'report_params' => $report_param,
                 'user' => $user
-                //'resource'=>$report_param['resourcesList'],
-                //'appKer'=>$report_param['appkernelsList'],
-                //'controlThresholdCoeff'=>$report_param['controlThresholdCoeff']
-                //'report_param'=>$_REQUEST['report_param']
             ));
 
             try {
@@ -1015,48 +1021,13 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
         }
         return $app->json($response);
-        echo json_encode($response);
-
-        try {
-            $response = array();
-            $pdo = \CCR\DB::factory('database');
-
-            $curent_tmp_settings = $this - Param($request, 'report_param', true);
-            var_dump($curent_tmp_settings);
-            //$curent_tmp_settings=json_decode($curent_tmp_settings,true);
-
-            $user_id = $this->getUserFromRequest($request)->getUserID();
-
-            formatNotificationSettingsFromClient($curent_tmp_settings, true);
-
-            $sqlres = $pdo->query(
-                'SELECT user_id,send_report_daily,send_report_weekly,send_report_monthly,settings
-                                    FROM mod_appkernel.report
-                                    WHERE user_id=:user_id',
-                array(':user_id' => $user_id)
-            );
-
-            if (count($sqlres) == 1) {
-                $sqlres = $sqlres[0];
-                $settings = json_decode($sqlres['settings'], true);
-                foreach ($settings as $key => $value) {
-                    $curent_tmp_settings[$key] = $value;
-                }
-            } else {
-                throw new Exception('settings is not set in db use default');
-            }
-            formatNotificationSettingsForClient($curent_tmp_settings);
-            $response['data'] = $curent_tmp_settings;
-            $response['success'] = true;
-            return $app->json($response);
-        } catch (Exception $e) {
-            //i.e. setting is not saved by user so send defaults
-            return $this->getDefaultNotifications($request, $app);
-        }
     }
 
     /**
      * Get list of resources active in last 90 days
+     * @param Request     $request
+     * @param Application $app
+     * @return JsonResponse
      */
     public function getResources(Request $request, Application $app)
     {
@@ -1086,8 +1057,6 @@ class AppKernelControllerProvider extends BaseControllerProvider
                     'id' => $resource->id,
                     'fullname' => $resource->name,
                     'name' => $resource->nickname
-                    /*'disabled' =>  !isset($resources[$resource->nickname]),
-                    'checked' => in_array($resource->id,$selectedResourceIds)*/
                 );
             }
             $response['response'] = $returnData;
@@ -1103,6 +1072,9 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
     /**
      * Get list of app kernels active in last 90 days
+     * @param Request     $request
+     * @param Application $app
+     * @return JsonResponse
      */
     public function getAppKernels(Request $request, Application $app)
     {
@@ -1110,7 +1082,6 @@ class AppKernelControllerProvider extends BaseControllerProvider
         try {
             $ak_db = new \AppKernel\AppKernelDb();
             $start_ts = date_timestamp_get(date_sub(date_create(), date_interval_create_from_date_string("90 days")));
-            $end_ts = date_timestamp_get(date_create());
 
             $all_app_kernels = $ak_db->getUniqueAppKernels();
             $returnData = array();
@@ -1187,11 +1158,11 @@ class AppKernelControllerProvider extends BaseControllerProvider
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param $type Tree node type
-     * @param $record Record returned from the database
+     * @param String  $type           Tree node type
+     * @param array   $record Record  returned from the database
      * @param boolean $resource_first (Optional) (Defaults to false.)
      *
-     * @return An object representation of the tree node
+     * @return Object An object representation of the tree node
      */
     private function createTreeNode($type, $record, $resource_first = false)
     {
@@ -1431,7 +1402,6 @@ class AppKernelControllerProvider extends BaseControllerProvider
                     );
                 }
                 $results[$resource][$appKer][$problemSize]["unsucc"] = (int)$row['total_tasks'];
-                //print "\tproblemSize:".$problemSize."\n";
             }
             //Merge results to respond
             $results2 = array();
@@ -1477,7 +1447,6 @@ or "Show Details of Successful Tasks" options to see details on tasks';
                                         $icount += 1;
                                     }
                                     $unsuccessfull_tasks = $unsuccessfull_tasks . '<br/>';
-                                    //var_dump($sqlres);
                                 } else {
                                     $unsuccessfull_tasks = $unsuccessfull_tasks . 'There is no unsuccessful runs.<br/>';
                                 }
@@ -1521,9 +1490,6 @@ or "Show Details of Successful Tasks" options to see details on tasks';
                         $unsucc += $row["unsucc"];
                         $succ += $row["succ"];
                     }
-
-                    //var_dump($problemSizes);
-                    //var_dump($resultsTMP);
 
                     foreach ($problemSizes as $problemSize) {
                         if (array_key_exists($problemSize, $resultsTMP)) {
@@ -1613,5 +1579,117 @@ or "Show Details of Successful Tasks" options to see details on tasks';
                 );
             }
         }
+    }
+
+    /**
+     * Retrieves the raw numeric values for the AppKernel Performance Map. This endpoint provides
+     * the data for `CenterReportCardPortlet.js`
+     *
+     * **NOTE:** This function will throw an UnauthorizedException if the user making the request
+     * does not have the Center Director or Center Staff acl.
+     *
+     * @param Request     $request
+     * @param Application $app
+     * @return JsonResponse
+     * @throws Exception if there is a problem instantiating \DateTime objects.
+     * @throws Exception if the user making the request is not a Center [Director|Staff]
+     */
+    public function getRawPerformanceMap(Request $request, Application $app)
+    {
+        $user = $this->authorize($request);
+
+        // We need to ensure that only Center Director / Center Staff users are authorized to
+        // utilize this endpoint. Note, we do not utilize the `requirements` parameter of the above
+        // `authorize` call because it utilizes `XDUser::hasAcls` which only checks if the user has
+        // *all* of the supplied acls, not any of the supplied acls.
+        if ( ! ( $user->hasAcl(ROLE_ID_CENTER_DIRECTOR) ||  $user->hasAcl(ROLE_ID_CENTER_STAFF) ) ) {
+            throw  new UnauthorizedHttpException('xdmod', "Unable to complete action. User is not authorized.");
+        }
+
+        $startDate = $this->getStringParam($request, 'start_date', true);
+        if ($startDate !== null) {
+            $startDate = new \DateTime($startDate);
+        }
+
+        $endDate = $this->getStringParam($request, 'end_date', true);
+        if ($endDate !== null) {
+            $endDate = new \DateTime($endDate);
+        }
+
+        $appKernels = $this->getStringParam($request, 'app_kernels', false);
+        if (strpos($appKernels, self::DEFAULT_DELIM) !== false) {
+            $appKernels = explode(self::DEFAULT_DELIM, $appKernels);
+        }
+
+        $problemSizes = $this->getStringParam($request, 'problem_sizes', false);
+        if (strpos($problemSizes, self::DEFAULT_DELIM) !== false) {
+            $problemSizes = explode(self::DEFAULT_DELIM, $problemSizes);
+        }
+
+        $data = array();
+        try {
+            $perfMap = new \AppKernel\PerformanceMap(array(
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'resource' => array('data' => $user->getResources()),
+                'appKer' => $appKernels,
+                'problemSize' => $problemSizes
+            ));
+
+            // The columns that we're going to be retrieving from the PerformanceMap and ultimately
+            // returning to the requester.
+            $valueCols = array(
+                'failedRuns',
+                'inControlRuns',
+                'overPerformingRuns',
+                'underPerformingRuns'
+            );
+
+            // Now that we have the app kernel data, iterate through and extract / sum data for presentation.
+            foreach($perfMap->perfMap['runsStatus'] as $resource => $runData) {
+                foreach($runData as $appKernel => $nodeCountData) {
+
+                    // Values that we'll be collecting / summing by node count & date.
+                    $values = array();
+                    foreach($nodeCountData as $nodeCount => $byDateData) {
+                        foreach($byDateData as $date => $runInfo) {
+
+                            // Now that we've reached the data level, initialize or add in the data
+                            // for the columns that we're interested in.
+                            foreach($valueCols as $valueCol) {
+                                if (!isset($values[$valueCol])) {
+                                    $values[$valueCol] = 0;
+                                }
+                                $values[$valueCol] += count($runInfo->$valueCol);
+                            }
+                        }
+                    }
+
+                    $data[] = array_merge(
+                        array(
+                            'resource' => $resource,
+                            'app_kernel' => $appKernel,
+                        ),
+                        $values
+                    );
+                }
+            }
+
+            $results = array(
+                'success' => true,
+                'results' => $data
+            );
+        } catch( Exception $e) {
+
+            // make sure that we log the exception so that we dont lose sight of it.
+            handle_uncaught_exception($e);
+
+            $results = array(
+                'success' => false,
+                'message' => 'An unexpected error has occurred while retrieving the AppKernel Performance Map data.'
+            );
+        }
+
+        return $app->json($results);
     }
 }
