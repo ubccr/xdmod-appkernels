@@ -149,7 +149,7 @@ class PerfPatternRecognition
 		foreach ($result as $r) {
 			$resourcesEnabled[$r['name']]=$r['enabled'];
 		}
-		$result = $db_akrr->query('SELECT COUNT( * ) AS `Rows` , `resource` FROM `SCHEDULEDTASKS` GROUP BY `resource` ORDER BY `resource`');
+		$result = $db_akrr->query('SELECT COUNT( * ) AS `Rows` , `resource` FROM `scheduled_tasks` GROUP BY `resource` ORDER BY `resource`');
 		foreach ($result as $r) {
 			if(! array_key_exists($r['resource'],$resourcesEnabled))
 				$resourcesEnabled[$r['resource']]=1;
