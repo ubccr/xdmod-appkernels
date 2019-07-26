@@ -5,7 +5,10 @@
         {
           "name": "Center Report Card",
           "type": "CenterReportCardPortlet",
-          "region": "left",
+          "location": {
+                "row": 0,
+                "column": 1
+          },
           "config": {
             "timeframe": "Year to date"
           }
@@ -17,9 +20,12 @@
         {
           "name": "Center Report Card",
           "type": "CenterReportCardPortlet",
-          "region": "left",
+          "location": {
+                "row": 0,
+                "column": 1
+          },
           "config": {
-            "timeframe": "Month to date"
+            "timeframe": "30 day"
           }
         }
       ]
