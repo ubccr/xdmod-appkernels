@@ -110,16 +110,23 @@ class PerformanceMap
         $params = array();
 
         if(isset($this->resource)) {
-            $quotedResourceIds = array_reduce(
-                $this->resource['data'],
-                function ($carry, $item) use ($pdo) {
-                    $carry[] = $pdo->quote($item['id']);
-                    return $carry;
-                },
-                array()
-            );
-            $sql = "SELECT akr.resource_id, akr.resource, akr.nickname FROM mod_appkernel.resource akr " .
-                   "WHERE akr.xdmod_resource_id IN (" . implode(', ', $quotedResourceIds) . ')';
+            if(array_key_exists('data', $this->resource)) {
+                // not sure where it is called from
+                $quotedResourceIds = array_reduce(
+                    $this->resource['data'],
+                    function ($carry, $item) use ($pdo) {
+                        $carry[] = $pdo->quote($item['id']);
+                        return $carry;
+                    },
+                    array()
+                );
+                $sql = "SELECT akr.resource_id, akr.resource, akr.nickname FROM mod_appkernel.resource akr " .
+                    "WHERE akr.xdmod_resource_id IN (" . implode(', ', $quotedResourceIds) . ')';
+            } else {
+                // probably here should be xdmod_resource_id to limit user to his resource
+                $sql = "SELECT akr.resource_id, akr.resource, akr.nickname FROM mod_appkernel.resource akr " .
+                    "WHERE akr.resource IN ('" . implode("', '", $this->resource) . "')";
+            }
         }
 
         $sqlres_tasdb=$pdo->query($sql, $params);
@@ -644,7 +651,7 @@ SQL;
             // Proceed with filtering the values...
             if ((!isset($ak_id)) ||
                 (isset($this->resource_ids) && !array_key_exists($resource, $this->resource_ids)) ||
-                (isset($this->appKer) && !in_array($this->ak_shortnames[$appKer], $this->appKer)) ||
+                (isset($this->appKer) && (!(empty($this->appKer) || in_array($this->ak_shortnames[$appKer], $this->appKer)))) ||
                 (isset($this->problemSize) && !in_array($problemSize, $this->problemSize))
             ) {
                 continue;
@@ -683,7 +690,6 @@ SQL;
                 $runsStatus[$resource][$appKer][$problemSize][$rec_date]->add_task($task);
             }
         }
-
         //sort
         ksort($runsStatus);
         foreach ($runsStatus as $resource => $val1) {
