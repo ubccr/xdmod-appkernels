@@ -82,7 +82,7 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
     initComponent: function () {
         var self = this;
 
-        var aspectRatio = 0.8;
+        var aspectRatio = 11.0 / 17.0;
         this.height = this.width * aspectRatio;
 
         var dateRanges = CCR.xdmod.ui.DurationToolbar.getDateRanges();
@@ -189,7 +189,7 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
                 ].join(' ');
             };
 
-            var height = 20;
+            var height = 17;
 
             // Make sure that we have at least some runs
             if (total > 0) {
@@ -234,7 +234,7 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
                     if (input.hasOwnProperty(id)) {
                         var runs = input[id].runs;
                         var percentage = total > 0 ? Math.round(((runs / total) * 100)) : 0;
-                        var msg = percentage + '% - ( ' + (runs / total) + ' )';
+                        var msg = percentage + '% - (' + runs + ' out of ' + total + ')';
 
                         contents.push(
                             rect(id, input[id].title, msg, percentage, sum, height, input[id].red, input[id].green, input[id].blue)
