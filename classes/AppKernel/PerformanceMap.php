@@ -586,7 +586,7 @@ SQL;
               axi.reporter,
               axi.reporternickname,
               axi.status
-            FROM mod_akrr.akrr_xdmod_instanceinfo AS axi
+            FROM akrr_xdmod_instanceinfo AS axi
             WHERE axi.collected >=  :start_date
               AND axi.collected <   :end_date
             ORDER BY axi.collected ASC;
@@ -618,7 +618,7 @@ SQL;
               axi.reporter,
               axi.reporternickname,
               axi.status
-            FROM mod_akrr.akrr_xdmod_instanceinfo AS axi
+            FROM akrr_xdmod_instanceinfo AS axi
             WHERE axi.collected >=  :start_date
               AND axi.collected <   :end_date
               AND axi.resource IN ( $quotedResources )

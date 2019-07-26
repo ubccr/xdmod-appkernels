@@ -11,28 +11,28 @@ try {
 
     $db = DB::factory('akrr-db');
 
-    $sql = 'SELECT COUNT(*) AS count FROM mod_akrr.ACTIVETASKS';
+    $sql = 'SELECT COUNT(*) AS count FROM active_tasks';
     list($countRow) = $db->query($sql);
     $activeCount = $countRow['count'];
 
     // TODO: Refactor these queries.
-    $sql = 'SELECT COUNT(*) AS count FROM mod_akrr.ACTIVETASKS WHERE DATEDIFF(NOW(), time_submitted_to_queue) >= 1';
+    $sql = 'SELECT COUNT(*) AS count FROM active_tasks WHERE DATEDIFF(NOW(), time_submitted_to_queue) >= 1';
     list($countRow) = $db->query($sql);
     $queued1DayCount = $countRow['count'];
 
-    $sql = 'SELECT COUNT(*) AS count FROM mod_akrr.ACTIVETASKS WHERE DATEDIFF(NOW(), time_submitted_to_queue) >= 2';
+    $sql = 'SELECT COUNT(*) AS count FROM active_tasks WHERE DATEDIFF(NOW(), time_submitted_to_queue) >= 2';
     list($countRow) = $db->query($sql);
     $queued2DaysCount = $countRow['count'];
 
-    $sql = 'SELECT COUNT(*) AS count FROM mod_akrr.ACTIVETASKS WHERE DATEDIFF(NOW(), time_submitted_to_queue) >= 3';
+    $sql = 'SELECT COUNT(*) AS count FROM active_tasks WHERE DATEDIFF(NOW(), time_submitted_to_queue) >= 3';
     list($countRow) = $db->query($sql);
     $queued3DaysCount = $countRow['count'];
 
-    $sql = 'SELECT COUNT(*) AS count FROM mod_akrr.ACTIVETASKS WHERE DATEDIFF(NOW(), time_submitted_to_queue) >= 4';
+    $sql = 'SELECT COUNT(*) AS count FROM active_tasks WHERE DATEDIFF(NOW(), time_submitted_to_queue) >= 4';
     list($countRow) = $db->query($sql);
     $queued4DaysCount = $countRow['count'];
 
-    $sql = 'SELECT COUNT(*) AS count FROM mod_akrr.ACTIVETASKS WHERE DATEDIFF(NOW(), time_submitted_to_queue) >= 5';
+    $sql = 'SELECT COUNT(*) AS count FROM active_tasks WHERE DATEDIFF(NOW(), time_submitted_to_queue) >= 5';
     list($countRow) = $db->query($sql);
     $queued5DaysCount = $countRow['count'];
 

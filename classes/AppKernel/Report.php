@@ -143,7 +143,7 @@ class Report
             $this->report_params[$key]=$value;
         }
 
-        //clone some variables to avoid data curraption
+        //clone some variables to avoid data corruption
         if ($this->report_params['start_date']!==null) {
             $this->report_params['start_date']=clone  $this->report_params['start_date'];
         }
