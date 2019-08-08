@@ -553,7 +553,7 @@ SQL;
 
 SQL;
             $params[':organization_id'] = $this->userOrganization;
-        } elseif (isset($this->resource_ids)) {
+        } elseif (isset($this->resource_ids) && (!(empty($this->resource_ids)))) {
             $resourceIds = implode(', ', $this->resource_ids);
             $sql = <<<SQL
         SELECT aki.ak_id,
@@ -570,7 +570,6 @@ SQL;
 SQL;
 
         }
-
         $rows = $pdo->query($sql, $params);
 
         $controlState = array();
