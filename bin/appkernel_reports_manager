@@ -6,8 +6,11 @@
  * @author Nikolay Simakov
  * @author Jeffrey T. Palmer <jtpalmer@buffalo.edu>
  */
-
-require_once __DIR__ . '/../share/configuration/linker.php';
+if(__DIR__=='/usr/bin') {
+    require_once '/usr/share/xdmod/configuration/linker.php';
+} else {
+    require_once __DIR__ . '/../share/configuration/linker.php';
+}
 
 use CCR\DB;
 use CCR\Log;
@@ -50,7 +53,7 @@ foreach ($options as $opt) {
     $options2[$opt[0]] = $opt[1];
 }
 $args = getopt($options1, $options2);
-    
+
     // default values
     // With the '-m' argument passed into this script along with a username,
     // reports only associated with the username will be built and sent.
@@ -97,7 +100,7 @@ foreach ($args as $arg => $value) {
         case 'resource':
             $resource = $value;
             break;
-        
+
         default:
             fwrite(STDERR, 'Invalid arguments: '.$arg.' => '.$value."\n");
             break;
@@ -108,7 +111,7 @@ foreach ($args as $arg => $value) {
     print("\t" . $arg . ' => ' . $value . "\n");
 }
     // ================================================================================
-    
+
 // Logger configuration.
 $conf = array(
     'file' => false,
@@ -198,11 +201,11 @@ foreach ($allGroupDeliveries as $groupDeliveries) {
             $logger->err( "can not find user with id: {$delivery['user_id']}");
             continue;
         }
-        
+
         $username   = $user->getUsername();
         $user_email = $user->getEmailAddress();
         $internal_dashboard_user=$user->isDeveloper() || $user->isDeveloper();
-        
+
         if ($maint_mode && $username != $maint_user) {
             continue;
         }
@@ -211,7 +214,7 @@ foreach ($allGroupDeliveries as $groupDeliveries) {
             $logger->info("Preparing report $report_type for $username ({$delivery['user_id']})");
 
             $report_param = json_decode($delivery['settings'], true);
-            
+
             if ($appkernel !== null) {
                 $report_param['appKer'] = array(
                     $appkernel
