@@ -162,7 +162,7 @@ class AkrrControllerProvider extends BaseControllerProvider
     }
 
     /**
-     * Retrieves a listing of the contents of the scheduled_tasks table from the
+     * Retrieves a listing of the contents of the SCHEDULEDTASKS table from the
      * AKRR REST API.
      *
      * @param Request $request that will be used to collect the required information.
@@ -405,7 +405,7 @@ class AkrrControllerProvider extends BaseControllerProvider
     }
 
     /**
-     * Retrieves a listing of the active_tasks table. These tasks should be currently running on a resource.
+     * Retrieves a listing of the ACTIVETASKS table. These tasks should be currently running on a resource.
      *
      * @param Request $request that will be used to collect the required information.
      * @param Application $app that will be used to facilitate setting up the response.
@@ -414,19 +414,19 @@ class AkrrControllerProvider extends BaseControllerProvider
      *   "message": <string>,
      *   "data": [
      *     {
-     *       "status_update_time": <timestamp: YYYY-MM-DD HH24:MI:SS>,
+     *       "statusupdatetime": <timestamp: YYYY-MM-DD HH24:MI:SS>,
      *       "master_task_id": <int>,
      *       "app": <string>,
      *       "resource_param": <json object>,
      *       "task_lock": <int>,
-     *       "datetime_stamp": <timestamp: YYYY.MM.DD.HH24.MI.SS.FF>,
+     *       "datetimestamp": <timestamp: YYYY.MM.DD.HH24.MI.SS.FF>,
      *       "time_submitted_to_queue": <timestamp: YYYY-MM-DD HH24:MI:SS>,
-     *       "fatal_errors_count": <int>,
-     *       "fails_to_submit_to_the_queue": <int>,
+     *       "FatalErrorsCount": <int>,
+     *       "FailsToSubmitToTheQueue": <int>,
      *       "status": <string>,
      *       "next_time_check": <timestamp: YYYY-MM-DD HH24:MI:SS>,
      *       "time_to_start": <timestamp: YYYY-MM-DD HH24:MI:SS>,
-     *       "status_info": <string>,
+     *       "statusinfo": <string>,
      *       "resource": <string>,
      *       "task_id": <int>,
      *       "time_activated": <timestamp: YYYY-MM-DD HH24:MI:SS>,
@@ -606,7 +606,7 @@ class AkrrControllerProvider extends BaseControllerProvider
         $data = false,
         $useToken = true
     ) {
-
+    
 
         $url = $path;
 

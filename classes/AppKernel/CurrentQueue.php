@@ -127,9 +127,9 @@ class CurrentQueue
         $sqlres=$arr_db->query('SELECT task_id,
                                 next_check_time,
                                 status,
-                                status_info,
-                                status_update_time,
-                                datetime_stamp,
+                                statusinfo,
+                                statusupdatetime,
+                                datetimestamp,
                                 time_activated,
                                 time_submitted_to_queue,
                                 task_lock,
@@ -141,11 +141,11 @@ class CurrentQueue
                                 app_param,
                                 task_param,
                                 group_id,
-                                fatal_errors_count,
-                                fails_to_submit_to_the_queue,
+                                FatalErrorsCount,
+                                FailsToSubmitToTheQueue,
                                 taskexeclog,
                                 master_task_id
-                            FROM active_tasks
+                            FROM mod_akrr.ACTIVETASKS
                             ORDER BY resource,app'
         );
         foreach ($sqlres as $res) {

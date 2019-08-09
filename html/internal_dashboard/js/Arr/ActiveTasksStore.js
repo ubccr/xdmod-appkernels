@@ -46,16 +46,16 @@ XDMoD.Arr.ActiveTasksStore = Ext.extend(Ext.data.JsonStore, {
                     type: 'string'
                 },
                 {
-                    name: 'status_info',
+                    name: 'statusinfo',
                     type: 'string'
                 },
                 {
-                    name: 'status_update_time',
+                    name: 'statusupdatetime',
                     type: 'date',
                     dateFormat: 'Y-m-d H:i:s'
                 },
                 {
-                    name: 'datetime_stamp',
+                    name: 'datetimestamp',
                     type: 'string'
                 },
                 {
@@ -119,11 +119,11 @@ XDMoD.Arr.ActiveTasksStore = Ext.extend(Ext.data.JsonStore, {
                     type: 'string'
                 },
                 {
-                    name: 'fatal_errors_count',
+                    name: 'FatalErrorsCount',
                     type: 'int'
                 },
                 {
-                    name: 'fails_to_submit_to_the_queue',
+                    name: 'FailsToSubmitToTheQueue',
                     type: 'int'
                 },
                 {

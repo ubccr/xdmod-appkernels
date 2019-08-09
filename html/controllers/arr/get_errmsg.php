@@ -13,7 +13,7 @@ try {
 
     $sql = '
         SELECT appstdout, stderr, stdout, taskexeclog
-        FROM akrr_errmsg
+        FROM mod_akrr.akrr_errmsg
         WHERE task_id = ?
         LIMIT 1
     ';

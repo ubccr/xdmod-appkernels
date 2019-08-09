@@ -27,7 +27,7 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
 
         var expander = new Ext.ux.grid.RowExpander({
             tpl: new Ext.Template(
-                '<div class="status-info-details"><pre>{status_info}</pre></div>'
+                '<div class="status-info-details"><pre>{statusinfo}</pre></div>'
             )
         });
 
@@ -42,7 +42,7 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
 
             if (record.get('status').match(/ERROR/)) {
                 return rowClass + ' grid-row-error';
-            } else if (record.get('fatal_errors_count') > 0 || record.get('fails_to_submit_to_the_queue') > 0) {
+            } else if (record.get('FatalErrorsCount') > 0 || record.get('FailsToSubmitToTheQueue') > 0) {
                 return rowClass + ' grid-row-warning';
             }
 
@@ -73,7 +73,7 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
                     },
                     {
                         header: 'Status Info',
-                        dataIndex: 'status_info'
+                        dataIndex: 'statusinfo'
                     },
                     {
                         header: 'Time in Queue',
@@ -112,12 +112,12 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
                     },
                     {
                         header: 'Fatal Errors',
-                        dataIndex: 'fatal_errors_count',
+                        dataIndex: 'FatalErrorsCount',
                         align: 'right'
                     },
                     {
                         header: 'Fails to Submit',
-                        dataIndex: 'fails_to_submit_to_the_queue',
+                        dataIndex: 'FailsToSubmitToTheQueue',
                         align: 'right'
                     }
                 ]
