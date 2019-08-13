@@ -294,7 +294,7 @@ class Report
         $perfMap=new PerformanceMap(array(
             'start_date'=>$this->report_params['performance_map_start_date'],
             'end_date'=>$this->report_params['performance_map_end_date'],
-            'resource'=>$this->report_params['resource'],
+            'resource'=> $this->report_params['resource'],
             'appKer'=>$this->report_params['appKer'],
             'problemSize'=>$this->report_params['problemSize'],
             'controlThreshold'=>$this->report_params['controlThreshold'],

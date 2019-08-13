@@ -110,8 +110,8 @@ class PerformanceMap
         $params = array();
 
         if(isset($this->resource)) {
-            if(array_key_exists('data', $this->resource)) {
-                // not sure where it is called from
+            if (array_key_exists('data', $this->resource)) {
+                // limit resources by xdmod_resource_id
                 $quotedResourceIds = array_reduce(
                     $this->resource['data'],
                     function ($carry, $item) use ($pdo) {
@@ -122,8 +122,8 @@ class PerformanceMap
                 );
                 $sql = "SELECT akr.resource_id, akr.resource, akr.nickname FROM mod_appkernel.resource akr " .
                     "WHERE akr.xdmod_resource_id IN (" . implode(', ', $quotedResourceIds) . ')';
-            } else {
-                // probably here should be xdmod_resource_id to limit user to his resource
+            } else if (!empty($this->resource)) {
+                // limit resources by AKRR resource name
                 $sql = "SELECT akr.resource_id, akr.resource, akr.nickname FROM mod_appkernel.resource akr " .
                     "WHERE akr.resource IN ('" . implode("', '", $this->resource) . "')";
             }
@@ -492,12 +492,12 @@ class PerformanceMap
         $rec_dates = array();
 
         $start_date = clone $this->start_date;
-        $end_date = clone $this->end_date;
+        $end_date_exclusive = clone $this->end_date_exclusive;
 
         $run_date = clone $this->start_date;
         $day_interval = new DateInterval('P1D');
 
-        while ($run_date <= $end_date) {
+        while ($run_date < $end_date_exclusive) {
             $rec_dates[] = $run_date->format('Y/m/d');
             $run_date->add($day_interval);
         }
@@ -531,7 +531,7 @@ class PerformanceMap
 SQL;
         $params = array(
             ':start_date' => $start_date->format('Y/m/d'),
-            ':end_date' => $end_date->format('Y/m/d')
+            ':end_date' => $end_date_exclusive->format('Y/m/d')
         );
 
         // If a userOrganization has been provided then filter the results on them.
@@ -593,8 +593,7 @@ SQL;
 SQL;
         $params = array(
             ':start_date' => $start_date->format('Y/m/d'),
-            ':end_date' => $end_date->format('Y/m/d')
-
+            ':end_date' => $end_date_exclusive->format('Y/m/d')
         );
 
         // If we have resource id's then we should additionally filter on them.
