@@ -22,8 +22,7 @@ selectMenuOption 8
 # MySQL DB
 answerQuestion {DB Hostname or IP} {}
 answerQuestion {DB Port} {}
-answerQuestion {DB Username} akrruser
-providePassword {DB Password:} akrruser
+answerQuestion {DB Username} {}
 
 # AKRR REST API
 answerQuestion {AKRR REST API username} {}
