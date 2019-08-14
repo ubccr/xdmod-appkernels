@@ -1,4 +1,4 @@
-Ext.namespace('XDMoD', 'XDMoD.Module');
+Ext.namespace('XDMoD', 'XDMoD.Module', 'CCR', 'CCR.xdmod', 'CCR.xdmod.ui');
 
 XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
     title: 'Notification',

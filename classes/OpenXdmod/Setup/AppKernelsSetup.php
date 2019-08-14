@@ -4,6 +4,7 @@
  */
 
 namespace OpenXdmod\Setup;
+
 use CCR\DB\MySQLHelper;
 use Exception;
 
@@ -84,7 +85,7 @@ EOT
         $akConf['akrr-db_pass'] = $akConf['appkernel_pass'];
 
         while (true) {
-            $can_access_app_kernel_db = $this->check_db_access(
+            $can_access_app_kernel_db = $this->checkDataBaseAccess(
                 $akConf['appkernel_host'],
                 $akConf['appkernel_port'],
                 $akConf['appkernel_user'],
@@ -92,7 +93,7 @@ EOT
                 $akConf['appkernel_database'],
                 "app_kernel_def"
             );
-            $can_access_akrr_db = $this->check_db_access(
+            $can_access_akrr_db = $this->checkDataBaseAccess(
                 $akConf['akrr-db_host'],
                 $akConf['akrr-db_port'],
                 $akConf['akrr-db_user'],
@@ -185,24 +186,23 @@ EOT
      *
      * @return bool can run select
      */
-    protected function check_db_access(
+    protected function checkDataBaseAccess(
         $host,
         $port,
         $username,
         $password,
         $db_name,
         $table_name
-    )
-    {
+    ) {
         try {
-            print_r(MySQLHelper::staticExecuteStatement(
+            MySQLHelper::staticExecuteStatement(
                 $host,
                 $port,
                 $username,
                 $password,
                 $db_name,
                 "SELECT * FROM " . $table_name . " LIMIT 10"
-            ));
+            );
             return true;
         } catch (Exception $e) {
             return false;

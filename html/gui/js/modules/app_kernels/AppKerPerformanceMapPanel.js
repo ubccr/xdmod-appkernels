@@ -33,7 +33,7 @@ XDMoD.Arr.AppKerPerformanceMapGrid = Ext.extend(Ext.grid.GridPanel, {
         viewready: function () {
             this.store.load();
         }
-    },//B0FFC5
+    },
     colorStyles: {
         W: 'style="background-color:white;"',
         F: 'style="background-color:#FFB0C4;"',

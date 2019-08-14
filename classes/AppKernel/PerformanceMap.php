@@ -122,7 +122,7 @@ class PerformanceMap
                 );
                 $sql = "SELECT akr.resource_id, akr.resource, akr.nickname FROM mod_appkernel.resource akr " .
                     "WHERE akr.xdmod_resource_id IN (" . implode(', ', $quotedResourceIds) . ')';
-            } else if (!empty($this->resource)) {
+            } elseif (!empty($this->resource)) {
                 // limit resources by AKRR resource name
                 $sql = "SELECT akr.resource_id, akr.resource, akr.nickname FROM mod_appkernel.resource akr " .
                     "WHERE akr.resource IN ('" . implode("', '", $this->resource) . "')";
