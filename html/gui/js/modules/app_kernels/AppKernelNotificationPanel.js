@@ -533,6 +533,12 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
             if (this.loadSettings()) {
                 this.un('afterlayout', this.initLoadSettings, this);
             }
+
+            // Ensure that we unmask the main interface once we're done loading.
+            var viewer = CCR.xdmod.ui.Viewer.getViewer();
+            if (viewer.el) {
+                viewer.el.unmask();
+            }
         };
 
         this.on('afterlayout', this.initLoadSettings, this);
