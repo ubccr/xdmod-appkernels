@@ -33,15 +33,15 @@ XDMoD.Arr.AppKerPerformanceMapGrid = Ext.extend(Ext.grid.GridPanel, {
         viewready: function () {
             this.store.load();
         }
-    },
+    },//B0FFC5
     colorStyles: {
         W: 'style="background-color:white;"',
         F: 'style="background-color:#FFB0C4;"',
-        U: 'style="background-color:#F7FE2E;"',
-        O: 'style="background-color:#FE9A2E;"',
-        C: 'style="background-color:#81BEF7;"',
+        U: 'style="background-color:#FFB336;"',
+        O: 'style="background-color:#81BEF7;"',
+        C: 'style="background-color:#FFF8DC;"',
         N: 'style="background-color:#B0FFC5;"',
-        R: 'style="background-color:#F781F3;"'
+        R: 'style="background-color:#DCDCDC;"'
     },
     rendererForCell: function (value) {
         if (value !== ' ' && value !== '') {
@@ -212,22 +212,27 @@ Ext.extend(XDMoD.Arr.AppKerPerformanceMapPanel, Ext.Panel, {
     problemSizeList: [1, 2, 4, 8, 16],
     appKerList: ['xdmod.app.astro.enzo', 'xdmod.app.chem.gamess', 'xdmod.app.chem.nwchem', 'xdmod.app.md.namd', 'xdmod.benchmark.hpcc', 'xdmod.benchmark.io.ior', 'xdmod.benchmark.io.mpi-tile-io', 'xdmod.benchmark.mpi.imb', 'xdmod.benchmark.graph.graph500', 'xdmod.bundle'],
     legend:
-        'Each day summarized in table cell as pair of a symbol and a number.' +
-        'Symbol represent the status of last application kernel execution on that day and number' +
-        ' shows total number of runs. Each cell is colored according to the statu' +
-        's of last application kernel run. Below is the codes description: <br/><' +
-        'br/><table border="1" cellspacing="0"><tr><td>Code</td><t' +
-        'd>Description</td></tr><tr><td style="background-color:#B0FFC5;">N</td>' +
-        '<td>Application kernel was executed within control interval</td></tr><tr>' +
-        '<td style="background-color:#F7FE2E;">U</td><td>Application kernel w' +
-        'as under-performing</td></tr><tr><td style="background-color:#FE9A2E;"' +
-        '>O</td><td>Application kernel was over-performing</td></tr><tr><td style' +
-        '="background-color:#FFB0C4;">F</td><td>Application kernel failed to ru' +
-        'n</td></tr><tr><td style="background-color:#81BEF7;">C</td><td>This ru' +
-        'n was used to calculate control region</td></tr><tr><td style="backgro' +
-        'und-color:#F781F3;">R</td><td>Application kernel have run, but control i' +
-        'nformation is not available</td></tr><tr><td style="background-color:white;">' +
-        '</td><td>There was no application kernel runs</td></tr></table>' +
+        '<b>KEY</b>: Each day is summarized in a table cell as pair of a symbol and a number. ' +
+        'The symbol represents the status of last application kernel execution on that day ' +
+        'and the number shows the total number of runs. Each cell is colored according to ' +
+        'the status of last application kernel run. The description of the codes are: <br/><br/>' +
+        '<table border="1" cellspacing="0" style="">' +
+        '<tr><td>Code</td><td>Description</td></tr>' +
+        '<tr><td style="background-color:#B0FFC5;">N</td>' +
+        '<td>Application kernel was executed within control interval</td></tr>' +
+        '<tr><td style="background-color:#FFB336;">U</td>' +
+        '<td>Application kernel was under-performing</td></tr>' +
+        '<tr><td style="background-color:#81BEF7;">O</td>' +
+        '<td>Application kernel was over-performing</td></tr>' +
+        '<tr><td style="background-color:#FFB0C4;">F</td>' +
+        '<td>Application kernel failed to run</td></tr>' +
+        '<tr><td style="background-color:#FFF8DC;">C</td>' +
+        '<td>This run was used to calculate control region</td></tr>' +
+        '<tr><td style="background-color:#DCDCDC;">R</td>' +
+        '<td>Application kernel ran, but control information is not available</td></tr>' +
+        '<tr><td style="background-color:white;"> </td>' +
+        '<td>There was no application kernel runs</td></tr>' +
+        '</table>' +
         'Select cell for more details',
     initComponent: function () {
         var appKerPerformanceMapGrid = new XDMoD.Arr.AppKerPerformanceMapGrid({
