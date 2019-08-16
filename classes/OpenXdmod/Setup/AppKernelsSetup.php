@@ -123,11 +123,13 @@ EOT
                 $answer = $this->console->prompt(
                     'Try again?',
                     'yes',
-                    array('yes', 'abort')
+                    array('yes', 'skip', 'abort')
                 );
 
-                if ($answer != 'yes') {
+                if ($answer === 'abort') {
                     exit(1);
+                } else if ($answer === 'skip') {
+                    break;
                 }
 
             } else {
