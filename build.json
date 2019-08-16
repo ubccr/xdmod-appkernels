@@ -43,7 +43,7 @@
             "configuration/assets.d": "assets.d",
             "configuration/modules.d/appkernels.json": "modules.d/appkernels.json",
             "configuration/linker.d/appkernels.json": "linker.d/appkernels.json",
-            "configuration/roles.d/appkernels-center_report_card.json": "roles.d/appkernels-center_report_card.json"
+            "configuration/roles.d": ""
         },
         "etc/crond": {
             "configuration/cron.conf": "xdmod-appkernels"

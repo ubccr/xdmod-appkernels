@@ -150,7 +150,8 @@ class CurrentQueue
         );
         foreach ($sqlres as $res) {
             //$res['time_activated']
-            if($this->report_params['resource']===null || in_array($res['resource'], $this->report_params['resource']))
+            if($this->report_params['resource']===null || empty($this->report_params['resource']) ||
+                in_array($res['resource'], $this->report_params['resource']))
                 $active_tasks[]=$res;
         }
         return $active_tasks;

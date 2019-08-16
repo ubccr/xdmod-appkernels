@@ -1,4 +1,5 @@
-Ext.namespace('XDMoD', 'XDMoD.Module');
+/* global Ext, XDMoD, CCR */
+Ext.namespace('XDMoD', 'XDMoD.Module', 'CCR', 'CCR.xdmod', 'CCR.xdmod.ui');
 
 XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
     title: 'Notification',
@@ -532,6 +533,12 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
         this.initLoadSettings = function () {
             if (this.loadSettings()) {
                 this.un('afterlayout', this.initLoadSettings, this);
+            }
+
+            // Ensure that we unmask the main interface once we're done loading.
+            var viewer = CCR.xdmod.ui.Viewer.getViewer();
+            if (viewer.el) {
+                viewer.el.unmask();
             }
         };
 

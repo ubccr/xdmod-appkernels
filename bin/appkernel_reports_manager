@@ -6,8 +6,7 @@
  * @author Nikolay Simakov
  * @author Jeffrey T. Palmer <jtpalmer@buffalo.edu>
  */
-
-require_once __DIR__ . '/../share/configuration/linker.php';
+require_once __DIR__ . '/../configuration/linker.php';
 
 use CCR\DB;
 use CCR\Log;
@@ -135,7 +134,6 @@ if($logLevel >= Log::DEBUG) {
     }
 }
 // ================================================================================
-
 // Logger configuration.
 $conf = array(
     'file' => false,
