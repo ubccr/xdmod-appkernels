@@ -6,13 +6,21 @@
  * @author Nikolay Simakov
  * @author Jeffrey T. Palmer <jtpalmer@buffalo.edu>
  */
+require_once __DIR__ . '/../configuration/linker.php';
 
-require_once __DIR__ . '/../share/configuration/linker.php';
 
 use CCR\DB;
 use CCR\Log;
 use AppKernel\AppKernelDb;
 use AppKernel\Report;
+
+/**
+ * Log level determined by "verbose" and "debug".
+ *
+ * @var int
+ */
+$logLevel = -1;
+
 
 // ================================================================================
 // Parse command line options
@@ -41,6 +49,16 @@ $options = array(
         "r:",
         "resource:",
         "Generate report ony for specified resource"
+    ),
+    array(
+        "v",
+        "verbose",
+        "verbose output"
+    ),
+    array(
+        "d",
+        "debug",
+        "debug output"
     )
 );
 $options1 = "";
@@ -50,7 +68,7 @@ foreach ($options as $opt) {
     $options2[$opt[0]] = $opt[1];
 }
 $args = getopt($options1, $options2);
-    
+
     // default values
     // With the '-m' argument passed into this script along with a username,
     // reports only associated with the username will be built and sent.
@@ -97,22 +115,31 @@ foreach ($args as $arg => $value) {
         case 'resource':
             $resource = $value;
             break;
-        
+        case 'v':
+        case 'verbose':
+            $logLevel = max($logLevel, Log::INFO);
+            break;
+        case 'd':
+        case 'debug':
+            $logLevel = max($logLevel, Log::DEBUG);
+            break;
         default:
             fwrite(STDERR, 'Invalid arguments: '.$arg.' => '.$value."\n");
             break;
     }
 }
-print("Accepted arguments:\n");
-foreach ($args as $arg => $value) {
-    print("\t" . $arg . ' => ' . $value . "\n");
+if($logLevel >= Log::DEBUG) {
+    print("Accepted arguments:\n");
+    foreach ($args as $arg => $value) {
+        print("\t" . $arg . ' => ' . $value . "\n");
+    }
 }
-    // ================================================================================
-    
+// ================================================================================
 // Logger configuration.
 $conf = array(
     'file' => false,
-    'emailSubject' => 'App Kernel Report Scheduler'
+    'emailSubject' => 'App Kernel Report Scheduler',
+    'consoleLogLevel' => $logLevel
 );
 $conf['emailSubject'] .= (APPLICATION_ENV == 'dev') ? ' [Dev]' : '';
 $logger = Log::factory('ak-reports', $conf);
@@ -128,14 +155,14 @@ $logger->notice(array(
 
 $dailyDeliveries = $db->query(
     'SELECT user_id, send_report_daily, send_report_weekly, send_report_monthly, settings
-    FROM mod_appkernel.report
+    FROM report
     WHERE send_report_daily = 1'
 );
 
 $dayOfTheWeek = intval($end_date->format('w')) + 1;
 $weeklyDeliveries = $db->query(
     'SELECT user_id, send_report_daily, send_report_weekly, send_report_monthly, settings
-    FROM mod_appkernel.report
+    FROM report
     WHERE send_report_weekly = :dayOfTheWeek',
     array(':dayOfTheWeek' => $dayOfTheWeek)
 );
@@ -147,7 +174,7 @@ if ($lastDayOfTheMonth == $dayOfTheMonth) {
         'SELECT 
             user_id, send_report_daily, send_report_weekly, 
             send_report_monthly, settings
-	    FROM mod_appkernel.report
+	    FROM report
 	    WHERE send_report_monthly >= :dayOfTheMonth',
         array(':dayOfTheMonth' => $dayOfTheMonth)
     );
@@ -156,7 +183,7 @@ if ($lastDayOfTheMonth == $dayOfTheMonth) {
         'SELECT 
             user_id, send_report_daily, send_report_weekly,
             send_report_monthly, settings
-	    FROM mod_appkernel.report
+	    FROM report
 	    WHERE send_report_monthly = :dayOfTheMonth',
         array(':dayOfTheMonth' => $dayOfTheMonth)
     );
@@ -198,11 +225,11 @@ foreach ($allGroupDeliveries as $groupDeliveries) {
             $logger->err( "can not find user with id: {$delivery['user_id']}");
             continue;
         }
-        
+
         $username   = $user->getUsername();
         $user_email = $user->getEmailAddress();
         $internal_dashboard_user=$user->isDeveloper() || $user->isDeveloper();
-        
+
         if ($maint_mode && $username != $maint_user) {
             continue;
         }
@@ -211,7 +238,7 @@ foreach ($allGroupDeliveries as $groupDeliveries) {
             $logger->info("Preparing report $report_type for $username ({$delivery['user_id']})");
 
             $report_param = json_decode($delivery['settings'], true);
-            
+
             if ($appkernel !== null) {
                 $report_param['appKer'] = array(
                     $appkernel

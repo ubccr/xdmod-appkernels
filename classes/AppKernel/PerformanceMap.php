@@ -110,16 +110,23 @@ class PerformanceMap
         $params = array();
 
         if(isset($this->resource)) {
-            $quotedResourceIds = array_reduce(
-                $this->resource['data'],
-                function ($carry, $item) use ($pdo) {
-                    $carry[] = $pdo->quote($item['id']);
-                    return $carry;
-                },
-                array()
-            );
-            $sql = "SELECT akr.resource_id, akr.resource, akr.nickname FROM mod_appkernel.resource akr " .
-                   "WHERE akr.xdmod_resource_id IN (" . implode(', ', $quotedResourceIds) . ')';
+            if (array_key_exists('data', $this->resource)) {
+                // limit resources by xdmod_resource_id
+                $quotedResourceIds = array_reduce(
+                    $this->resource['data'],
+                    function ($carry, $item) use ($pdo) {
+                        $carry[] = $pdo->quote($item['id']);
+                        return $carry;
+                    },
+                    array()
+                );
+                $sql = "SELECT akr.resource_id, akr.resource, akr.nickname FROM mod_appkernel.resource akr " .
+                    "WHERE akr.xdmod_resource_id IN (" . implode(', ', $quotedResourceIds) . ')';
+            } elseif (!empty($this->resource)) {
+                // limit resources by AKRR resource name
+                $sql = "SELECT akr.resource_id, akr.resource, akr.nickname FROM mod_appkernel.resource akr " .
+                    "WHERE akr.resource IN ('" . implode("', '", $this->resource) . "')";
+            }
         }
 
         $sqlres_tasdb=$pdo->query($sql, $params);
@@ -174,35 +181,36 @@ class PerformanceMap
         $tdStyle=array(
             ' '=>'style="background-color:white;"',
             'F'=>'style="background-color:#FFB0C4;"',
-            'U'=>'style="background-color:#F7FE2E;"',
-            'O'=>'style="background-color:#FE9A2E;"',
-            'C'=>'style="background-color:#81BEF7;"',
+            'U'=>'style="background-color:#FFB336;"',
+            'O'=>'style="background-color:#81BEF7;"',
+            'C'=>'style="background-color:#FFF8DC;"',
             'N'=>'style="background-color:#B0FFC5;"',
-            'R'=>'style="background-color:#F781F3;"'
+            'R'=>'style="background-color:#DCDCDC;"'
         );
 
         $message='';
-        $message.='<h3>Table 3. Performance Heat Map of All App Kernels on Each System</h3>';
+        $message.='<h3>Table 3. Performance Heat Map of All App Kernels on Each System</h3>' . "\n";
 
         $message.='<b>KEY</b>: Each day is summarized in a table cell as pair of a symbol and a number. The symbol represents the status of last application kernel'
                 . ' execution on that day and the number shows the total number of runs. Each cell is colored according to the status of last application kernel run.'
-                . ' The description of the codes are: <br/><br/>'
-                . '<table border="1" cellspacing="0" style="">'
+                . ' The description of the codes are: <br/><br/>' . "\n"
+                . '<table border="1" cellspacing="0" style="">' . "\n"
                 . '<tr>'
                 . '<td>Code</td>'
                 . '<td>Description</td>'
-                . '</tr>';
+                . '</tr>' . "\n";
 
 
         foreach(array('N','U','O','F','C','R', ' ') as $c){
             $message.="<tr>";
-            $message.="<td {$tdStyle[$c]}>{$c}</td>";
+            $message.="<td {$tdStyle[$c]}>{$c}</td>\n";
             $message.="<td>".TaskState::$summaryCodes[$c]."</td>";
-            $message.="</tr>";
+            $message.="</tr>\n";
         }
 
-        $message.='</table>';
+        $message.="</table>\n";
         $message.='The status code is linked to full report of the last run.<br/><br/>';
+        print($message);
 
 
         $totalColumns=1+count($rec_dates)+1;
@@ -485,12 +493,12 @@ class PerformanceMap
         $rec_dates = array();
 
         $start_date = clone $this->start_date;
-        $end_date = clone $this->end_date;
+        $end_date_exclusive = clone $this->end_date_exclusive;
 
         $run_date = clone $this->start_date;
         $day_interval = new DateInterval('P1D');
 
-        while ($run_date <= $end_date) {
+        while ($run_date < $end_date_exclusive) {
             $rec_dates[] = $run_date->format('Y/m/d');
             $run_date->add($day_interval);
         }
@@ -524,7 +532,7 @@ class PerformanceMap
 SQL;
         $params = array(
             ':start_date' => $start_date->format('Y/m/d'),
-            ':end_date' => $end_date->format('Y/m/d')
+            ':end_date' => $end_date_exclusive->format('Y/m/d')
         );
 
         // If a userOrganization has been provided then filter the results on them.
@@ -546,7 +554,7 @@ SQL;
 
 SQL;
             $params[':organization_id'] = $this->userOrganization;
-        } elseif (isset($this->resource_ids)) {
+        } elseif (isset($this->resource_ids) && (!(empty($this->resource_ids)))) {
             $resourceIds = implode(', ', $this->resource_ids);
             $sql = <<<SQL
         SELECT aki.ak_id,
@@ -563,7 +571,6 @@ SQL;
 SQL;
 
         }
-
         $rows = $pdo->query($sql, $params);
 
         $controlState = array();
@@ -587,8 +594,7 @@ SQL;
 SQL;
         $params = array(
             ':start_date' => $start_date->format('Y/m/d'),
-            ':end_date' => $end_date->format('Y/m/d')
-
+            ':end_date' => $end_date_exclusive->format('Y/m/d')
         );
 
         // If we have resource id's then we should additionally filter on them.
@@ -644,7 +650,7 @@ SQL;
             // Proceed with filtering the values...
             if ((!isset($ak_id)) ||
                 (isset($this->resource_ids) && !array_key_exists($resource, $this->resource_ids)) ||
-                (isset($this->appKer) && !in_array($this->ak_shortnames[$appKer], $this->appKer)) ||
+                (isset($this->appKer) && (!(empty($this->appKer) || in_array($this->ak_shortnames[$appKer], $this->appKer)))) ||
                 (isset($this->problemSize) && !in_array($problemSize, $this->problemSize))
             ) {
                 continue;
@@ -683,7 +689,6 @@ SQL;
                 $runsStatus[$resource][$appKer][$problemSize][$rec_date]->add_task($task);
             }
         }
-
         //sort
         ksort($runsStatus);
         foreach ($runsStatus as $resource => $val1) {
