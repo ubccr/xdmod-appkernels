@@ -121,7 +121,7 @@ XDMoD.Module.Dashboard.CenterReportCardComponent = Ext.extend(Ext.ux.Portlet, {
             },
             listeners: {
                 load: function () {
-                    // Make sure that once we're loaded we remove this components
+                    // Make sure that once we're loaded we remove this component's
                     // mask. This was added during the `afterrender` event.
                     self.el.unmask();
                 },
