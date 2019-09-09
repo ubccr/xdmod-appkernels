@@ -1,0 +1,34 @@
+{
+    "+roles": {
+        "+cd": {
+            "+dashboard_components": [
+                {
+                    "name": "Center Report Card",
+                    "type": "xdmod-dash-centerrepcard-cmp",
+                    "location": {
+                        "row": 0,
+                        "column": 1
+                    },
+                    "config": {
+                        "timeframe": "Year to date"
+                    }
+                }
+            ]
+        },
+        "+cs": {
+            "+dashboard_components": [
+                {
+                    "name": "Center Report Card",
+                    "type": "xdmod-dash-centerrepcard-cmp",
+                    "location": {
+                        "row": 0,
+                        "column": 1
+                    },
+                    "config": {
+                        "timeframe": "30 day"
+                    }
+                }
+            ]
+        }
+    }
+}
