@@ -31,56 +31,22 @@ Ext.namespace('XDMoD.Module.Dashboard');
  *     - `this.gridstore.listeners.load`
  *     - `this.gridstore.listeners.exception`
  */
-XDMoD.Module.Dashboard.CenterReportCardComponent = Ext.extend(Ext.ux.Portlet, {
+XDMoD.Module.Dashboard.CenterReportCardComponent = Ext.extend(CCR.xdmod.ui.Portlet, {
 
     layout: 'fit',
     autoScroll: true,
     titleBase: 'Center Report Card',
-
-    tools: [
-        {
-            id: 'help',
-            qtip: [
-                '<ul>',
-                '<li style="padding-top:6px;margin-bottom:6px;">',
-                '<span style="width:20px;background:#ff0000;display:inline-block">&nbsp;</span>',
-                '<span><b>Failed Runs</b></span>',
-                '<ul>',
-                '<li style="margin-left:6px;">A run in which the app kernel failed to complete successfully.</li>',
-                '</ul>',
-                '</li>',
-                '<li style="margin-top:6px;margin-bottom:6px;">',
-                '<span style="width: 20px;background:#ffb336;display:inline-block">&nbsp;</span>',
-                '<span><b>Under Performing Runs</b></span>',
-                '<ul>',
-                '<li style="margin-left:6px;">A run in which the app kernel completed successfully but performed below the established control region.</li>',
-                '</ul>',
-                '</li>',
-                '<li style="margin-top:6px;margin-bottom:6px;">',
-                '<span style="width: 20px;background:#50b432;display:inline-block ">&nbsp;</span>',
-                '<span><b>In Control Runs</b></span>',
-                '<ul>',
-                '<li style="margin-left:6px;">A run in which the app kernel completed successfully and performed within the established control region.</li>',
-                '</ul>',
-                '</li>',
-                '<li style="margin-top:6px;padding-bottom:6px;">',
-                '<span style="width: 20px;background:#3c86ff;display:inline-block">&nbsp;</span>',
-                '<span><b>Over Performing Runs</b></span>',
-                '<ul>',
-                '<li style="margin-left:6px;">A run in which the app kernel completed successfully and performed better than the established control region.</li>',
-                '</ul>',
-                '</li>',
-                '</ul>'
-            ].join(' '),
-            qwidth: 60
-        }
-    ],
 
     /**
      * Constructor for the CenterReportCardComponent.
      */
     initComponent: function () {
         var self = this;
+
+        this.help = {
+            title: this.titleBase,
+            html: '<img src="/gui/images/help/centerreport-component.svg" />'
+        };
 
         var aspectRatio = 11.0 / 17.0;
         this.height = this.width * aspectRatio;
