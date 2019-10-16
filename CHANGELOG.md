@@ -1,7 +1,7 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
-## 2019-10-16 v8.5.0
+## 2019-10-17 v8.5.0
 - Bug Fixes
     - General
         - Removing unneeded `print` statement ([PR \#68](https://github.com/ubccr/xdmod/pull/68))

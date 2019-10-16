@@ -65,7 +65,7 @@ rm -rf $RPM_BUILD_ROOT
 %config(noreplace) %{_sysconfdir}/cron.d/%{name}
 
 %changelog
-* Wed Oct 16 2019 XDMoD <ccr-xdmod-list@listserv.buffalo.edu> 8.5.0-1.0
+* Thu Oct 17 2019 XDMoD <ccr-xdmod-list@listserv.buffalo.edu> 8.5.0-1.0
     - Release 8.5.0
 * Tue Apr 23 2019 XDMoD <ccr-xdmod-list@listserv.buffalo.edu> 8.1.0-1.0
     - Release 8.1.0.
