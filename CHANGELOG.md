@@ -1,6 +1,22 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
+## 2019-10-16 v8.5.0
+- Bug Fixes
+    - General
+        - Removing unneeded `print` statement ([PR \#68](https://github.com/ubccr/xdmod/pull/68))
+        - Multiple fixes ([PR \#65](https://github.com/ubccr/xdmod/pull/65))
+- Enhancements
+    - User Dashboard
+        - Update help for Center Report component. ([PR \#67](https://github.com/ubccr/xdmod/pull/67))
+        - Minor UI changes to Center Report Portlet ([PR \#64](https://github.com/ubccr/xdmod/pull/64))
+- New Features
+    - User Dashboard
+        - User Dashboard - Center Report Card ([PR \#63](https://github.com/ubccr/xdmod/pull/63))
+- Release Prep
+    - General
+        - Update version numbers to 8.5 ([PR \#61](https://github.com/ubccr/xdmod/pull/61))
+
 ## 2019-04-23 v8.1.0
 
 - Bug Fixes
