@@ -1,3 +1,3 @@
 ---
-redirect_to: /8.1/ak-install-source.html
+redirect_to: /8.5/ak-install-source.html
 ---

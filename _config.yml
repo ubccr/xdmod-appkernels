@@ -27,12 +27,22 @@ url: "http://appkernels.xdmod.org" # the base hostname & protocol for your site
 github_username: ubccr
 github_url: https://github.com/ubccr/xdmod-appkernels
 xdmod_module_name: Application Kernels
-latest_version: "8.1"
+latest_version: "8.5"
 version_list:
+  - "8.5"
   - "8.1"
-  - "8.0"
 
 defaults:
+  -
+    scope:
+      path: "8.5"
+      type: "pages"
+    values:
+      layout: "page"
+      version: "8.5"
+      sw_version: "8.5.0"
+      style: "effervescence"
+      tocversion: "v8_5toc"
   -
     scope:
       path: "8.1"
@@ -42,14 +52,6 @@ defaults:
       version: "8.1"
       style: "effervescence"
       tocversion: "v8_1toc"
-  -
-    scope:
-      path: "8.0"
-      type: "pages"
-    values:
-      layout: "page"
-      version: "8.0"
-      menu_markdown: "8.0/menu.md"
 
 # Build settings
 markdown: kramdown

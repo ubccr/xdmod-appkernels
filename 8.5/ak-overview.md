@@ -1,7 +1,8 @@
 ---
 title: Application Kernels Overview
 redirect_from:
-    - "/8.1/"
+    - "/8.5/"
+    - ""
 ---
 
 Application Kernel Performance Monitoring Module of XDMoD tool is

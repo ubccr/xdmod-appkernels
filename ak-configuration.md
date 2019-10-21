@@ -1,3 +1,3 @@
 ---
-redirect_to: /8.1/ak-configuration.html
+redirect_to: /8.5/ak-configuration.html
 ---
