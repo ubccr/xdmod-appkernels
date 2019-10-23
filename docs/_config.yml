@@ -29,13 +29,16 @@ github_url: https://github.com/ubccr/xdmod-appkernels
 xdmod_module_name: Application Kernels
 
 defaults:
-    -
-        scope:
-            path: ""
-            type: "pages"
-        values:
-            layout: "page"
-            menu_markdown: "menu.md"
+  -
+    scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "page"
+      version: "9.0"
+      sw_version: "9.0.0"
+      style: "effervescence"
+      tocversion: "toc"
 
 # Build settings
 markdown: kramdown
