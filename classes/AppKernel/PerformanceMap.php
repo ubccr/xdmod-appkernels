@@ -210,8 +210,6 @@ class PerformanceMap
 
         $message.="</table>\n";
         $message.='The status code is linked to full report of the last run.<br/><br/>';
-        print($message);
-
 
         $totalColumns=1+count($rec_dates)+1;
 
