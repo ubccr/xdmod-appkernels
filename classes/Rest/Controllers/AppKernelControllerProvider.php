@@ -1602,10 +1602,6 @@ or "Show Details of Successful Tasks" options to see details on tasks';
         // utilize this endpoint. Note, we do not utilize the `requirements` parameter of the above
         // `authorize` call because it utilizes `XDUser::hasAcls` which only checks if the user has
         // *all* of the supplied acls, not any of the supplied acls.
-        if ( ! ( $user->hasAcl(ROLE_ID_CENTER_DIRECTOR) ||  $user->hasAcl(ROLE_ID_CENTER_STAFF) ) ) {
-            throw  new UnauthorizedHttpException('xdmod', "Unable to complete action. User is not authorized.");
-        }
-
         $startDate = $this->getStringParam($request, 'start_date', true);
         if ($startDate !== null) {
             $startDate = new \DateTime($startDate);
@@ -1628,13 +1624,16 @@ or "Show Details of Successful Tasks" options to see details on tasks';
 
         $data = array();
         try {
-            $perfMap = new \AppKernel\PerformanceMap(array(
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'resource' => array('data' => $user->getResources()),
-                'appKer' => $appKernels,
-                'problemSize' => $problemSizes
-            ));
+            $options = array(
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'appKer' => $appKernels,
+                    'problemSize' => $problemSizes
+            );
+            if (!$user->hasAcl(ROLE_ID_PROGRAM_OFFICER)) {
+                $options['resource'] = array('data' => $user->getResources());
+            }
+            $perfMap = new \AppKernel\PerformanceMap($options);
 
             // The columns that we're going to be retrieving from the PerformanceMap and ultimately
             // returning to the requester.
