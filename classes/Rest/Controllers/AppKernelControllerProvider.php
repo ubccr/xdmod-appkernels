@@ -1585,9 +1585,6 @@ or "Show Details of Successful Tasks" options to see details on tasks';
      * Retrieves the raw numeric values for the AppKernel Performance Map. This endpoint provides
      * the data for `CenterReportCardPortlet.js`
      *
-     * **NOTE:** This function will throw an UnauthorizedException if the user making the request
-     * does not have the Center Director or Center Staff acl.
-     *
      * @param Request     $request
      * @param Application $app
      * @return JsonResponse
@@ -1598,10 +1595,6 @@ or "Show Details of Successful Tasks" options to see details on tasks';
     {
         $user = $this->authorize($request);
 
-        // We need to ensure that only Center Director / Center Staff users are authorized to
-        // utilize this endpoint. Note, we do not utilize the `requirements` parameter of the above
-        // `authorize` call because it utilizes `XDUser::hasAcls` which only checks if the user has
-        // *all* of the supplied acls, not any of the supplied acls.
         $startDate = $this->getStringParam($request, 'start_date', true);
         if ($startDate !== null) {
             $startDate = new \DateTime($startDate);
