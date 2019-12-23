@@ -37,7 +37,6 @@
         "etc": {
             "configuration/internal_dashboard.json": "internal_dashboard.d/appkernels.json",
             "configuration/portal_settings.ini": "portal_settings.d/appkernels.ini",
-            "configuration/roles.json": "roles.d/appkernels.json",
             "configuration/setup.json": "setup.d/appkernels.json",
             "configuration/rest.d": "rest.d",
             "configuration/assets.d": "assets.d",
