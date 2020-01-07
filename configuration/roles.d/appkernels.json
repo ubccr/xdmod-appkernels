@@ -14,7 +14,7 @@
                     ],
                     "javascriptClass": "XDMoD.Module.AppKernels",
                     "javascriptReference": "CCR.xdmod.ui.appKernels",
-                    "tooltip": "Displays data referencing the reliability and performance of grid resources",
+                    "tooltip": "Displays data reflecting the reliability and performance of grid resources",
                     "userManualSectionName": "App Kernels"
                 }
             ]
