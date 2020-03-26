@@ -128,7 +128,7 @@ EOT
 
                 if ($answer === 'abort') {
                     exit(1);
-                } else if ($answer === 'skip') {
+                } elseif ($answer === 'skip') {
                     break;
                 }
 

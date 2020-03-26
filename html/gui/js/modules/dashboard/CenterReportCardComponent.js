@@ -1,10 +1,10 @@
 /* global Ext, XDMoD, CCR, window */
-Ext.namespace('XDMoD.Modules.SummaryPortlets');
+Ext.namespace('XDMoD.Module.Dashboard');
 
 /**
- * XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet
+ * XDMoD.Module.Dashboard.CenterReportCardComponent
  *
- * This portlet is responsible for displaying data that could be used to determine
+ * This component is responsible for displaying data that could be used to determine
  * the "health" of a center. Specifically, this implementation shows App Kernel
  * data for a given XDMoD Installation. Specifically it will display a horizontal
  * stacked barchart of the failed, in control, and under / over performing runs
@@ -16,7 +16,7 @@ Ext.namespace('XDMoD.Modules.SummaryPortlets');
  * `modw.resourcefact.organization_id`.
  *
  *
- * This portlet is driven by the REST Endpoint at
+ * This component is driven by the REST Endpoint at
  * `<XDMoD Rest URL>/app_kernels/performance_map/raw`. Which in turn is served by
  * the `AppKernelControllerProvider::getRawPerformanceMap` function.
  *
@@ -31,56 +31,22 @@ Ext.namespace('XDMoD.Modules.SummaryPortlets');
  *     - `this.gridstore.listeners.load`
  *     - `this.gridstore.listeners.exception`
  */
-XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portlet, {
+XDMoD.Module.Dashboard.CenterReportCardComponent = Ext.extend(CCR.xdmod.ui.Portlet, {
 
     layout: 'fit',
     autoScroll: true,
     titleBase: 'Center Report Card',
 
-    tools: [
-        {
-            id: 'help',
-            qtip: [
-                '<ul>',
-                '<li style="padding-top:6px;margin-bottom:6px;">',
-                '<span style="width:20px;background:#ff0000;display:inline-block">&nbsp;</span>',
-                '<span><b>Failed Runs</b></span>',
-                '<ul>',
-                '<li style="margin-left:6px;">A run in which the app kernel failed to complete successfully.</li>',
-                '</ul>',
-                '</li>',
-                '<li style="margin-top:6px;margin-bottom:6px;">',
-                '<span style="width: 20px;background:#ffb336;display:inline-block">&nbsp;</span>',
-                '<span><b>Under Performing Runs</b></span>',
-                '<ul>',
-                '<li style="margin-left:6px;">A run in which the app kernel completed successfully but performed below the established control region.</li>',
-                '</ul>',
-                '</li>',
-                '<li style="margin-top:6px;margin-bottom:6px;">',
-                '<span style="width: 20px;background:#50b432;display:inline-block ">&nbsp;</span>',
-                '<span><b>In Control Runs</b></span>',
-                '<ul>',
-                '<li style="margin-left:6px;">A run in which the app kernel completed successfully and performed within the established control region.</li>',
-                '</ul>',
-                '</li>',
-                '<li style="margin-top:6px;padding-bottom:6px;">',
-                '<span style="width: 20px;background:#3c86ff;display:inline-block">&nbsp;</span>',
-                '<span><b>Over Performing Runs</b></span>',
-                '<ul>',
-                '<li style="margin-left:6px;">A run in which the app kernel completed successfully and performed better than the established control region.</li>',
-                '</ul>',
-                '</li>',
-                '</ul>'
-            ].join(' '),
-            qwidth: 60
-        }
-    ],
-
     /**
-     * Constructor for the CenterReportCardPortlet.
+     * Constructor for the CenterReportCardComponent.
      */
     initComponent: function () {
         var self = this;
+
+        this.help = {
+            title: this.titleBase,
+            html: '<img src="/gui/images/help/centerreport-component.svg" />'
+        };
 
         var aspectRatio = 11.0 / 17.0;
         this.height = this.width * aspectRatio;
@@ -94,7 +60,7 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
             }
         }
         /**
-         * The main datastore for this portlet. It retrieves app kernel run data
+         * The main datastore for this component. It retrieves app kernel run data
          * for the specified time period from `this.config.start_date` to
          * `this.config.end_date`. These values are populated w/ the value from
          * the XDMoD Duration Toolbar.
@@ -121,7 +87,7 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
             },
             listeners: {
                 load: function () {
-                    // Make sure that once we're loaded we remove this portlets
+                    // Make sure that once we're loaded we remove this component's
                     // mask. This was added during the `afterrender` event.
                     self.el.unmask();
                 },
@@ -262,7 +228,7 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
         }; // var valueRenderer = function (value, metaData, record) {
 
         /**
-         * The main visual element for this portlet. Displays App Kernels by
+         * The main visual element for this component. Displays App Kernels by
          * resource, name, and a stacked horizontal bar chart of the failed,
          * under performing, in control and over performing runs.
          */
@@ -333,12 +299,12 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
 
         this.updateTitle(this.config.start_date, this.config.end_date);
 
-        XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet.superclass.initComponent.apply(this, arguments);
+        XDMoD.Module.Dashboard.CenterReportCardComponent.superclass.initComponent.apply(this, arguments);
     }, // initComponent
 
     listeners: {
         duration_change: function (timeframe) {
-            // Mask the portlet as we're going to be loading new data.
+            // Mask the component as we're going to be loading new data.
             this.el.mask('Loading...');
 
             this.gridStore.load({
@@ -348,7 +314,7 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
                 }
             });
 
-            // Make sure that the portlet title reflects the updated start / end
+            // Make sure that the component title reflects the updated start / end
             // date
             this.updateTitle(timeframe.start_date, timeframe.end_date);
 
@@ -363,7 +329,7 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
     }, // listeners: {
 
     /**
-     * A helper function that will update this portlet's title attribute w/
+     * A helper function that will update this component's title attribute w/
      * the start / end date used to generate the data it is displaying.
      *
      * @param {Date} startDate
@@ -383,6 +349,6 @@ XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portle
             ('' + date.getDate()).padStart(2, '0');
     } // formatDate: function(date) {
 
-}); // XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet = Ext.extend(Ext.ux.Portlet, {
+}); // XDMoD.Module.Dashboard.CenterReportCardComponent = Ext.extend(Ext.ux.Portlet, {
 
-Ext.reg('CenterReportCardPortlet', XDMoD.Modules.SummaryPortlets.CenterReportCardPortlet);
+Ext.reg('xdmod-dash-centerrepcard-cmp', XDMoD.Module.Dashboard.CenterReportCardComponent);
