@@ -438,6 +438,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
         $params = $paramBag->all();
 
         foreach ($results as $result) {
+            $result = $result->autoAggregate();
             $num_proc_units_changed = false;
             if ($show_num_proc_units_separately && $result->rawNumProcUnits != $lastResult->rawNumProcUnits) {
                 $num_proc_units_changed = true;
@@ -504,6 +505,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
                     $single_metric && $show_control_zones,
                     $single_metric && $show_running_averages,
                     $single_metric && $show_control_interval,
+                    true,
                     $contextMenuOnClick
                 );
             }
