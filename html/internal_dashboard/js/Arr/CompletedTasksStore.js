@@ -16,6 +16,7 @@ XDMoD.Arr.CompletedTasksStore = Ext.extend(Ext.data.JsonStore, {
     },
 
     constructor: function (config) {
+        // eslint-disable-next-line no-param-reassign
         config = config || {};
 
         Ext.apply(config, {

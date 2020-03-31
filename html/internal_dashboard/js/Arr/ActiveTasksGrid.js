@@ -17,6 +17,7 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     constructor: function (config) {
+        // eslint-disable-next-line no-param-reassign
         config = config || {};
 
         Ext.applyIf(config, {
@@ -79,9 +80,9 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
                         header: 'Time in Queue',
                         dataIndex: 'time_in_queue',
                         renderer: function (value) {
-                            var minute = 1000 * 60,
-                                hour = minute * 60,
-                                day = hour * 24;
+                            var minute = 1000 * 60;
+                            var hour = minute * 60;
+                            var day = hour * 24;
 
                             if (value === 0) {
                                 return '0';
@@ -91,9 +92,8 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
                                 return Math.floor(value / minute) + ' minutes';
                             } else if (value < day) {
                                 return Math.floor(value / hour) + ' hours';
-                            } else {
-                                return Math.floor(value / day) + ' days';
                             }
+                            return Math.floor(value / day) + ' days';
                         }
                     },
                     {

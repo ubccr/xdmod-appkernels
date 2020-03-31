@@ -16,6 +16,7 @@ XDMoD.Arr.ActiveTasksStore = Ext.extend(Ext.data.JsonStore, {
     },
 
     constructor: function (config) {
+        // eslint-disable-next-line no-param-reassign
         config = config || {};
 
         var nowEpoch = Date.now();
