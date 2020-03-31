@@ -438,6 +438,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
         $params = $paramBag->all();
 
         foreach ($results as $result) {
+            $result = $result->autoAggregate();
             $num_proc_units_changed = false;
             if ($show_num_proc_units_separately && $result->rawNumProcUnits != $lastResult->rawNumProcUnits) {
                 $num_proc_units_changed = true;
@@ -504,6 +505,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
                     $single_metric && $show_control_zones,
                     $single_metric && $show_running_averages,
                     $single_metric && $show_control_interval,
+                    true,
                     $contextMenuOnClick
                 );
             }
@@ -1343,7 +1345,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
             $sql = "
                 SELECT resource,reporter,reporternickname,COUNT(*) as total_tasks,AVG(status) as success_rate
-                FROM mod_akrr.akrr_xdmod_instanceinfo
+                FROM akrr_xdmod_instanceinfo
                 WHERE '$start_date' <=collected AND  collected < '$end_date' AND status=1
                 $extraFilters
                 GROUP BY resource,reporternickname ORDER BY resource,reporternickname ASC;";
@@ -1375,7 +1377,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
             //Count unsuccessfull Tasks
             $sql = "
                 SELECT resource,reporter,reporternickname,COUNT(*) as total_tasks,AVG(status) as success_rate
-                FROM mod_akrr.akrr_xdmod_instanceinfo
+                FROM akrr_xdmod_instanceinfo
                 WHERE '$start_date' <=collected AND  collected < '$end_date' AND status=0
                 $extraFilters
                 GROUP BY resource,reporternickname ORDER BY resource,reporternickname ASC;";
@@ -1429,7 +1431,7 @@ or "Show Details of Successful Tasks" options to see details on tasks';
                                 if ((int)$row["unsucc"] > 0) {
                                     $sql = "
                                         SELECT instance_id
-                                        FROM mod_akrr.akrr_xdmod_instanceinfo
+                                        FROM akrr_xdmod_instanceinfo
                                         WHERE '$start_date' <=collected AND  collected < '$end_date'
                                         AND status=0 AND resource='$resource'
                                         AND reporternickname='$appKer.$problemSize' $extraFilters
@@ -1455,7 +1457,7 @@ or "Show Details of Successful Tasks" options to see details on tasks';
                                 if ((int)$row["succ"] > 0) {
                                     $sql = "
                                         SELECT instance_id
-                                        FROM mod_akrr.akrr_xdmod_instanceinfo
+                                        FROM akrr_xdmod_instanceinfo
                                         WHERE '$start_date' <=collected AND  collected < '$end_date'
                                         AND status=1 AND resource='$resource'
                                         AND reporternickname='$appKer.$problemSize' $extraFilters

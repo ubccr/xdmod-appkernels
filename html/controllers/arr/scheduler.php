@@ -51,7 +51,7 @@ require_once dirname(__FILE__).'/../../../configuration/linker.php';
                                             task_param,
                                             group_id,
                                             parent_task_id
-                                    FROM mod_akrr.SCHEDULEDTASKS'
+                                    FROM scheduled_tasks'
                 );
                 $bundle=array();
                 foreach ($scheduled_tasks as &$task) {

@@ -4,7 +4,7 @@ namespace DataWarehouse\Access;
 
 class DataExplorer extends Common
 {
-    public function get_ak_plot($user) 
+    public function get_ak_plot($user)
     {
         $ak_db = new \AppKernel\AppKernelDb();
 
@@ -17,7 +17,7 @@ class DataExplorer extends Common
         if(isset($this->request['inline']))
         {
             $inline = $this->request['inline'] == 'true' || $this->request['inline'] === 'y';
-        }	
+        }
 
         list($start_date, $end_date, $start_ts, $end_ts) = $this->checkDateParameters();
 
@@ -54,15 +54,15 @@ class DataExplorer extends Common
                             $resourceId,
                             $metricId,
                             $puCount,
-                            $start_ts, 
-                            $end_ts, 
+                            $start_ts,
+                            $end_ts,
                             false,
                             false,
-                            true, 
+                            true,
                             false);
 
                         foreach($datasetList as $result)
-                        {				
+                        {
                             $datasets[] = $result;
                         }
                     }
@@ -71,11 +71,11 @@ class DataExplorer extends Common
                 elseif(preg_match('/ak_(?P<ak>\d+)_metric_(?P<metric>\d+)/', $metric, $matches))
                 {
                     $akId = $matches['ak'];
-                    $metricId = $matches['metric'];	
+                    $metricId = $matches['metric'];
 
                     if(count($selectedProcessingUnits) == 0)
                     {
-                        $pus = $ak_db->getProcessingUnits($start_date,$end_date,  
+                        $pus = $ak_db->getProcessingUnits($start_date,$end_date,
                             $selectedResourceIds, $selectedMetrics);
                         foreach($pus as $pu)
                         {
@@ -89,21 +89,20 @@ class DataExplorer extends Common
                             $resourceId,
                             $metricId,
                             $puCount,
-                            $start_ts, 
-                            $end_ts, 
+                            $start_ts,
+                            $end_ts,
                             false,
                             false,
-                            true, 
+                            true,
                             false);
 
                         foreach($datasetList as $result)
                         {
-                            $datasets[] = $result;
+                            // aggregate output if number of points is large
+                            $datasets[] = $result->autoAggregate();
                         }
                     }
-
                 }
-
             }
         }
 
@@ -125,7 +124,7 @@ class DataExplorer extends Common
 			$title=$title?$title:implode(', ',$filename_resources).'; '.implode(', ',$filename_kernels).'; '.implode(', ',$filename_metrics);
             $hc->setTitle($show_title?($title):NULL, $font_size);
             $hc->setLegend($legend_location, $font_size);//called before and after
-            $hc->configure($datasets,						
+            $hc->configure($datasets,
                 $font_size,
                 $limit,
                 $offset,
@@ -143,7 +142,7 @@ class DataExplorer extends Common
             {
                 $message = "<- Select a metric from the left";
             } else
-                if(count($selectedResourceIds) < 1) 
+                if(count($selectedResourceIds) < 1)
                 {
                     $message = "<- Select a resource from the left";
                 }
@@ -188,25 +187,25 @@ class DataExplorer extends Common
 
     private function getSelectedResourceIds()
     {
-        return isset($this->request['selectedResourceIds']) && 
+        return isset($this->request['selectedResourceIds']) &&
             $this->request['selectedResourceIds'] != '' ? explode(',',$this->request['selectedResourceIds']):array();
     }
 
     private function getSelectedPUCounts()
     {
-        return isset($this->request['selectedPUCounts']) && 
+        return isset($this->request['selectedPUCounts']) &&
             $this->request['selectedPUCounts'] != '' ? explode(',',$this->request['selectedPUCounts']):array();
     }
 
     private function getSelectedMetrics()
     {
-        return isset($this->request['selectedMetrics']) && 
+        return isset($this->request['selectedMetrics']) &&
             $this->request['selectedMetrics'] != '' ? explode(',',$this->request['selectedMetrics']):array();
     }
 
     private function getShowChangeIndicator()
     {
-        return  ( isset($this->request['show_change_indicator']) 
+        return  ( isset($this->request['show_change_indicator'])
             ? $this->request['show_change_indicator'] === 'y' : false );
     }
 }

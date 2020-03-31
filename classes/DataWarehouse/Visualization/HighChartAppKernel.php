@@ -17,6 +17,8 @@ class HighChartAppKernel extends HighChart2
 
     const underPerformingColor = '#F5A9BC';
 
+    const minmaxColor = '#cc99ff';
+
     public $_axis_index;
 
     /**
@@ -72,7 +74,8 @@ class HighChartAppKernel extends HighChart2
         $showControlZones = false,
         $showRunningAverages = false,
         $showControlInterval = false,
-                $contextMenuOnClick=NULL
+        $showMinMax = false,
+        $contextMenuOnClick=NULL
     ) {
         $this->_chart['title']['style'] = array(
             'color'=> '#000000',
@@ -85,7 +88,7 @@ class HighChartAppKernel extends HighChart2
         $this->_chart['subtitle']['y'] = 30 + $font_size;
         $this->_chart['legend']['itemStyle'] = array(
             'color' => '#274b6d',
-            'fontWeight' => 'normal', 
+            'fontWeight' => 'normal',
             'fontSize' => (12  + $font_size).'px'
         );
         $tooltipConfig = array(
@@ -132,13 +135,18 @@ class HighChartAppKernel extends HighChart2
         {
             if(!isset($this->_axis[$dataset->metricUnit]))
             {
-                                $yMin=min($dataset->valueVector);
-                                $yMax=max($dataset->valueVector);
-                                $dy=$yMax-$yMin;
+                $yMin=min($dataset->valueVector);
+                if(count($dataset->valueLowVector)>0)$yMin=min($yMin, min($dataset->valueLowVector));
+                if(count($dataset->controlMinVector)>0)$yMin=min($yMin, min($dataset->controlMinVector));
 
-                                $yMin-=0.05*$dy;
-                                $yMax+=0.05*$dy;
-                                if($yMin<0)$yMin=0;
+                $yMax=max($dataset->valueVector);
+                if(count($dataset->valueHighVector)>0)$yMax=max($yMax, max($dataset->valueHighVector));
+                if(count($dataset->controlMaxVector)>0)$yMax=max($yMax, max($dataset->controlMaxVector));
+                $dy=$yMax-$yMin;
+
+                $yMin-=0.05*$dy;
+                $yMax+=0.05*$dy;
+                if($yMin<0)$yMin=0;
 
                 $yAxisColorValue = $colors[$this->_axisCount % 33];
                 $yAxisColor = '#'.str_pad(dechex($yAxisColorValue),6,'0',STR_PAD_LEFT);
@@ -172,25 +180,24 @@ class HighChartAppKernel extends HighChart2
                                 $this->_axis_index[$dataset->metricUnit]=count($this->_chart['yAxis']);
                                 $this->_chart['yAxis'][] = $yAxis;
                 $this->_axisCount++;
+            } else{
+                $yMin=min($dataset->valueVector);
+                $yMax=max($dataset->valueVector);
+                $dy=$yMax-$yMin;
+
+                $yMin-=0.05*$dy;
+                $yMax+=0.05*$dy;
+                if($yMin<0)$yMin=0;
+
+                if($this->_axis[$dataset->metricUnit]['min']>$yMin){
+                    $this->_axis[$dataset->metricUnit]['min']=$yMin;
+                    $this->_chart['yAxis'][$this->_axis_index[$dataset->metricUnit]]['min']=$yMin;
+                }
+                if($this->_axis[$dataset->metricUnit]['max']<$yMax){
+                    $this->_axis[$dataset->metricUnit]['max']=$yMax;
+                    $this->_chart['yAxis'][$this->_axis_index[$dataset->metricUnit]]['max']=$yMax;
+                }
             }
-                        else{
-                                $yMin=min($dataset->valueVector);
-                                $yMax=max($dataset->valueVector);
-                                $dy=$yMax-$yMin;
-
-                                $yMin-=0.05*$dy;
-                                $yMax+=0.05*$dy;
-                                if($yMin<0)$yMin=0;
-
-                                if($this->_axis[$dataset->metricUnit]['min']>$yMin){
-                                    $this->_axis[$dataset->metricUnit]['min']=$yMin;
-                                    $this->_chart['yAxis'][$this->_axis_index[$dataset->metricUnit]]['min']=$yMin;
-                                }
-                                if($this->_axis[$dataset->metricUnit]['max']<$yMax){
-                                    $this->_axis[$dataset->metricUnit]['max']=$yMax;
-                                    $this->_chart['yAxis'][$this->_axis_index[$dataset->metricUnit]]['max']=$yMax;
-                                }
-                        }
         }
         $controlPivot = -0.5;
         foreach($datasets as $index => $dataset)
@@ -206,11 +213,15 @@ class HighChartAppKernel extends HighChart2
 
             if($longLegend)
             {
-                $datasetName = '['.$dataset->numProcUnits.': '.$dataset->resourceName.'] <br/>'.$dataset->akName.' '.$dataset->metric.' [<span style="color:'.$yAxisColor.'">'.$dataset->metricUnit.'</span>]';
+                $datasetName = '['.$dataset->numProcUnits.': '.$dataset->resourceName.'] <br/>'.$dataset->akName.' '.
+                    $dataset->metric.$dataset->note.' [<span style="color:'.$yAxisColor.'">'.$dataset->metricUnit.'</span>]';
             }
             else
             {
-                $datasetName = $dataset->numProcUnits;
+                if($dataset->note==="")
+                    $datasetName = $dataset->numProcUnits;
+                else
+                    $datasetName = $dataset->numProcUnits . " " . $dataset->note;
             }
 
             $enableMarkers = $dataCount < 11 || ($dataCount < 31 && $this->_width > \DataWarehouse\Visualization::$thumbnail_width);
@@ -227,7 +238,7 @@ class HighChartAppKernel extends HighChart2
                 if($showChangeIndicator && $dataset->versionVector[$i] > 0)
                 {
                     $sv['marker']['symbol'] = $this->_indicator_url;
-                    $sv['marker']['enabled'] = true; 
+                    $sv['marker']['enabled'] = true;
                 }else
                 {
                     $sv['marker']['enabled'] = $enableMarkers;
@@ -237,7 +248,7 @@ class HighChartAppKernel extends HighChart2
             }
             $data_series_desc = array(
                 'name' => $datasetName,
-                'zIndex' => 1,
+                'zIndex' => 10,
                 'color'=>  $color,
                 'type' => 'line',
                 'shadow' => false,
@@ -277,7 +288,7 @@ class HighChartAppKernel extends HighChart2
                 $version_series_desc = array(
                     'name' => 'Change Indicator',
                     'yAxis' => $yAxis['index'],
-                    'zIndex' => 10,
+                    'zIndex' => 9,
                     'type' => 'scatter',
                     'tooltip' => array(
                         'enabled' => false
@@ -308,7 +319,7 @@ class HighChartAppKernel extends HighChart2
                 $aColor = '#'.str_pad(dechex(\DataWarehouse\Visualization::alterBrightness($color,-200)),6,'0',STR_PAD_LEFT);
                 $data_series_desc = array(
                     'name' => 'Running Average',
-                    'zIndex' => 1,
+                    'zIndex' => 8,
                     'color'=>  $aColor,
                     'type' => 'line',
                     'shadow' => false,
@@ -376,7 +387,7 @@ class HighChartAppKernel extends HighChart2
 
                 $data_series_desc = array(
                     'name' => 'Control',
-                    'zIndex' => 1,
+                    'zIndex' => 7,
                     'type' => 'line',
                     'shadow' => false,
                     'dashStyle' => 'ShortDot',
@@ -394,6 +405,33 @@ class HighChartAppKernel extends HighChart2
                 );
                 $this->_chart['series'][] = $data_series_desc;
             }
+            if($showMinMax && count($dataset->valueLowVector)>0 && count($dataset->valueHighVector)>0) {
+                $rangeValues = array();
+                foreach($dataset->valueLowVector as $i => $v)
+                {
+                    $v2 = $dataset->valueHighVector[$i];
+                    $sv = array($dataset->timeVector[$i]*1000.0, $v2?(double)$v2:NULL, $v?(double)$v:NULL);
+
+                    $rangeValues[] = $sv;
+                }
+
+                $data_series_desc = array(
+                    'name' => 'MinMax Values',
+                    'zIndex' => 6,
+                    'color'=>  self::minmaxColor,
+                    'type' => 'areasplinerange',
+                    'shadow' => false,
+                    'yAxis' => $yAxis['index'],
+                    'lineWidth' => 0,
+                    'showInLegend' => true,
+                    'connectNulls' => false,
+                    'marker' => array(
+                        'enabled' => false
+                    ),
+                    'data' => $rangeValues
+                );
+                $this->_chart['series'][] = $data_series_desc;
+            }
             if($showControlInterval)
             {
                 $rangeValues = array();
@@ -405,7 +443,6 @@ class HighChartAppKernel extends HighChart2
                     $rangeValues[] = $sv;
                 }
 
-                $aColor = '#'.str_pad(dechex(\DataWarehouse\Visualization::alterBrightness(0xB0E0E6,00)),6,'0',STR_PAD_LEFT);
                 $data_series_desc = array(
                     'name' => 'Control Band',
                     'zIndex' => 0,

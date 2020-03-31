@@ -44,7 +44,7 @@ XDMoD.Arr.CompletedTasksStore = Ext.extend(Ext.data.JsonStore, {
                     type: 'string'
                 },
                 {
-                    name: 'statusinfo',
+                    name: 'status_info',
                     type: 'string'
                 },
                 {
@@ -60,11 +60,11 @@ XDMoD.Arr.CompletedTasksStore = Ext.extend(Ext.data.JsonStore, {
                     type: 'string'
                 },
                 {
-                    name: 'FatalErrorsCount',
+                    name: 'fatal_errors_count',
                     type: 'int'
                 },
                 {
-                    name: 'FailsToSubmitToTheQueue',
+                    name: 'fails_to_submit_to_the_queue',
                     type: 'int'
                 }
             ]

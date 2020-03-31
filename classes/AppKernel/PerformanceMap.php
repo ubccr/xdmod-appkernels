@@ -211,6 +211,7 @@ class PerformanceMap
         $message.="</table>\n";
         $message.='The status code is linked to full report of the last run.<br/><br/>';
 
+
         $totalColumns=1+count($rec_dates)+1;
 
         //body
@@ -569,6 +570,7 @@ SQL;
 SQL;
 
         }
+
         $rows = $pdo->query($sql, $params);
 
         $controlState = array();
@@ -585,7 +587,7 @@ SQL;
               axi.reporter,
               axi.reporternickname,
               axi.status
-            FROM mod_akrr.akrr_xdmod_instanceinfo AS axi
+            FROM akrr_xdmod_instanceinfo AS axi
             WHERE axi.collected >=  :start_date
               AND axi.collected <   :end_date
             ORDER BY axi.collected ASC;
@@ -616,7 +618,7 @@ SQL;
               axi.reporter,
               axi.reporternickname,
               axi.status
-            FROM mod_akrr.akrr_xdmod_instanceinfo AS axi
+            FROM akrr_xdmod_instanceinfo AS axi
             WHERE axi.collected >=  :start_date
               AND axi.collected <   :end_date
               AND axi.resource IN ( $quotedResources )
