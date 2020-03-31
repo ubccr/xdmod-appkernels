@@ -9,11 +9,13 @@ XDMoD.Arr.ActiveTasksPanel = Ext.extend(Ext.Panel, {
     },
 
     initComponent: function () {
-
+        // eslint-disable-next-line no-underscore-dangle
         Ext.apply(this, this._DEFAULT_CONFIG);
-
+        // eslint-disable-next-line no-underscore-dangle
         this.toolbar = this._createToolbar();
+        // eslint-disable-next-line no-underscore-dangle
         this.store = this._createDataStore();
+        // eslint-disable-next-line no-underscore-dangle
         this.grid = this._createGridPanel();
 
         Ext.apply(this, {
@@ -60,7 +62,7 @@ XDMoD.Arr.ActiveTasksPanel = Ext.extend(Ext.Panel, {
             }
 
             var processDeletion = function (selection) {
-                var lower = typeof selection === 'string' ? selection.toLowerCase() : "";
+                var lower = typeof selection === 'string' ? selection.toLowerCase() : '';
                 switch (lower) {
                     case Ext.MessageBox.buttonText.ok.toLowerCase():
                     case Ext.MessageBox.buttonText.yes.toLowerCase():
@@ -73,13 +75,11 @@ XDMoD.Arr.ActiveTasksPanel = Ext.extend(Ext.Panel, {
                             method: 'DELETE',
                             success: function (response) {
                                 if (response && response.responseText) {
-
                                     var data = JSON.parse(response.responseText);
 
                                     var success = data && data.success ? data.success : false;
 
                                     if (success) {
-
                                         Ext.Msg.show({
                                             title: 'Task Deleted',
                                             msg: 'Task successfully deleted.',
@@ -90,8 +90,7 @@ XDMoD.Arr.ActiveTasksPanel = Ext.extend(Ext.Panel, {
                                             }
                                         });
                                     } else {
-
-                                        var message = 'An error occurred while attempting to delete task. [ ' + (data.message ? data.message : 'N/A' ) + ' ]';
+                                        var message = 'An error occurred while attempting to delete task. [ ' + (data.message ? data.message : 'N/A') + ' ]';
                                         Ext.Msg.show({
                                             title: 'Error',
                                             msg: message,
@@ -187,28 +186,28 @@ XDMoD.Arr.ActiveTasksPanel = Ext.extend(Ext.Panel, {
                 url: XDMoD.REST.url + '/akrr/tasks/active?token=' + XDMoD.REST.token
             }),
             fields: [
-                {name: 'status_update_time', type: 'string'},
-                {name: 'master_task_id', type: 'int'},
-                {name: 'app', type: 'string'},
-                {name: 'resource_param', type: 'string'},
-                {name: 'task_lock', type: 'int'},
-                {name: 'datetime_stamp', type: 'string'},
-                {name: 'time_submitted_to_queue', type: 'string'},
-                {name: 'fatal_errors_count', type: 'int'},
-                {name: 'fails_to_submit_to_the_queue', type: 'int'},
-                {name: 'status', type: 'string'},
-                {name: 'next_check_time', type: 'string'},
-                {name: 'time_to_start', type: 'string'},
-                {name: 'status_info', type: 'string'},
-                {name: 'resource', type: 'string'},
-                {name: 'task_id', type: 'int'},
-                {name: 'time_activated', type: 'string'},
-                {name: 'repeat_in', type: 'string'},
-                {name: 'task_param', type: 'string'},
-                {name: 'task_exec_log', type: 'string'},
-                {name: 'parent_task_id', type: 'int'},
-                {name: 'app_param', type: 'string'},
-                {name: 'group_id', type: 'string'}
+                { name: 'status_update_time', type: 'string' },
+                { name: 'master_task_id', type: 'int' },
+                { name: 'app', type: 'string' },
+                { name: 'resource_param', type: 'string' },
+                { name: 'task_lock', type: 'int' },
+                { name: 'datetime_stamp', type: 'string' },
+                { name: 'time_submitted_to_queue', type: 'string' },
+                { name: 'fatal_errors_count', type: 'int' },
+                { name: 'fails_to_submit_to_the_queue', type: 'int' },
+                { name: 'status', type: 'string' },
+                { name: 'next_check_time', type: 'string' },
+                { name: 'time_to_start', type: 'string' },
+                { name: 'status_info', type: 'string' },
+                { name: 'resource', type: 'string' },
+                { name: 'task_id', type: 'int' },
+                { name: 'time_activated', type: 'string' },
+                { name: 'repeat_in', type: 'string' },
+                { name: 'task_param', type: 'string' },
+                { name: 'task_exec_log', type: 'string' },
+                { name: 'parent_task_id', type: 'int' },
+                { name: 'app_param', type: 'string' },
+                { name: 'group_id', type: 'string' }
             ]
         });
     },
@@ -231,28 +230,21 @@ XDMoD.Arr.ActiveTasksPanel = Ext.extend(Ext.Panel, {
                     sortable: false
                 },
                 columns: [
-                    {header: 'Resource', dataIndex: 'resource', sortable: true},
-                    {header: 'Application', dataIndex: 'app', sortable: true},
-                    {header: 'resource_param', dataIndex: 'resource_param', sortable: true},
-                    {header: 'Time Submitted', dataIndex: 'time_submitted_to_queue', sortable: true},
-                    {header: 'time_to_start', dataIndex: 'time_to_start', sortable: true},
-                    {header: 'next_check_time', dataIndex: 'next_check_time', sortable: true},
-                    {header: 'status_update_time', dataIndex: 'status_update_time', sortable: true},
-                    {header: 'time_activated', dataIndex: 'time_activated', sortable: true},
-                    /*{header: 'master_task_id', dataIndex: 'master_task_id', sortable: true},*/
-                    {header: 'datetime_stamp', dataIndex: 'datetime_stamp', sortable: true},
-                    {header: 'status', dataIndex: 'status', sortable: true},
-                    {header: 'status_info', dataIndex: 'status_info', sortable: true},
-                    /*{header: 'task_id', dataIndex: 'task_id', sortable: true},*/
-                    /*{header: 'repeat_in', dataIndex: 'repeat_in', sortable: true},*/
-                    /*{header: 'task_param', dataIndex: 'task_param', sortable: true},*/
-                    {header: 'task_exec_log', dataIndex: 'task_exec_log', sortable: true},
-                    {header: 'fatal_errors_count', dataIndex: 'fatal_errors_count', sortable: true},
-                    {header: 'fails_to_submit_to_the_queue', dataIndex: 'fails_to_submit_to_the_queue', sortable: true},
-                    {header: 'task_lock', dataIndex: 'task_lock', sortable: true}
-                    /*{header: 'parent_task_id', dataIndex: 'parent_task_id', sortable: true},
-                     {header: 'app_param', dataIndex: 'app_param', sortable: true},
-                     {header: 'group_id', dataIndex: 'group_id', sortable: true}*/
+                    { header: 'Resource', dataIndex: 'resource', sortable: true },
+                    { header: 'Application', dataIndex: 'app', sortable: true },
+                    { header: 'resource_param', dataIndex: 'resource_param', sortable: true },
+                    { header: 'Time Submitted', dataIndex: 'time_submitted_to_queue', sortable: true },
+                    { header: 'time_to_start', dataIndex: 'time_to_start', sortable: true },
+                    { header: 'next_check_time', dataIndex: 'next_check_time', sortable: true },
+                    { header: 'status_update_time', dataIndex: 'status_update_time', sortable: true },
+                    { header: 'time_activated', dataIndex: 'time_activated', sortable: true },
+                    { header: 'datetime_stamp', dataIndex: 'datetime_stamp', sortable: true },
+                    { header: 'status', dataIndex: 'status', sortable: true },
+                    { header: 'status_info', dataIndex: 'status_info', sortable: true },
+                    { header: 'task_exec_log', dataIndex: 'task_exec_log', sortable: true },
+                    { header: 'fatal_errors_count', dataIndex: 'fatal_errors_count', sortable: true },
+                    { header: 'fails_to_submit_to_the_queue', dataIndex: 'fails_to_submit_to_the_queue', sortable: true },
+                    { header: 'task_lock', dataIndex: 'task_lock', sortable: true }
                 ]
             }),
             sm: new Ext.grid.RowSelectionModel({
