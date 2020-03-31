@@ -3552,8 +3552,8 @@ class Dataset
 
                 $prevTime = $curTime;
                 $meanVal = 0.0;
-                $minVal = $this->valueVector[0];
-                $maxVal = $this->valueVector[0];
+                $minVal = $this->valueVector[$i];
+                $maxVal = $this->valueVector[$i];
                 $n = 0;
             }
             $n++;
