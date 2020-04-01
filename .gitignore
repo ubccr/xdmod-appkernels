@@ -312,4 +312,3 @@ configuration/aggregation_meta/
 # External QA assets
 /.qa/
 /phpcs.xml
-
