@@ -132,7 +132,7 @@ class AppKernelDb
             "INSERT INTO ingester_log
             (source, url, num, last_update, start_time, end_time, success, message, reportobj)
             VALUES (?, ?, ?, FROM_UNIXTIME(?), FROM_UNIXTIME(?), FROM_UNIXTIME(?), ?, ?, COMPRESS(?))";
-            $params = array($log->source,
+        $params = array($log->source,
             $log->url,
             $log->num,
             $log->last_update,
@@ -142,11 +142,11 @@ class AppKernelDb
             $log->message,
             $log->reportObj);
             $numRows = $this->db->execute($sql, $params);
-            if (1 == $numRows ) {
-                $this->log("Added entry to ingestion log");
-            }
+        if (1 == $numRows ) {
+            $this->log("Added entry to ingestion log");
+        }
 
-            return ( 1 == $numRows );
+        return ( 1 == $numRows );
     }
 
     // --------------------------------------------------------------------------------

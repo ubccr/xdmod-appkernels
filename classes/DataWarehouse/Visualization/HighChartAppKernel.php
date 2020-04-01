@@ -9,15 +9,15 @@ namespace DataWarehouse\Visualization;
  */
 class HighChartAppKernel extends HighChart2
 {
-    const inControlColor = '#aaffaa';
+    const IN_CONTROL_COLOR = '#aaffaa';
 
-    const controlRegionTimeIntervalColor = '#E0F8F7';
+    const CONTROL_REGION_TIME_INTERVAL_COLOR = '#E0F8F7';
 
-    const overPerformingColor = '#F2F5A9';
+    const OVERPERFORMING_COLOR = '#F2F5A9';
 
-    const underPerformingColor = '#F5A9BC';
+    const UNDERPERFORMING_COLOR = '#F5A9BC';
 
-    const minmaxColor = '#cc99ff';
+    const MINMAX_COLOR = '#cc99ff';
 
     public $_axis_index;
 
@@ -63,19 +63,20 @@ class HighChartAppKernel extends HighChart2
     public function configure(
         &$datasets,
         $font_size = 0,
-        $limit = NULL, $offset = NULL,
+        $limit = null,
+        $offset = null,
         $isSVG = false,
         $drillDown = false,
         $colorsPerCore = false,
         $longLegend = false,
-        $showChangeIndicator = true ,
+        $showChangeIndicator = true,
         $showControls = false,
         $discreteControls = false,
         $showControlZones = false,
         $showRunningAverages = false,
         $showControlInterval = false,
         $showMinMax = false,
-        $contextMenuOnClick=NULL
+        $contextMenuOnClick = null
     ) {
         $this->_chart['title']['style'] = array(
             'color'=> '#000000',
@@ -105,9 +106,8 @@ class HighChartAppKernel extends HighChart2
             'type' => 'datetime',
             'min' => strtotime($this->_startDate)*1000,
             // Don't specify a max xAxis value--highcharts is smart enough to plot the whole dataset.
-            //'max' => strtotime($this->_endDate)*1000,
             'labels' => $this->_swapXY ? array(
-                'enabled' => true, /*'rotation' => -90, 'align' => 'right',*/
+                'enabled' => true,
                 'step' => round(($font_size<0?0:$font_size+5 ) / 11),
                 'style' => array(
                     'fontSize' => (11 + $font_size).'px',
@@ -115,7 +115,7 @@ class HighChartAppKernel extends HighChart2
                 )
             )
             : array(
-                'enabled' => true, /*'rotation' => -90, 'align' => 'right',*/
+                'enabled' => true,
                 'step' => ceil(($font_size<0?0:$font_size+11  ) / 11),
                 'style' => array(
                     'fontSize' => (11 + $font_size).'px',
@@ -133,23 +133,32 @@ class HighChartAppKernel extends HighChart2
 
         foreach($datasets as $index => $dataset)
         {
-            if(!isset($this->_axis[$dataset->metricUnit]))
-            {
+            if(!isset($this->_axis[$dataset->metricUnit])) {
                 $yMin=min($dataset->valueVector);
-                if(count($dataset->valueLowVector)>0)$yMin=min($yMin, min($dataset->valueLowVector));
-                if(count($dataset->controlMinVector)>0)$yMin=min($yMin, min($dataset->controlMinVector));
+                if(count($dataset->valueLowVector)>0) {
+                    $yMin = min($yMin, min($dataset->valueLowVector));
+                }
+                if(count($dataset->controlMinVector)>0) {
+                    $yMin = min($yMin, min($dataset->controlMinVector));
+                }
 
                 $yMax=max($dataset->valueVector);
-                if(count($dataset->valueHighVector)>0)$yMax=max($yMax, max($dataset->valueHighVector));
-                if(count($dataset->controlMaxVector)>0)$yMax=max($yMax, max($dataset->controlMaxVector));
+                if(count($dataset->valueHighVector)>0) {
+                    $yMax=max($yMax, max($dataset->valueHighVector));
+                }
+                if(count($dataset->controlMaxVector)>0) {
+                    $yMax=max($yMax, max($dataset->controlMaxVector));
+                }
                 $dy=$yMax-$yMin;
 
                 $yMin-=0.05*$dy;
                 $yMax+=0.05*$dy;
-                if($yMin<0)$yMin=0;
+                if($yMin<0) {
+                    $yMin=0;
+                }
 
                 $yAxisColorValue = $colors[$this->_axisCount % 33];
-                $yAxisColor = '#'.str_pad(dechex($yAxisColorValue),6,'0',STR_PAD_LEFT);
+                $yAxisColor = '#'.str_pad(dechex($yAxisColorValue), 6, '0', STR_PAD_LEFT);
                 $yAxis = array(
                     'title' => array(
                          'text' => $dataset->metricUnit,
@@ -187,13 +196,15 @@ class HighChartAppKernel extends HighChart2
 
                 $yMin-=0.05*$dy;
                 $yMax+=0.05*$dy;
-                if($yMin<0)$yMin=0;
+                if($yMin<0) {
+                    $yMin=0;
+                }
 
-                if($this->_axis[$dataset->metricUnit]['min']>$yMin){
+                if($this->_axis[$dataset->metricUnit]['min']>$yMin) {
                     $this->_axis[$dataset->metricUnit]['min']=$yMin;
                     $this->_chart['yAxis'][$this->_axis_index[$dataset->metricUnit]]['min']=$yMin;
                 }
-                if($this->_axis[$dataset->metricUnit]['max']<$yMax){
+                if($this->_axis[$dataset->metricUnit]['max']<$yMax) {
                     $this->_axis[$dataset->metricUnit]['max']=$yMax;
                     $this->_chart['yAxis'][$this->_axis_index[$dataset->metricUnit]]['max']=$yMax;
                 }
@@ -205,23 +216,21 @@ class HighChartAppKernel extends HighChart2
             $dataCount = count($dataset->valueVector);
             $yAxis = $this->_axis[$dataset->metricUnit];
             $yAxisColorValue = $colors[$yAxis['index'] % 33];
-            $yAxisColor = '#'.str_pad(dechex($yAxisColorValue),6,'0',STR_PAD_LEFT);
+            $yAxisColor = '#'.str_pad(dechex($yAxisColorValue), 6, '0', STR_PAD_LEFT);
 
             $color_value =  $colorsPerCore?self::getAppKernelColor($dataset->rawNumProcUnits):  $colors[$this->_datasetCount % 33];
-            $color = '#'.str_pad(dechex($color_value),6,'0',STR_PAD_LEFT);
-            $lineColor = '#'.str_pad(dechex(\DataWarehouse\Visualization::alterBrightness($color_value,-70)),6,'0',STR_PAD_LEFT);
+            $color = '#'.str_pad(dechex($color_value), 6, '0', STR_PAD_LEFT);
+            $lineColor = '#'.str_pad(dechex(\DataWarehouse\Visualization::alterBrightness($color_value, -70)), 6, '0', STR_PAD_LEFT);
 
-            if($longLegend)
-            {
+            if($longLegend) {
                 $datasetName = '['.$dataset->numProcUnits.': '.$dataset->resourceName.'] <br/>'.$dataset->akName.' '.
                     $dataset->metric.$dataset->note.' [<span style="color:'.$yAxisColor.'">'.$dataset->metricUnit.'</span>]';
-            }
-            else
-            {
-                if($dataset->note==="")
+            } else {
+                if($dataset->note==="") {
                     $datasetName = $dataset->numProcUnits;
-                else
+                } else {
                     $datasetName = $dataset->numProcUnits . " " . $dataset->note;
+                }
             }
 
             $enableMarkers = $dataCount < 11 || ($dataCount < 31 && $this->_width > \DataWarehouse\Visualization::$thumbnail_width);
@@ -232,11 +241,11 @@ class HighChartAppKernel extends HighChart2
                     'x' => $dataset->timeVector[$i]*1000.0,
                     'y' => (double)$v
                 );
-                if($v===null)
-                    $sv['y']=null;
+                if($v===null) {
+                    $sv['y'] = null;
+                }
                 $sv['marker'] = array();
-                if($showChangeIndicator && $dataset->versionVector[$i] > 0)
-                {
+                if($showChangeIndicator && $dataset->versionVector[$i] > 0) {
                     $sv['marker']['symbol'] = $this->_indicator_url;
                     $sv['marker']['enabled'] = true;
                 }else
@@ -268,8 +277,7 @@ class HighChartAppKernel extends HighChart2
                 'data' => $seriesValues
             );
 
-            if($drillDown&&$contextMenuOnClick===NULL)
-            {
+            if($drillDown&&$contextMenuOnClick===null) {
                 $data_series_desc['cursor'] = 'pointer';
                 $data_series_desc['rawNumProcUnits'] = $dataset->rawNumProcUnits;
             }
@@ -277,12 +285,11 @@ class HighChartAppKernel extends HighChart2
             $this->_chart['series'][] = $data_series_desc;
 
             $versionSum = array_sum($dataset->versionVector);
-            if($showChangeIndicator && $versionSum > 0 && !isset($this->changeIndicatorInLegend) )
-            {
+            if($showChangeIndicator && $versionSum > 0 && !isset($this->changeIndicatorInLegend) ) {
                 $versionValues = array();
                 foreach($dataset->versionVector as $i => $v)
                 {
-                    $versionValues[] = array('x' => $dataset->timeVector[$i]*1000.0, 'y' => null/* $v > 0 ?(double)$dataset->valueVector[$i]: null*/) ;
+                    $versionValues[] = array('x' => $dataset->timeVector[$i]*1000.0, 'y' => null) ;
                 }
 
                 $version_series_desc = array(
@@ -297,7 +304,6 @@ class HighChartAppKernel extends HighChart2
                         'enabled' => true,
                         'symbol' => $this->_indicator_url,
                     ),
-                    //'lineWidth' => 2 + $font_size/4,
                     'showInLegend' => !isset($this->changeIndicatorInLegend),
                     'legendIndex' => 100000,
                     'data' => $versionValues
@@ -306,17 +312,15 @@ class HighChartAppKernel extends HighChart2
                 $this->_chart['series'][] = $version_series_desc;
             }
 
-            if($showRunningAverages)
-            {
+            if($showRunningAverages) {
                 $averageValues = array();
                 foreach($dataset->runningAverageVector as $i => $v)
                 {
-                    $sv = array('x' =>  $dataset->timeVector[$i]*1000.0, 'y' => $v?(double)$v:NULL);
-
+                    $sv = array('x' =>  $dataset->timeVector[$i]*1000.0, 'y' => $v?(double)$v:null);
                     $averageValues[] = $sv;
                 }
 
-                $aColor = '#'.str_pad(dechex(\DataWarehouse\Visualization::alterBrightness($color,-200)),6,'0',STR_PAD_LEFT);
+                $aColor = '#'.str_pad(dechex(\DataWarehouse\Visualization::alterBrightness($color, -200)), 6, '0', STR_PAD_LEFT);
                 $data_series_desc = array(
                     'name' => 'Running Average',
                     'zIndex' => 8,
@@ -339,10 +343,8 @@ class HighChartAppKernel extends HighChart2
                 $this->_chart['series'][] = $data_series_desc;
             }
 
-            if($showControls)
-            {
-                if(!isset($this->_axis['control']))
-                {
+            if($showControls) {
+                if(!isset($this->_axis['control'])) {
                     $yAxisControl = array(
                         'title' => array(
                             'text' => 'Control',
@@ -375,11 +377,14 @@ class HighChartAppKernel extends HighChart2
                 $controlVector = array();
                 foreach($dataset->controlVector as $i => $control)
                 {
-                    if($discreteControls)
-                    {
-                        if($control > 0) $control = 1;
-                        else if($control < $controlPivot) $control = -1;
-                        else $control = 0;
+                    if($discreteControls) {
+                        if($control > 0) {
+                            $control = 1;
+                        } elseif($control < $controlPivot) {
+                            $control = -1;
+                        } else {
+                            $control = 0;
+                        }
                     }
                     $sv = array('x' =>  $dataset->timeVector[$i]*1000.0, 'y' => (double)$control);
                     $controlVector[] = $sv;
@@ -410,7 +415,7 @@ class HighChartAppKernel extends HighChart2
                 foreach($dataset->valueLowVector as $i => $v)
                 {
                     $v2 = $dataset->valueHighVector[$i];
-                    $sv = array($dataset->timeVector[$i]*1000.0, $v2?(double)$v2:NULL, $v?(double)$v:NULL);
+                    $sv = array($dataset->timeVector[$i]*1000.0, $v2?(double)$v2:null, $v?(double)$v:null);
 
                     $rangeValues[] = $sv;
                 }
@@ -418,7 +423,7 @@ class HighChartAppKernel extends HighChart2
                 $data_series_desc = array(
                     'name' => 'MinMax Values',
                     'zIndex' => 6,
-                    'color'=>  self::minmaxColor,
+                    'color'=>  self::MINMAX_COLOR,
                     'type' => 'areasplinerange',
                     'shadow' => false,
                     'yAxis' => $yAxis['index'],
@@ -432,13 +437,12 @@ class HighChartAppKernel extends HighChart2
                 );
                 $this->_chart['series'][] = $data_series_desc;
             }
-            if($showControlInterval)
-            {
+            if($showControlInterval) {
                 $rangeValues = array();
                 foreach($dataset->controlStartVector as $i => $v)
                 {
                     $v2 = $dataset->controlEndVector[$i];
-                    $sv = array($dataset->timeVector[$i]*1000.0, $v2?(double)$v2:NULL, $v?(double)$v:NULL);
+                    $sv = array($dataset->timeVector[$i]*1000.0, $v2?(double)$v2:null, $v?(double)$v:null);
 
                     $rangeValues[] = $sv;
                 }
@@ -446,7 +450,7 @@ class HighChartAppKernel extends HighChart2
                 $data_series_desc = array(
                     'name' => 'Control Band',
                     'zIndex' => 0,
-                    'color'=>  self::inControlColor,
+                    'color'=>  self::IN_CONTROL_COLOR,
                     'type' => 'areasplinerange',
                     'shadow' => false,
                     'yAxis' => $yAxis['index'],
@@ -461,169 +465,188 @@ class HighChartAppKernel extends HighChart2
                 $this->_chart['series'][] = $data_series_desc;
             }
 
-            if($showControlZones)
-            {
-                            $controlCount = count($dataset->controlVector);
-                            $outOfControlWindowStartIndex = NULL;
-                            $betterThanControlWindowStartIndex = NULL;
-                            $inControlWindowStartIndex = NULL;
-                            $lastControl = NULL;
-                            $times = $dataset->timeVector;
-                            $controlStatus = $dataset->controlStatus;
+            if($showControlZones) {
+                $times = $dataset->timeVector;
+                $controlStatus = $dataset->controlStatus;
 
-                            for($i=0;$i<count($controlStatus);$i++)
-                            {
-                                if($controlStatus[$i]==='under_performing'){
-                                    $i0=$i;
-                                    while($i<count($controlStatus)&&$controlStatus[$i]==='under_performing'){
-                                        $i++;
-                                    }
-                                    $i1=$i;
-                                    if($i1>=count($controlStatus)){$i1=count($controlStatus)-1;}
+                for($i=0; $i<count($controlStatus); $i++) {
+                    if($controlStatus[$i]==='under_performing') {
+                        $i0=$i;
+                        while($i<count($controlStatus)&&$controlStatus[$i]==='under_performing') {
+                            $i++;
+                        }
+                        $i1=$i;
+                        if($i1>=count($controlStatus)) {
+                            $i1=count($controlStatus)-1;
+                        }
 
-                                    $t0=$times[$i0];
-                                    $t1=$times[$i1];
-                                    if($i0!==0){$t0-=0.5*($times[$i0]-$times[$i0-1]);}
-                                    else {$t0-=12*60*60;}
-                                    if($i1!==count($controlStatus)-1 && count($controlStatus)>1){$t1+=0.5*($times[$i1+1]-$times[$i1]);}
-                                    else {$t1+=12*60*60;}
+                        $t0=$times[$i0];
+                        $t1=$times[$i1];
+                        if($i0!==0) {
+                            $t0-=0.5*($times[$i0]-$times[$i0-1]);
+                        }
+                        else {
+                            $t0-=12*60*60;
+                        }
+                        if($i1!==count($controlStatus)-1 && count($controlStatus)>1) {
+                            $t1+=0.5*($times[$i1+1]-$times[$i1]);
+                        }
+                        else {
+                            $t1+=12*60*60;
+                        }
 
-                                    if($i0!=$i1){
-                                        $this->_chart['xAxis']['plotBands'][] = array(
-                                                            'from' => $t0*1000,
-                                                            'to' => $t1*1000,
-                                                            'color' =>self::underPerformingColor
-                                                    );
-                                    }
-                                }
-                                if($i>=count($controlStatus))
-                                    break;
-
-                                if($controlStatus[$i]==='over_performing'){
-                                    $i0=$i;
-                                    while($i<count($controlStatus)&&$controlStatus[$i]==='over_performing'){
-                                        $i++;
-                                    }
-                                    $i1=$i;
-                                    if($i1>=count($controlStatus)){$i1=count($controlStatus)-1;}
-
-                                    $t0=$times[$i0];
-                                    $t1=$times[$i1];
-                                    if($i0!==0){$t0-=0.5*($times[$i0]-$times[$i0-1]);}
-                                    else {$t0-=12*60*60;}
-                                    if($i1!==count($controlStatus)-1 && count($controlStatus)>1){$t1+=0.5*($times[$i1+1]-$times[$i1]);}
-                                    else {$t1+=12*60*60;}
-
-                                    if($i0!=$i1){
-                                        $this->_chart['xAxis']['plotBands'][] = array(
-                                                            'from' => $t0*1000,
-                                                            'to' => $t1*1000,
-                                                            'color' =>self::overPerformingColor
-                                                    );
-                                    }
-                                }
-                                if($i>=count($controlStatus))
-                                    break;
-                                if($controlStatus[$i]==='control_region_time_interval'){
-                                    $i0=$i;
-                                    while($i<count($controlStatus)&&$controlStatus[$i]==='control_region_time_interval'){
-                                        $i++;
-                                    }
-                                    $i1=$i;
-                                    if($i1>=count($controlStatus)){$i1=count($controlStatus)-1;}
-
-                                    $t0=$times[$i0];
-                                    $t1=$times[$i1];
-                                    if($i0!==0){$t0-=0.5*($times[$i0]-$times[$i0-1]);}
-                                    else {$t0-=12*60*60;}
-                                    if($i1!==count($controlStatus)-1 && count($controlStatus)>1){$t1+=0.5*($times[$i1+1]-$times[$i1]);}
-                                    else {$t1+=12*60*60;}
-
-                                    if($i0!=$i1){
-                                        $this->_chart['xAxis']['plotBands'][] = array(
-                                                            'from' => $t0*1000,
-                                                            'to' => $t1*1000,
-                                                            'color' =>self::controlRegionTimeIntervalColor
-                                                    );
-                                    }
-                                }
-                                if($i>=count($controlStatus))
-                                    break;
-                            }
-
-                            if(!isset($this->outOfControlInLegend) )
-                            {
-                                    $versionValues = array();
-                                    foreach($dataset->versionVector as $i => $v)
-                                    {
-                                            $versionValues[] = array('x' => $dataset->timeVector[$i]*1000.0, 'y' => NULL) ;
-                                    }
-
-                                    $ooc_series_desc = array(
-                                            'name' => 'Out of Control',
-                                            'yAxis' => $yAxis['index'],
-                                            'type' => 'area',
-                                            'color' => self::underPerformingColor,
-                                            'showInLegend' => !isset($this->outOfControlInLegend),
-                                            'legendIndex' => 100000,
-                                            'data' => $versionValues
-                                    );
-                                    $this->outOfControlInLegend = true;
-                                    $this->_chart['series'][] = $ooc_series_desc;
-                            }
-                            if(!isset($this->betterThanControlInLegend) )
-                            {
-                                    $versionValues = array();
-                                    foreach($dataset->versionVector as $i => $v)
-                                    {
-                                            $versionValues[] = array(
-                                                    'x' => $dataset->timeVector[$i]*1000.0,
-                                                    'y' => NULL
-                                            ) ;
-                                    }
-
-                                    $inc_series_desc = array(
-                                            'name' => 'Better than Control',
-                                            'yAxis' => $yAxis['index'],
-                                            'type' => 'area',
-                                            'color' => self::overPerformingColor,
-                                            'showInLegend' => !isset($this->betterThanControlInLegend),
-                                            'legendIndex' => 100001,
-                                            'data' => $versionValues
-                                    );
-                                    $this->betterThanControlInLegend = true;
-                                    $this->_chart['series'][] = $inc_series_desc;
-                            }
-                            if(!isset($this->controlRegionTimeIntervalInLegend) )
-                            {
-                                    $versionValues = array();
-                                    foreach($dataset->versionVector as $i => $v)
-                                    {
-                                            $versionValues[] = array(
-                                                    'x' => $dataset->timeVector[$i]*1000.0,
-                                                    'y' => NULL
-                                            ) ;
-                                    }
-
-                                    $inc_series_desc = array(
-                                            'name' => 'Control Region Time Interval',
-                                            'yAxis' => $yAxis['index'],
-                                            'type' => 'area',
-                                            'color' => self::controlRegionTimeIntervalColor,
-                                            'showInLegend' => !isset($this->controlRegionTimeIntervalInLegend),
-                                            'legendIndex' => 100001,
-                                            'data' => $versionValues
-                                    );
-                                    $this->controlRegionTimeIntervalInLegend = true;
-                                    $this->_chart['series'][] = $inc_series_desc;
-                            }
-
-                    }
-                    if($contextMenuOnClick!==NULL){
-                        for($i=0;$i<count($this->_chart['series']);$i++){
-                            $this->_chart['series'][$i]['cursor'] = 'pointer';
+                        if($i0!=$i1) {
+                            $this->_chart['xAxis']['plotBands'][] = array(
+                                'from' => $t0*1000,
+                                'to' => $t1*1000,
+                                'color' =>self::UNDERPERFORMING_COLOR
+                            );
                         }
                     }
+                    if($i>=count($controlStatus)) {
+                        break;
+                    }
+
+                    if($controlStatus[$i]==='over_performing') {
+                        $i0=$i;
+                        while($i<count($controlStatus)&&$controlStatus[$i]==='over_performing'){
+                            $i++;
+                        }
+                        $i1=$i;
+                        if($i1>=count($controlStatus)) {
+                            $i1=count($controlStatus)-1;
+                        }
+
+                        $t0=$times[$i0];
+                        $t1=$times[$i1];
+                        if($i0!==0) {
+                            $t0-=0.5*($times[$i0]-$times[$i0-1]);
+                        } else {
+                            $t0-=12*60*60;
+                        }
+                        if($i1!==count($controlStatus)-1 && count($controlStatus)>1) {
+                            $t1+=0.5*($times[$i1+1]-$times[$i1]);
+                        } else {
+                            $t1+=12*60*60;
+                        }
+
+                        if($i0!=$i1) {
+                            $this->_chart['xAxis']['plotBands'][] = array(
+                                'from' => $t0*1000,
+                                'to' => $t1*1000,
+                                'color' =>self::OVERPERFORMING_COLOR
+                            );
+                        }
+                    }
+                    if($i>=count($controlStatus)) {
+                        break;
+                    }
+                    if($controlStatus[$i]==='control_region_time_interval') {
+                        $i0=$i;
+                        while($i<count($controlStatus)&&$controlStatus[$i]==='control_region_time_interval') {
+                            $i++;
+                        }
+                        $i1=$i;
+                        if($i1>=count($controlStatus)) {
+                            $i1=count($controlStatus)-1;
+                        }
+
+                        $t0=$times[$i0];
+                        $t1=$times[$i1];
+                        if($i0!==0) {
+                            $t0-=0.5*($times[$i0]-$times[$i0-1]);
+                        } else {
+                            $t0-=12*60*60;
+                        }
+                        if($i1!==count($controlStatus)-1 && count($controlStatus)>1) {
+                            $t1+=0.5*($times[$i1+1]-$times[$i1]);
+                        } else {
+                            $t1+=12*60*60;
+                        }
+
+                        if($i0!=$i1) {
+                            $this->_chart['xAxis']['plotBands'][] = array(
+                                'from' => $t0*1000,
+                                'to' => $t1*1000,
+                                'color' =>self::CONTROL_REGION_TIME_INTERVAL_COLOR
+                            );
+                        }
+                    }
+                    if($i>=count($controlStatus)) {
+                        break;
+                    }
+                }
+
+                if(!isset($this->outOfControlInLegend) ) {
+                        $versionValues = array();
+                    foreach($dataset->versionVector as $i => $v)
+                        {
+                                    $versionValues[] = array('x' => $dataset->timeVector[$i]*1000.0, 'y' => null) ;
+                    }
+
+                        $ooc_series_desc = array(
+                                'name' => 'Out of Control',
+                                'yAxis' => $yAxis['index'],
+                                'type' => 'area',
+                                'color' => self::UNDERPERFORMING_COLOR,
+                                'showInLegend' => !isset($this->outOfControlInLegend),
+                                'legendIndex' => 100000,
+                                'data' => $versionValues
+                                            );
+                                            $this->outOfControlInLegend = true;
+                                            $this->_chart['series'][] = $ooc_series_desc;
+                }
+                if(!isset($this->betterThanControlInLegend) ) {
+                        $versionValues = array();
+                    foreach($dataset->versionVector as $i => $v)
+                        {
+                                    $versionValues[] = array(
+                                            'x' => $dataset->timeVector[$i]*1000.0,
+                                            'y' => null
+                                    ) ;
+                    }
+
+                        $inc_series_desc = array(
+                                'name' => 'Better than Control',
+                                'yAxis' => $yAxis['index'],
+                                'type' => 'area',
+                                'color' => self::OVERPERFORMING_COLOR,
+                                'showInLegend' => !isset($this->betterThanControlInLegend),
+                                'legendIndex' => 100001,
+                                'data' => $versionValues
+                                            );
+                                            $this->betterThanControlInLegend = true;
+                                            $this->_chart['series'][] = $inc_series_desc;
+                }
+                if(!isset($this->controlRegionTimeIntervalInLegend) ) {
+                        $versionValues = array();
+                    foreach($dataset->versionVector as $i => $v)
+                        {
+                                        $versionValues[] = array(
+                                                'x' => $dataset->timeVector[$i]*1000.0,
+                                                'y' => null
+                                        ) ;
+                    }
+
+                        $inc_series_desc = array(
+                                'name' => 'Control Region Time Interval',
+                                'yAxis' => $yAxis['index'],
+                                'type' => 'area',
+                                'color' => self::CONTROL_REGION_TIME_INTERVAL_COLOR,
+                                'showInLegend' => !isset($this->controlRegionTimeIntervalInLegend),
+                                'legendIndex' => 100001,
+                                'data' => $versionValues
+                                            );
+                                            $this->controlRegionTimeIntervalInLegend = true;
+                                            $this->_chart['series'][] = $inc_series_desc;
+                }
+
+            }
+            if($contextMenuOnClick!==null) {
+                for($i=0; $i<count($this->_chart['series']); $i++) {
+                    $this->_chart['series'][$i]['cursor'] = 'pointer';
+                }
+            }
                     $this->_datasetCount++;
         }
         $this->setDataSource(array('XDMoD App Kernels'));
@@ -642,8 +665,7 @@ class HighChartAppKernel extends HighChart2
             128 =>0x0f0f0f
         );
 
-        if(isset($colors[$cores]) )
-        {
+        if(isset($colors[$cores]) ) {
             return $colors[$cores];
         }
         else
@@ -665,8 +687,7 @@ class HighChartAppKernel extends HighChart2
             128 =>'diamond'
         );
 
-        if(isset($colors[$cores]) )
-        {
+        if(isset($colors[$cores]) ) {
             return $colors[$cores];
         }
         else
@@ -675,12 +696,11 @@ class HighChartAppKernel extends HighChart2
         }
     }
 
-    public function getRawImage($format = 'png', $params = array(), $user = NULL)
+    public function getRawImage($format = 'png', $params = array(), $user = null)
     {
         $returnData = $this->exportJsonStore();
 
-        if( $format == 'img_tag')
-        {
+        if($format == 'img_tag') {
             return '<img class="xd-img" alt="'.$this->getTitle().'" width="'.$this->_width*$this->_scale.'" height="'.$this->_height*$this->_scale.'"  class="chart_thumb-img" src="data:image/png;base64,'.base64_encode(\xd_charting\exportHighchart($returnData['data'][0], $this->_width, $this->_height, $this->_scale, 'png')).'" />';
         }
 
