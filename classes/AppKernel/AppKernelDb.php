@@ -2535,11 +2535,9 @@ class AppKernelDb
         if($sqlAKcond) {
             $datasetsQuery.="\n ( ".$sqlAKcond." ) ";
         }
-        //test walltime (metric_id=4)
         $datasetsQuery.="\nORDER BY 1, 2, 3\n";
         $datasets = $this->db->query($datasetsQuery);
         $datasetsLength = count($datasets);
-        $message_length = 0;
         $time_end = microtime(true);
         $this->log("Timing(Get a list of possible unique datasets (datasetsQuery))=".($time_end - $time_start), PEAR_LOG_DEBUG);
 
@@ -2556,7 +2554,6 @@ class AppKernelDb
             'N_sqlupdate1'=>0,
             'sqlupdate2'=>0.0,
             'N_sqlupdate2'=>0
-
         );
         foreach($datasets as $di => $dataset)
         {
