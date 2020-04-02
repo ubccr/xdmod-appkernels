@@ -1009,7 +1009,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
             ));
 
             try {
-                $report->send_report_to_email($recipient, $internal_dashboard_user);
+                $report->sendReportToEmail($recipient, $internal_dashboard_user);
             } catch (Exception $e) {
                 $response['success'] = false;
                 $response['message'] = $e->getMessage();

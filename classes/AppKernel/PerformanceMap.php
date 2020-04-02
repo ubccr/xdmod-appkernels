@@ -9,8 +9,9 @@ use DateInterval;
 
 class PerformanceMap
 {
-    public $start_date,$end_date;/** @param \DateTime */
-    private $end_date_exclusive;/** @param \DateTime */
+    public $start_date; /** @param \DateTime */
+    public $end_date; /** @param \DateTime */
+    private $end_date_exclusive; /** @param \DateTime */
 
 
     public $controlThreshold;/** @param float */
@@ -60,15 +61,15 @@ class PerformanceMap
         $this->ak_plot_viewer_web_address = $siteAddress.'#main_tab_panel:app_kernels:app_kernel_viewer?';
         $this->ak_control_region_web_address = $siteAddress.'internal_dashboard/index.php#appkernels:ak_control_regions?';
 
-        if(!array_key_exists('end_date',$options))
-            $options['end_date']=new DateTime(date('Y-m-d'));
-        if(!array_key_exists('start_date',$options))
-        {
+        if(!array_key_exists('end_date', $options)) {
+            $options['end_date'] = new DateTime(date('Y-m-d'));
+        }
+        if(!array_key_exists('start_date', $options)) {
             $options['start_date']=clone $options['end_date'];
             $options['start_date']->sub(new DateInterval('P7D'));
         }
 
-        $options=array_merge(self::$default_options,$options);
+        $options=array_merge(self::$default_options, $options);
 
         //initiate interlal variables
         $this->start_date=$options['start_date'];
@@ -97,7 +98,7 @@ class PerformanceMap
             $ak_fullnames[$row['name']]=$row['ak_base_name'];
             $ak_def_ids[$row['ak_base_name']]=$row['ak_def_id'];
         }
-        if(!in_array('xdmod.bundle',$ak_shortnames)){
+        if(!in_array('xdmod.bundle', $ak_shortnames)) {
             $ak_shortnames['xdmod.bundle']='Bundle';
             $ak_fullnames['Bundle']='xdmod.bundle';
         }
@@ -145,9 +146,8 @@ class PerformanceMap
         if(count($sqlres_tasdb)>0){
             $this->walltime_metric_id=$sqlres_tasdb[0]['metric_id'];
         }else{
-            $this->walltime_metric_id=NULL;
+            $this->walltime_metric_id=null;
         }
-
 
         $this->perfMap=$this->getMap();
     }
@@ -161,7 +161,7 @@ class PerformanceMap
      *
      * @return html with performance map table
      */
-    public function make_report($internal_dashboard_user=false)
+    public function makeReport($internal_dashboard_user = false)
     {
         //PerformanceMap
         $web_address = $this->ak_instance_view_web_address;
@@ -223,17 +223,17 @@ class PerformanceMap
             $message.='<td colspan=1>&nbsp;</td>';
             $span=0;
             $prev_monthyear='//';
-            for($i=0;$i<count($rec_dates);$i++)
-            {
-                $rd=explode('/',$rec_dates[$i]);
+            for($i=0; $i<count($rec_dates); $i++) {
+                $rd=explode('/', $rec_dates[$i]);
                 $monthyear=date("F", mktime(0, 0, 0, $rd[1], 10)).', '.$rd[0];
                 $span++;
-                if(($i==count($rec_dates)-1)||($i>0 && $monthyear!=$prev_monthyear))
-                {
-                    if($i==count($rec_dates)-1)
+                if(($i==count($rec_dates)-1)||($i>0 && $monthyear!=$prev_monthyear)) {
+                    if($i==count($rec_dates)-1) {
                         $span++;
-                    if($i==0)
-                        $prev_monthyear=$rd[0].'/'.$rd[1];
+                    }
+                    if($i==0) {
+                        $prev_monthyear = $rd[0] . '/' . $rd[1];
+                    }
                     $message.='<td colspan='.($span-1).' '.$tdStyle_Day.'>'.$prev_monthyear.'</td>';
                     $span=1;
                 }
@@ -247,7 +247,7 @@ class PerformanceMap
 
             foreach ($rec_dates as $rec_date)
             {
-                $rd=explode('/',$rec_date);
+                $rd=explode('/', $rec_date);
                 $message.='<td '.$tdStyle_Day.'>&nbsp;'.$rd[2].'&nbsp;</td>';
             }
             $message.='<td colspan=1>Plot</td>';
@@ -256,8 +256,7 @@ class PerformanceMap
             {
                 $message.='<tr>';
                 $message.='<td colspan='.$totalColumns.' '.$tdStyle_Resource.'>Resource: <b>'.$resource.'</b>    Application Kernel: <b>'.$this->ak_shortnames[$appKer].'</b>';
-                if(array_key_exists($appKer, $this->ak_def_ids) && array_key_exists($resource,$this->resource_ids) && $this->walltime_metric_id!==NULL)
-                {
+                if(array_key_exists($appKer, $this->ak_def_ids) && array_key_exists($resource, $this->resource_ids) && $this->walltime_metric_id!==null) {
                     $kernel_id="{$this->resource_ids[$resource]}_{$this->ak_def_ids[$appKer]}";
                     if($internal_dashboard_user){
                         $message.=", <a href=\"{$ak_control_region_web_address}kernel={$kernel_id}&{$datesStr}\">control region panel</a></td>";
@@ -291,14 +290,12 @@ class PerformanceMap
                         }
 
                     }
-                    if(array_key_exists($appKer, $this->ak_def_ids) && array_key_exists($resource,$this->resource_ids) && $this->walltime_metric_id!==NULL)
-                    {
+                    if(array_key_exists($appKer, $this->ak_def_ids) && array_key_exists($resource, $this->resource_ids) && $this->walltime_metric_id!==null) {
                         $kernel_id="{$this->ak_def_ids[$appKer]}_{$this->resource_ids[$resource]}_{$this->walltime_metric_id}_$problemSize";
                         $message.="<td><a href=\"{$ak_plot_viewer_web_address}kernel={$kernel_id}&{$datesStr}\">Plot</a></td>";
-
                     }
                     else {
-                        $message.="<td>123&nbsp;</td>";
+                        $message.="<td>&nbsp;</td>";
                     }
                     $message.='</tr>';
                 }
@@ -307,7 +304,7 @@ class PerformanceMap
         }
         return $message;
     }
-    public function get_summary_for_days($days)
+    public function getSummaryForDays($days)
     {
         $runsStatus=$this->perfMap['runsStatus'];
 
@@ -362,24 +359,39 @@ class PerformanceMap
             if($totalRuns>0)
             {
                 $messageTable.='<td>'.$resource.'</td>';
-                if($inControlRuns>0)  $messageTable.='<td '.$tdStyle['N'].'>';
-                else $messageTable.='<td '.$tdStyle[' '].'>';
-                $messageTable.=$inControlRuns.sprintf(' (%\'@5.1f%%)',100.0*$inControlRuns/$totalRuns).'</td>';
+                if($inControlRuns>0) {
+                    $messageTable.='<td '.$tdStyle['N'].'>';
+                } else {
+                    $messageTable.='<td '.$tdStyle[' '].'>';
+                }
+                $messageTable.=$inControlRuns.sprintf(' (%\'@5.1f%%)', 100.0*$inControlRuns/$totalRuns).'</td>';
 
-                if($outOfControlRuns>0)  $messageTable.='<td '.$tdStyle['U'].'>';
-                else $messageTable.='<td '.$tdStyle[' '].'>';
-                $messageTable.=$outOfControlRuns.sprintf(' (%\'@5.1f%%)',100.0*$outOfControlRuns/$totalRuns).'</td>';
+                if($outOfControlRuns>0) {
+                    $messageTable.='<td '.$tdStyle['U'].'>';
+                } else {
+                    $messageTable.='<td '.$tdStyle[' '].'>';
+                }
+                $messageTable.=$outOfControlRuns.sprintf(' (%\'@5.1f%%)', 100.0*$outOfControlRuns/$totalRuns).'</td>';
 
-                if($noControlInfoRuns>0)  $messageTable.='<td '.$tdStyle['R'].'>';
-                else $messageTable.='<td '.$tdStyle[' '].'>';
-                $messageTable.=$noControlInfoRuns.sprintf(' (%\'@5.1f%%)',100.0*$noControlInfoRuns/$totalRuns).'</td>';
+                if($noControlInfoRuns>0) {
+                    $messageTable.='<td '.$tdStyle['R'].'>';
+                } else {
+                    $messageTable.='<td '.$tdStyle[' '].'>';
+                }
+                $messageTable.=$noControlInfoRuns.sprintf(' (%\'@5.1f%%)', 100.0*$noControlInfoRuns/$totalRuns).'</td>';
 
-                if($failedRuns>0)  $messageTable.='<td '.$tdStyle['F'].'>';
-                else $messageTable.='<td '.$tdStyle[' '].'>';
-                $messageTable.=$failedRuns.sprintf(' (%\'@5.1f%%)',100.0*$failedRuns/$totalRuns).'</td>';
+                if($failedRuns>0) {
+                    $messageTable.='<td '.$tdStyle['F'].'>';
+                } else {
+                    $messageTable.='<td '.$tdStyle[' '].'>';
+                }
+                $messageTable.=$failedRuns.sprintf(' (%\'@5.1f%%)', 100.0*$failedRuns/$totalRuns).'</td>';
 
-                if($totalRuns>0)  $messageTable.='<td '.$tdStyle[' '].'>';
-                else $messageTable.='<td '.$tdStyle[' '].'>';
+                if($totalRuns>0) {
+                    $messageTable.='<td '.$tdStyle[' '].'>';
+                } else {
+                    $messageTable.='<td '.$tdStyle[' '].'>';
+                }
                 $messageTable.=$totalRuns.'</td>';
             }
             else
@@ -401,48 +413,59 @@ class PerformanceMap
         $failedRuns=0;
         $totalRuns=0;
 
-        foreach ($runsStatus as $resource => $val0)
-        {
-
-            foreach ($val0 as $appKer => $val1)
-                foreach ($val1 as $problemSize => $taskStateGroups)
-                {
-                    foreach ($days as $rec_date)
-                    {
-                        $totalRuns2=count($taskStateGroups[$rec_date]->tasks);
-                        $totalRuns+=$totalRuns2;
-                        if($totalRuns2>0)
-                        {
-                            $inControlRuns+=count($taskStateGroups[$rec_date]->inControlRuns);
-                            $outOfControlRuns+=count($taskStateGroups[$rec_date]->underPerformingRuns);
-                            $noControlInfoRuns+=count($taskStateGroups[$rec_date]->noControlInfoRuns);
-                            $failedRuns+=count($taskStateGroups[$rec_date]->failedRuns);
+        foreach ($runsStatus as $resource => $val0) {
+            foreach ($val0 as $appKer => $val1) {
+                foreach ($val1 as $problemSize => $taskStateGroups) {
+                    foreach ($days as $rec_date) {
+                        $totalRuns2 = count($taskStateGroups[$rec_date]->tasks);
+                        $totalRuns += $totalRuns2;
+                        if ($totalRuns2 > 0) {
+                            $inControlRuns += count($taskStateGroups[$rec_date]->inControlRuns);
+                            $outOfControlRuns += count($taskStateGroups[$rec_date]->underPerformingRuns);
+                            $noControlInfoRuns += count($taskStateGroups[$rec_date]->noControlInfoRuns);
+                            $failedRuns += count($taskStateGroups[$rec_date]->failedRuns);
                         }
                     }
                 }
+            }
         }
         $messageTable.='<tr>';
         if($totalRuns>0)
         {
             $messageTable.='<td align="right">Total</td>';
-            if($inControlRuns>0)  $messageTable.='<td '.$tdStyle['N'].'>';
-            else $messageTable.='<td '.$tdStyle[' '].'>';
-            $messageTable.=$inControlRuns.sprintf(' (%\'@5.1f%%)',100.0*$inControlRuns/$totalRuns).'</td>';
+            if($inControlRuns>0) {
+                $messageTable.='<td '.$tdStyle['N'].'>';
+            } else {
+                $messageTable.='<td '.$tdStyle[' '].'>';
+            }
+            $messageTable.=$inControlRuns.sprintf(' (%\'@5.1f%%)', 100.0*$inControlRuns/$totalRuns).'</td>';
 
-            if($outOfControlRuns>0)  $messageTable.='<td '.$tdStyle['U'].'>';
-            else $messageTable.='<td '.$tdStyle[' '].'>';
-            $messageTable.=$outOfControlRuns.sprintf(' (%\'@5.1f%%)',100.0*$outOfControlRuns/$totalRuns).'</td>';
+            if($outOfControlRuns>0) {
+                $messageTable.='<td '.$tdStyle['U'].'>';
+            } else {
+                $messageTable.='<td '.$tdStyle[' '].'>';
+            }
+            $messageTable.=$outOfControlRuns.sprintf(' (%\'@5.1f%%)', 100.0*$outOfControlRuns/$totalRuns).'</td>';
 
-            if($noControlInfoRuns>0)  $messageTable.='<td '.$tdStyle['R'].'>';
-            else $messageTable.='<td '.$tdStyle[' '].'>';
-            $messageTable.=$noControlInfoRuns.sprintf(' (%\'@5.1f%%)',100.0*$noControlInfoRuns/$totalRuns).'</td>';
+            if($noControlInfoRuns>0) {
+                $messageTable.='<td '.$tdStyle['R'].'>';
+            } else {
+                $messageTable.='<td '.$tdStyle[' '].'>';
+            }
+            $messageTable.=$noControlInfoRuns.sprintf(' (%\'@5.1f%%)', 100.0*$noControlInfoRuns/$totalRuns).'</td>';
 
-            if($failedRuns>0)  $messageTable.='<td '.$tdStyle['F'].'>';
-            else $messageTable.='<td '.$tdStyle[' '].'>';
-            $messageTable.=$failedRuns.sprintf(' (%\'@5.1f%%)',100.0*$failedRuns/$totalRuns).'</td>';
+            if($failedRuns>0) {
+                $messageTable.='<td '.$tdStyle['F'].'>';
+            } else {
+                $messageTable.='<td '.$tdStyle[' '].'>';
+            }
+            $messageTable.=$failedRuns.sprintf(' (%\'@5.1f%%)', 100.0*$failedRuns/$totalRuns).'</td>';
 
-            if($totalRuns>0)  $messageTable.='<td '.$tdStyle[' '].'>';
-            else $messageTable.='<td '.$tdStyle[' '].'>';
+            if($totalRuns>0) {
+                $messageTable.='<td '.$tdStyle[' '].'>';
+            } else {
+                $messageTable.='<td '.$tdStyle[' '].'>';
+            }
             $messageTable.=$totalRuns.'</td>';
         }
         else
@@ -456,14 +479,15 @@ class PerformanceMap
         }
         $messageTable.='</tr>';
         $messageTable.='</table>';
-        $messageTable=str_replace('@','&nbsp;',$messageTable);
+        $messageTable=str_replace('@', '&nbsp;', $messageTable);
 
 
         $messageHeader='';
-        if(count($days)==1)
-            $messageHeader.='Summary for app kernels executed on '.$days[0].'</br>';
-        else
-            $messageHeader.='Summary for app kernels executed from '.$days[0].' to '.end($days).'</br>';
+        if(count($days)==1) {
+            $messageHeader .= 'Summary for app kernels executed on ' . $days[0] . '</br>';
+        } else {
+            $messageHeader .= 'Summary for app kernels executed from ' . $days[0] . ' to ' . end($days) . '</br>';
+        }
 
         $message='';
         $message.='Total number of runs: <b>'. $totalRuns.'</b><br/>';
@@ -826,14 +850,14 @@ SQL;
                     }
 
                     $results[] = $result;
-                } // foreach($nodeCountData as $problemSize => $problemSizeData) {
-            } // foreach($runData as $appKernel => $nodeCountData) {
-        } // foreach($runsStatus as $resource => $runData) {
+                }
+            }
+        }
 
         $response['success'] = true;
         $response['response'] = $results;
         $response['count'] = count($response['response']);
 
         return $response;
-    } // public function getMapForWeb()
+    }
 }
