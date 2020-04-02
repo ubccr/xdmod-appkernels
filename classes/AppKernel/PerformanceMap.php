@@ -126,7 +126,7 @@ class PerformanceMap
             } elseif (!empty($this->resource)) {
                 // limit resources by AKRR resource name
                 $sql = "SELECT akr.resource_id, akr.resource, akr.nickname FROM mod_appkernel.resource akr " .
-                    "WHERE akr.resource IN ('" . implode("', '", $this->resource) . "')";
+                    "WHERE akr.nickname IN ('" . implode("', '", $this->resource) . "')";
             }
         }
 
