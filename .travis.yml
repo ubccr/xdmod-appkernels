@@ -14,6 +14,7 @@ env:
         - XDMOD_TEST_ARTIFACTS_MIRROR="$HOME/xdmod-test-artifacts.git"
         - XDMOD_MODULE_DIR="appkernels"
         - XDMOD_MODULE_NAME="Application Kernels"
+        - XDMOD_MAIN_BRANCH="xdmod9.0"
 
 # Add dependency directories to the Travis cache
 cache:
