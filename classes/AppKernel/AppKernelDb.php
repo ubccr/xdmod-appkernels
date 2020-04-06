@@ -132,7 +132,8 @@ class AppKernelDb
             "INSERT INTO ingester_log
             (source, url, num, last_update, start_time, end_time, success, message, reportobj)
             VALUES (?, ?, ?, FROM_UNIXTIME(?), FROM_UNIXTIME(?), FROM_UNIXTIME(?), ?, ?, COMPRESS(?))";
-        $params = array($log->source,
+        $params = array(
+            $log->source,
             $log->url,
             $log->num,
             $log->last_update,
@@ -140,13 +141,14 @@ class AppKernelDb
             $log->end_time,
             $log->success,
             $log->message,
-            $log->reportObj);
+            $log->reportObj
+        );
             $numRows = $this->db->execute($sql, $params);
-        if (1 == $numRows ) {
+        if (1 === $numRows ) {
             $this->log("Added entry to ingestion log");
         }
 
-        return ( 1 == $numRows );
+        return ( 1 === $numRows );
     }
 
     // --------------------------------------------------------------------------------
@@ -166,7 +168,7 @@ class AppKernelDb
             success, message, UNCOMPRESS(reportobj) as reportobj FROM ingester_log
          WHERE success=1 ORDER BY last_update DESC LIMIT 1";
             $result = $this->db->query($sql);
-        if (1 != count($result) ) {
+        if (1 !== count($result) ) {
             return false;
         }
 
@@ -830,7 +832,7 @@ class AppKernelDb
 
         $sql = "SELECT * ".($debugMode ?'':", unix_timestamp(min(start_time)) as start_ts, unix_timestamp(max(end_time)) as end_ts ")."  FROM " . ( $debugMode ? "v_tree_debug" : "a_tree" );
 
-        if (null !== $criteria && 0 != count($criteria) ) {
+        if (null !== $criteria && 0 !== count($criteria) ) {
             foreach ( $criteria as $key => $value ) {
                 if (null === $value ) {
                     continue;
@@ -903,7 +905,7 @@ class AppKernelDb
             }
         }
 
-        if (0 != count($sqlCriteria) ) {
+        if (0 !== count($sqlCriteria) ) {
             $sql .= " WHERE " . implode(" AND ", $sqlCriteria);
         }
         if (null !== $groupBy ) {
@@ -955,7 +957,7 @@ class AppKernelDb
 
         $sql = "SELECT * FROM " . ( $debugMode ? "v_tree_debug" : "a_tree" );
 
-        if (null !== $criteria && 0 != count($criteria) ) {
+        if (null !== $criteria && 0 !== count($criteria) ) {
             foreach ( $criteria as $key => $value ) {
                 if (null === $value ) {
                     continue;
@@ -1028,7 +1030,7 @@ class AppKernelDb
             }
         }
 
-        if (0 != count($sqlCriteria) ) {
+        if (0 !== count($sqlCriteria) ) {
             $sql .= " WHERE " . implode(" AND ", $sqlCriteria);
         }
         if (null !== $groupBy ) {
@@ -1081,7 +1083,7 @@ class AppKernelDb
 
         $sql = "SELECT * FROM " . ( $metadataOnly ? "a_tree2" : "a_data2" );
 
-        if (null !== $criteria && 0 != count($criteria) ) {
+        if (null !== $criteria && 0 !== count($criteria) ) {
             foreach ( $criteria as $key => $value ) {
                 if (null === $value ) {
                     continue;
@@ -1251,7 +1253,7 @@ class AppKernelDb
             $criteriaList[] = "resource_id = $resourceId";
         }
 
-        if (0 != count($criteriaList) ) {
+        if (0 !== count($criteriaList) ) {
             $sql .= " WHERE " . implode(" AND ", $criteriaList);
         }
 
@@ -1752,30 +1754,30 @@ class AppKernelDb
         }
         if($add_to_a_data) {
             //a_data and a_tree
-            if($ak->db_resource_visible && $ak->db_ak_def_visible && $ak->status=='success') {
+            if($ak->db_resource_visible && $ak->db_ak_def_visible && $ak->status==='success') {
                 //a_tree
                 $sql = "SELECT UNIX_TIMESTAMP(start_time) as start_time,UNIX_TIMESTAMP(end_time) as end_time ,status
                     FROM a_tree WHERE ak_def_id=? AND resource_id=? AND metric_id=? AND num_units=?";
                 $params = array($ak->db_ak_def_id, $ak->db_resource_id, $metric->id, $ak->deployment_num_proc_units);
                 $rows=$this->db->query($sql, $params);
 
-                if(count($rows)>1) {
+                if(count($rows) > 1) {
                     $this->log("a_tree has more then one entries for ak_def_id, resource_id, metric_id, num_units", PEAR_LOG_ERR);
                 }
 
                 $start_time=$ak->deployment_time;
                 $end_time=$ak->deployment_time;
                 $status=$ak->status;
-                if(count($rows)>=1) {
-                    if($rows[0]['start_time']<$start_time) {
+                if(count($rows) >= 1) {
+                    if($rows[0]['start_time'] < $start_time) {
                         $start_time=$rows[0]['start_time'];
                     }
-                    if($rows[0]['end_time']>$end_time) {
+                    if($rows[0]['end_time'] > $end_time) {
                         $end_time=$rows[0]['end_time'];
                         $status=$rows[0]['status'];
                     }
                 }
-                if(count($rows)!=0) {
+                if(count($rows) != 0) {
                     $sql = "DELETE FROM a_tree WHERE ak_def_id=? AND resource_id=? AND metric_id=? AND num_units=?";
                     $params = array($ak->db_ak_def_id, $ak->db_resource_id, $metric->id, $ak->deployment_num_proc_units);
                     if(!$dryRunMode) {
@@ -1815,32 +1817,32 @@ class AppKernelDb
                     $numRows = $this->db->execute($sql, $params);
                 }
             }
-            if($ak->db_resource_visible && $ak->db_ak_def_visible && $ak->status!='queued') {
+            if($ak->db_resource_visible && $ak->db_ak_def_visible && $ak->status!=='queued') {
                 //a_tree2
                 $sql = "SELECT UNIX_TIMESTAMP(start_time) as start_time,UNIX_TIMESTAMP(end_time) as end_time ,status
                     FROM a_tree2 WHERE ak_def_id=? AND resource_id=? AND metric_id=? AND num_units=?";
                 $params = array($ak->db_ak_def_id, $ak->db_resource_id, $metric->id, $ak->deployment_num_proc_units);
                 $rows=$this->db->query($sql, $params);
 
-                if(count($rows)>1) {
+                if(count($rows) > 1) {
                     $this->log("a_tree2 has more then one entries for ak_def_id, resource_id, metric_id, num_units", PEAR_LOG_ERR);
                 }
 
                 $start_time=$ak->deployment_time;
                 $end_time=$ak->deployment_time;
                 $status=$ak->status;
-                if(count($rows)>=1) {
+                if(count($rows) >= 1) {
                     $status=$rows[0]['status'];
-                    if($rows[0]['start_time']<$start_time) {
+                    if($rows[0]['start_time'] < $start_time) {
                         $start_time=$rows[0]['start_time'];
                     }
-                    if($rows[0]['end_time']>$end_time) {
+                    if($rows[0]['end_time'] > $end_time) {
                         $end_time=$rows[0]['end_time'];
                         $status=$rows[0]['status'];
                     }
                 }
 
-                if(count($rows)!=0) {
+                if(count($rows) !== 0) {
                     $sql = "DELETE FROM a_tree2 WHERE ak_def_id=? AND resource_id=? AND metric_id=? AND num_units=?";
                     $params = array($ak->db_ak_def_id, $ak->db_resource_id, $metric->id, $ak->deployment_num_proc_units);
                     if(!$dryRunMode) {
@@ -1976,7 +1978,7 @@ class AppKernelDb
         // The metric didn't exist for that ak
         $sql = "SELECT * FROM metric WHERE guid='$guid'";
         $result = $this->db->query($sql);
-        if(count($result)>0) {
+        if(count($result) > 0) {
             $metricId = $result[0]['metric_id'];
 
             $sql = "INSERT INTO ak_has_metric (ak_id, metric_id, num_units) VALUES (?,?,?)";
@@ -2113,9 +2115,9 @@ class AppKernelDb
         $ak_def_id = intval($ak_def_id);
         $control_region_type="'".$control_region_type."'";
         $startDateTime = "'".$startDateTime."'";
-        $n_points = ($n_points!==null ? intval($n_points):'NULL');
-        $endDateTime = ($endDateTime!==null ? "'".$endDateTime."'":'NULL');
-        $comment = ($comment!==null ? "'".$comment."'":'NULL');
+        $n_points = ($n_points !== null ? intval($n_points): 'NULL');
+        $endDateTime = ($endDateTime !== null ? "'".$endDateTime."'":'NULL');
+        $comment = ($comment !== null ? "'".$comment."'": 'NULL');
 
         //make query for control recalculation
         $sqlAKcond=array();
@@ -2185,8 +2187,7 @@ class AppKernelDb
                 return array('success' => false,
                     'message' => "Control region already exists for such time interval");
             }
-        }
-        else{
+        } else {
             if($update) {
                 return array('success' => false,
                     'message' => "Such control region time interval do not exist, can not update it.");
@@ -2217,7 +2218,7 @@ class AppKernelDb
              WHERE control_region_def_id=$control_region_def_id;
         ";
         $controlRegionDefToDelete = $this->db->query($controlRegionDefQuery);
-        if(count($controlRegionDefToDelete)==0) {
+        if(count($controlRegionDefToDelete) === 0) {
             return array('success' => false,
                 'message' => "Such control region time interval do not exist, can not delete it.");
         }
@@ -2325,9 +2326,9 @@ class AppKernelDb
             );
 
             for($i=1; $i<count($newenv_regions_start); $i++) {
-                if($newenv_regions_start[$i-1]['ak_def_id']==$newenv_regions_start[$i]['ak_def_id']
-                    && $newenv_regions_start[$i-1]['resource_id']==$newenv_regions_start[$i]['resource_id']
-                    && $newenv_regions_start[$i-1]['collected']!=$newenv_regions_start[$i]['collected']
+                if($newenv_regions_start[$i-1]['ak_def_id'] === $newenv_regions_start[$i]['ak_def_id']
+                    && $newenv_regions_start[$i-1]['resource_id'] === $newenv_regions_start[$i]['resource_id']
+                    && $newenv_regions_start[$i-1]['collected'] !== $newenv_regions_start[$i]['collected']
                 ) {
                     $ak_def_id=$newenv_regions_start[$i]['ak_def_id'];
                     $resource_id=$newenv_regions_start[$i]['resource_id'];
@@ -2452,13 +2453,13 @@ class AppKernelDb
             $larger = true;
             $attr = explode(',', $metricAttribute);
 
-            if(isset($attr[0]) && $attr[0] != '') {
+            if(isset($attr[0]) && $attr[0] !== '') {
                 $akName = $attr[0];
             }
             if(isset($attr[2]) && count($attr[2]) > 0) {
                 $larger = substr($attr[2], 0, 1) != 'S';
             }
-            if(isset($attr[1]) && $attr[1] !='') {
+            if(isset($attr[1]) && $attr[1] !== '') {
                 $metricName = strtolower($attr[1]);
                 if(isset($metricsLookupByName[$metricName])) {
                     $largerAttributeMap[$metricName] = $larger;
@@ -2672,7 +2673,7 @@ class AppKernelDb
                     ";
                     $controlRegions = $this->db->query($controlRegionQuery);
                     //if there is no control regions initiate the first one
-                    if(count($controlRegions)!=count($controlRegionDef)) {
+                    if(count($controlRegions) !== count($controlRegionDef)) {
                         $CRdefs=array();
                         foreach($controlRegionDef as $cdef) {
                             $CRdefs[$cdef['control_region_def_id']]=$cdef;
@@ -2795,7 +2796,7 @@ class AppKernelDb
                                     $controlEnd = $controlAverage+$control_criteria*$controlStDev;
 
                                     $controlDiff = abs($controlEnd-$controlStart);
-                                    if($controlDiff == 0) {
+                                    if($controlDiff === 0) {
                                         $controlDiff = 1;
                                     }
 
@@ -2879,8 +2880,8 @@ class AppKernelDb
                     //get control region
                     $date_collected_timestamp=date_timestamp_get(date_create($data[$i]['collected']));
                     for($idControlRegion=0; $idControlRegion<count($controlRegions)-1; $idControlRegion++) {
-                        if($date_collected_timestamp>=$controlRegions[$idControlRegion]['control_region_starts_timestamp']
-                            && $date_collected_timestamp<$controlRegions[$idControlRegion+1]['control_region_starts_timestamp']
+                        if($date_collected_timestamp >= $controlRegions[$idControlRegion]['control_region_starts_timestamp']
+                            && $date_collected_timestamp < $controlRegions[$idControlRegion+1]['control_region_starts_timestamp']
                         ) {
                             break;
                         }
@@ -2892,19 +2893,19 @@ class AppKernelDb
                     $controlEnd = $controlRegion['controlEnd'];
 
                     $controlDiff = abs($controlEnd-$controlStart);
-                    if($controlDiff == 0) {
+                    if($controlDiff === 0) {
                         $controlDiff = 1;
                     }
 
                     //calculate if the data point is in control or what
                     {
                     if($i < $runningAverageSize) {
-                        $offset = ($i-$runningAverageSize < 0) ? 0 : ($i-$runningAverageSize);
-                        $l = $i-$offset+1;
+                        $offset = ($i - $runningAverageSize < 0) ? 0 : ($i-$runningAverageSize);
+                        $l = $i - $offset + 1;
                     }
                     else
                         {
-                        $offset = $i-$runningAverageSize+1;
+                        $offset = $i - $runningAverageSize + 1;
                         $l = $runningAverageSize;
                     }
 
