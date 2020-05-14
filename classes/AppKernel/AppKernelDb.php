@@ -250,14 +250,15 @@ class AppKernelDb
                 continue;
             }
 
-            $akDef = new AppKernelDefinition;
-            $akDef->id = $row['ak_def_id'];
-            $akDef->name = $row['name'];
-            $akDef->basename = $basename;
-            $akDef->description = $row['description'];
-            $akDef->enabled = ( 1 == $row['enabled'] ? true : false );
-            $akDef->visible = ( 1 == $row['visible'] ? true : false );
-            $akDef->processor_unit = $row['processor_unit'];
+            $akDef = new AppKernelDefinition(
+                $id = $row['ak_def_id'],
+                $name = $row['name'],
+                $basename = $row['ak_base_name'],
+                $description = $row['description'],
+                $processor_unit = $row['processor_unit'],
+                $enabled = $row['enabled'],
+                $visible = $row['visible']
+            );
 
             $this->appKernelDefinitions[$basename] = $akDef;
             $this->akBaseNameList[] = $basename;
@@ -327,13 +328,18 @@ class AppKernelDb
 
     }
 
-    // --------------------------------------------------------------------------------
-
+    /**
+     * Get conditions for sql where clause on processing units number
+     *
+     * @param array $pu_counts array with processing units
+     * @return array array with conditions for sql where clause
+     */
     private function getProcessorCountWheres(array $pu_counts = array())
     {
         $processorCountWheres = array();
         foreach($pu_counts as $pu_count)
         {
+            $pu_count = intval($pu_count);
             $processorCountWheres[] = "vt.num_units = $pu_count";
         }
 
@@ -576,63 +582,103 @@ class AppKernelDb
         return $processingUnitList;
     }
 
-    // --------------------------------------------------------------------------------
-
+    /**
+     * Get list of unique appkernels on $resource_ids
+     *
+     * @param array $resource_ids
+     * @param array $node_counts
+     * @param array $core_counts
+     * @return array
+     */
     public function getUniqueAppKernels(array $resource_ids = array(), array $node_counts = array(), array $core_counts = array())
     {
         $processorCountWheres = $this->getProcessorCountWheres($node_counts, $core_counts);
 
-        $sql = "SELECT distinct vt.ak_def_id, vt.ak_name, akd.description, unix_timestamp(min(start_time)) as start_ts, unix_timestamp(max(end_time)) as end_ts
-            FROM `a_tree` vt, app_kernel_def akd
-        where vt.ak_def_id = akd.ak_def_id and akd.enabled = 1 and akd.visible = 1 ".
-            (count($resource_ids)>0?" and vt.resource_id in (".implode(',', $resource_ids).") ": " ").
-            (count($processorCountWheres)>0 ? " and ( ".implode(' or ', $processorCountWheres)." ) " : " ").
-            "group by vt.ak_def_id  order by vt.ak_name ";
+        $sql = "SELECT distinct vt.ak_def_id, vt.ak_name, akd.description, akd.ak_base_name, akd.processor_unit, " .
+            "unix_timestamp(min(start_time)) as start_ts, unix_timestamp(max(end_time)) as end_ts " .
+            "FROM `a_tree` vt, app_kernel_def akd " .
+            "WHERE vt.ak_def_id = akd.ak_def_id AND akd.enabled = 1 AND akd.visible = 1";
+        $params = array();
 
-        $result = $this->db->query($sql);
+        if (count($resource_ids) > 0){
+            $sql .= ' AND vt.resource_id in (:resource_ids)';
+            $params[':resource_ids'] = implode(',', array_map('intval',$resource_ids));
+        }
+        if (count($processorCountWheres) > 0){
+            $sql .= " AND ( ".implode(' OR ', $processorCountWheres)." ) ";
+        }
+        $sql .= " GROUP BY vt.ak_def_id  ORDER BY vt.ak_name ";
+
+        $result = $this->db->query($sql, $params);
 
         $uniqueAppKernelList = array();
 
         foreach($result as $row )
         {
-            $ak_def = new AppKernelDefinition;
-            $ak_def->id = $row['ak_def_id'];
-            $ak_def->name = $row['ak_name'];
-            $ak_def->description = $row['description'];
-            $ak_def->enabled = 1;
-            $ak_def->visible = 1;
-            $ak_def->start_ts = $row['start_ts'];
-            $ak_def->end_ts = $row['end_ts'];
-
+            $ak_def = new AppKernelDefinition(
+                $id = $row['ak_def_id'],
+                $name = $row['ak_name'],
+                $basename = $row['ak_base_name'],
+                $description = $row['description'],
+                $processor_unit = $row['processor_unit'],
+                $enabled = true,
+                $visible = true,
+                $start_ts = $row['start_ts'],
+                $end_ts = $row['end_ts']
+            );
             $uniqueAppKernelList[$row['ak_def_id']] = $ak_def;
         }
         return $uniqueAppKernelList;
     }
 
-    // --------------------------------------------------------------------------------
+    /**
+     * getMetrics
+     *
+     * @param $ak_def_id
+     * @param null $start_date
+     * @param null $end_date
+     * @param array $resource_ids
+     * @param array $pu_counts
+     * @return array
+     */
 
     public function getMetrics($ak_def_id, $start_date = null, $end_date = null, array $resource_ids = array(), array $pu_counts = array())
     {
         $processorCountWheres = $this->getProcessorCountWheres($pu_counts);
 
-        $sql = "SELECT distinct vt.metric_id, vt.metric, vt.processor_unit, vt.num_units
-            FROM `a_tree` vt, app_kernel_def akd
-        where vt.ak_def_id = akd.ak_def_id and akd.enabled = 1 and akd.visible = 1 ".
-            ($ak_def_id !== null ? " and vt.ak_def_id = $ak_def_id " : " " ).
-            ($start_date !== null ? " and '$start_date' <= end_time " : " ").
-            ($end_date !== null ? " and '$end_date' >= start_time " : " ").
-            (count($resource_ids)>0?" and vt.resource_id in (".implode(',', $resource_ids).") ": " ").
-            (count($processorCountWheres)>0 ? " and ( ".implode(' or ', $processorCountWheres)." ) " : " ").
-            "order by vt.metric";
-        $result = $this->db->query($sql);
+        $sql = "SELECT distinct vt.metric_id, vt.metric, vt.unit, vt.processor_unit, vt.num_units " .
+            "FROM `a_tree` vt, app_kernel_def akd " .
+            "WHERE vt.ak_def_id = akd.ak_def_id and akd.enabled = 1 and akd.visible = 1 ";
+        $params = array();
+
+        if ($ak_def_id !== null) {
+            $sql .= 'AND vt.ak_def_id = :ak_def_id ';
+            $params[':ak_def_id'] = $ak_def_id;
+        }
+        if ( $start_date !== null) {
+            $sql .= 'AND :start_date <= end_time ';
+            $params[':start_date'] = $start_date;
+        }
+        if ($end_date !== null) {
+            $sql .= 'AND :end_date >= start_time ';
+            $params[':end_date'] = $end_date;
+        }
+        if (count($resource_ids) > 0){
+            $sql .= 'AND vt.resource_id in (:resource_ids) ';
+            $params[':resource_ids'] = implode(',', array_map('intval',$resource_ids));
+        }
+        if (count($processorCountWheres) > 0){
+            $sql .= "AND ( ".implode(' OR ', $processorCountWheres)." ) ";
+        }
+
+        $sql .= "ORDER BY vt.metric ";
+
+        $results = $this->db->query($sql, $params);
 
         $metrics = array();
-        foreach($result as $row )
+        foreach($results as $row )
         {
-            $metric = new InstanceMetric($row['metric'], null);
-            $metric->id = $row['metric_id'];
-
-            $metrics[$row['metric_id']] = $metric;
+            $metrics[$row['metric_id']] = new InstanceMetric($row['metric'], null, $row['unit'], $row['metric_id']);
 
         }
         return $metrics;
