@@ -340,8 +340,12 @@ class AppKernelDb
         return $processorCountWheres;
     }
 
-    // --------------------------------------------------------------------------------
-
+    /**
+     * Get metrics wheres for SQL select
+     *
+     * @param array $metrics array of strings like ak_<ak_def_id>_metric_<metric_id>
+     * @return array of string with SQL conditions for select
+     */
     private function getMetricWheres(array $metrics = array())
     {
         $metricWheres = array();
@@ -523,25 +527,46 @@ class AppKernelDb
         $query_params[':end_date_gte'] = $end_date;
 
         return $this->modwDB->query($query, $query_params);
-    }//getResourceListing
+    }
 
-    // --------------------------------------------------------------------------------
-
+    /**
+     * Get Processing units for resources/appkernel/metrics between $start_date and $end_date.
+     *
+     * @param null $start_date Start Date
+     * @param null $end_date End Date
+     * @param array $resource_ids Resources IDs
+     * @param array $metrics Metrics string IDs (ak_<ak_def_id>_metric_<metric_id>)
+     * @return array of ProcessingUnit
+     */
     public function getProcessingUnits($start_date = null, $end_date = null, array $resource_ids = array(), array $metrics = array())
     {
         $processingUnitList = array();
         $metricWheres = $this->getMetricWheres($metrics);
 
-        $sql = "SELECT distinct  vt.num_units, vt.processor_unit FROM `a_tree` vt, app_kernel_def akd
-        where vt.ak_def_id = akd.ak_def_id  ".
-            ($start_date !== null ? " and '$start_date' <= end_time " : " ").
-            ($end_date !== null ? " and '$end_date' >= start_time " : " ").
-            (count($resource_ids)>0?" and vt.resource_id in (".implode(',', $resource_ids).") ": "  ").
-            (count($metricWheres)>0 ? " and ( ".implode(' or ', $metricWheres)." ) " : " ").
-            "order by vt.processor_unit, vt.num_units ";
-        $result = $this->db->query($sql);
+        $sql = "SELECT distinct vt.num_units, vt.processor_unit FROM `a_tree` vt, app_kernel_def akd " .
+            "WHERE vt.ak_def_id = akd.ak_def_id  ";
+        $params = array();
+        if ( $start_date !== null) {
+            $sql .= 'AND :start_date <= end_time ';
+            $params[':start_date'] = $start_date;
+        }
+        if ($end_date !== null) {
+            $sql .= 'AND :end_date >= start_time ';
+            $params[':end_date'] = $end_date;
+        }
+        if (count($resource_ids) > 0){
+            $sql .= ' AND vt.resource_id in (:resource_ids)';
+            $params[':resource_ids'] = implode(',', array_map('intval',$resource_ids));
+        }
+        if (count($metricWheres) > 0) {
+            $sql .= " and ( ".implode(' or ', $metricWheres)." ) ";
+        }
 
-        foreach($result as $row )
+        $sql .= "ORDER BY vt.processor_unit, vt.num_units ";
+
+        $results = $this->db->query($sql, $params);
+
+        foreach($results as $row )
         {
             $processing_unit = new ProcessingUnit;
             $processing_unit->unit = $row['processor_unit'];

@@ -37,19 +37,19 @@ class InstanceData
 
   // Name of the app kernel in the database definition
   public $db_ak_def_name = NULL;
-  
+
   // app kernel visability in the database definition
   public $db_ak_def_visible = NULL;
 
   // Database id for the resource
   public $db_resource_id = NULL;
-  
+
   // Name of resource in the database definition
   public $db_resource_name = NULL;
-  
+
   // Nickname of resource in the database definition
   public $db_resource_nickname = NULL;
-  
+
   // resource visability in the database definition
   public $db_resource_visible = NULL;
 
@@ -69,7 +69,7 @@ class InstanceData
 
   // The name of the app kernel including the number of processing units
   public $deployment_ak_name = NULL;
-  
+
   // The name of the app kernel without number of processing units (taken from the database)
   public $deployment_ak_base_name = NULL;
 
@@ -139,7 +139,7 @@ class InstanceData
   {
     return "(#{$this->deployment_instance_id} {$this->deployment_hostname}:{$this->deployment_ak_base_name}.{$this->deployment_num_proc_units} @" . date("Y-m-d H:i:s", $this->deployment_time) . ")";
   }  // __toString()
-  
+
   // --------------------------------------------------------------------------------
   // Return a string representation of the app kernel instance
   //
@@ -255,7 +255,7 @@ class InstanceData
       $valueList = preg_split('/[\n\r]+/', $parameter->value);
       sort($valueList);
       $valueList=array_unique($valueList);
-      
+
       $paramStr="";
       foreach ($valueList as $v) {
           if(substr($v,0,4)=='MD5:'){
@@ -305,7 +305,7 @@ class InstanceData
   // --------------------------------------------------------------------------------
 
   public function reset()
-  { 
+  {
     $this->db_ak_id = NULL;
     $this->db_ak_def_id = NULL;
     $this->db_ak_def_name = NULL;
@@ -353,7 +353,7 @@ class InstanceData
 
   public static function decode(&$str)
   {
-    
+
     $decodedStr = NULL;
     $unzippedStr = "";
 
@@ -514,6 +514,12 @@ class ProcessingUnit
 {
 	public $unit = NULL;
 	public $count = NULL;
+
+	public function __construct($unit=NULL, $count=NULL)
+    {
+        $this->unit = $unit;
+        $this->count = $count;
+    }
 }
 
 ?>
