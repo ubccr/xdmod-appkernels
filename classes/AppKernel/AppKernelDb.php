@@ -632,7 +632,7 @@ class AppKernelDb
     }
 
     /**
-     * getMetrics
+     * Get Metrics obtained between $start_date and $end_date for $ak_def_id on $resource_ids
      *
      * @param $ak_def_id
      * @param null $start_date
@@ -641,7 +641,6 @@ class AppKernelDb
      * @param array $pu_counts
      * @return array
      */
-
     public function getMetrics($ak_def_id, $start_date = null, $end_date = null, array $resource_ids = array(), array $pu_counts = array())
     {
         $processorCountWheres = $this->getProcessorCountWheres($pu_counts);
@@ -1311,31 +1310,33 @@ class AppKernelDb
         $criteriaList = array();
         $instanceList = array();
 
-        $sql =
-            "SELECT i.ak_id, ak.num_units, collected, status
-            FROM ak_instance i
-            JOIN app_kernel ak USING(ak_id)
-            JOIN resource r USING(resource_id)";
+        $sql = "SELECT i.ak_id, ak.num_units, collected, status " .
+            "FROM ak_instance i " .
+            "JOIN app_kernel ak USING(ak_id)" .
+            "JOIN resource r USING(resource_id)";
+        $params = array();
 
-        if (null !== $appKernelDefId ) {
-            $criteriaList[] = "i.ak_def_id = $appKernelDefId";
+        if ($appKernelDefId !== null) {
+            $criteriaList[] = "i.ak_def_id = :ak_def_id";
+            $params[":ak_def_id"] = $appKernelDefId;
         }
-        if (null !== $resourceId ) {
-            $criteriaList[] = "resource_id = $resourceId";
+        if ($resourceId !== null) {
+            $criteriaList[] = "resource_id = :resource_id";
+            $params[":resource_id"] = $resourceId;
         }
 
-        if (0 !== count($criteriaList) ) {
+        if (count($criteriaList) !==0) {
             $sql .= " WHERE " . implode(" AND ", $criteriaList);
         }
 
         $sql .= " ORDER BY collected DESC";
-        $result = $this->db->query($sql);
+        $result = $this->db->query($sql, $params);
 
         foreach ( $result as $row )
         {
             $ak = new InstanceData;
-            $ak->db_ak_id = $row['ak_id'];
-            $ak->deployment_num_proc_unit = $row['num_units'];
+            $ak->db_ak_id = intval($row['ak_id']);
+            $ak->deployment_num_proc_units = intval($row['num_units']);
             $ak->deployment_time = $row['collected'];
             $ak->status = $row['status'];
             $instanceList[] = $ak;
