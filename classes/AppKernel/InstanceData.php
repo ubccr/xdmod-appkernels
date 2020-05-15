@@ -29,10 +29,14 @@ class InstanceData
     // --------------------------------------------------------------------------------
     // Information from the app kernel database.  Prefixed with "db_"
 
-    // Application kernel id (takes into account the number of proc units)
+    /**
+     * @var int|null Application kernel id (takes into account the number of proc units)
+     */
     public $db_ak_id = null;
 
-    // Database id for the application kernel definition
+    /**
+     * @var int|null Database id for the application kernel definition
+     */
     public $db_ak_def_id = null;
 
     // Name of the app kernel in the database definition
@@ -73,7 +77,9 @@ class InstanceData
     // The name of the app kernel without number of processing units (taken from the database)
     public $deployment_ak_base_name = null;
 
-    // The number of processing units used by this app kernel
+    /**
+     * @var int|null  The number of processing units used by this app kernel
+     */
     public $deployment_num_proc_units = null;
 
     // The resource that the app kernel was run on
@@ -82,7 +88,9 @@ class InstanceData
     // The optional cluster node that the app kernel was run on
     public $deployment_execution_hostname = null;
 
-    // Execution time (unix timestamp)
+    /**
+     * @var int|null Execution time (unix timestamp)
+     */
     public $deployment_time = null;
 
     // Error message returned by the deployment infrastructure

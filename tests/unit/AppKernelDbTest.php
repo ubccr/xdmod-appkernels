@@ -14,7 +14,7 @@ function create_instance_data($db_ak_id, $deployment_num_proc_units, $deployment
 {
     $ak = new InstanceData;
     $ak->db_ak_id = $db_ak_id;
-    $ak->deployment_num_proc_units = $deployment_num_proc_units;
+    $ak->deployment_num_proc_units = strtotime($deployment_num_proc_units);
     $ak->deployment_time = $deployment_time;
     $ak->status = $status;
     return $ak;
@@ -233,10 +233,10 @@ final class AppKernelDbTest extends TestCase
     /**
      * @dataProvider loadAppKernelInstancesProvider
      */
-    public function testLoadAppKernelInstances($appKernelDefId, $resourceId, $n_expected = null, $expected = null)
+    public function testLoadAppKernelInstances($ak_def_id, $resource_id, $n_expected = null, $expected = null)
     {
         $ak_db = new \AppKernel\AppKernelDb();
-        $actual = $ak_db->loadAppKernelInstances($appKernelDefId, $resourceId);
+        $actual = $ak_db->loadAppKernelInstances($ak_def_id, $resource_id);
 
         if ($expected === null && $n_expected === null) {
             print(count($actual) . ", [\n");
