@@ -1,1086 +1,835 @@
-#!/usr/bin/env php
 <?php
-/**
- * Script for querying AKRR and ingesting the results into the Open
- * XDMoD data warehouse.  Queries the deployment engine, parses the
- * results, and imports them into the data warehouse.
- *
- * @package OpenXdmod\AppKernels
- *
- * @author Steve Gallo
- * @author Amin Ghadersohi
- * @author Tom Yearke
- * @author Nikolay Simakov
- * @author Jeffrey T. Palmer <jtpalmer@buffalo.edu>
- */
 
-require_once __DIR__ . '/../configuration/linker.php';
+namespace AppKernel;
 
 use CCR\Log;
-use AppKernel\AppKernelDb;
-use AppKernel\IngestionLogEntry;
-use AppKernel\InstanceData;
+use AppKernel;
+
+//use AppKernel\AppKernelDb;
+//use AppKernel\IngestionLogEntry;
+//use AppKernel\InstanceData;
+use Exception;
 
 /**
- * Explorer class to query and parse the deployment engine.
- *
- * NOTE: This should be renamed to Akrr or AKRR.
- *
- * @var string
+ * Class AppKernelIngestor
+ * @package AppKernel
  */
-$explorerType = 'Arr';
+class AppKernelIngestor
+{
+    /**
+     * Handle to the database resource
+     *
+     * @var \AppKernel\AppKernelDb|null
+     */
+    private $db = null;
 
-/**
- * Database handle.
- *
- * @var AppKernelDb|null
- */
-$db = null;
+    /**
+     * Optional PEAR::Log for logging
+     *
+     * @var Log|\Log|object|null
+     */
+    private $logger = null;
 
-/**
- * Logs for data on the ingestion process.
- *
- * @var IngestionLogEntry|null
- */
-$ingestionLog = null;
+    /**
+     * Operate in dry-run mode.  Query and parse files but do not update the
+     * database in any way.
+     *
+     * @var bool
+     */
+    private $dryRunMode = false;
 
-// Various flags.
+    /**
+     * Ingestion start timestamp.
+     *
+     * @var int|null
+     */
+    private $startTimestamp = null;
 
-/**
- * Calculate controls if true.
- *
- * @var bool
- */
-$calculateControls = false;
+    /**
+     * Ingestion end timestamp.
+     *
+     * @var int|null
+     */
+    private $endTimestamp = null;
 
-/**
- * Recalculate the controls and control intervals
- *
- * @var bool
- */
-$recalculateControls = false;
+    // Loading restrictions
 
-/**
- * Operate in dry-run mode.  Query and parse files but do not update the
- * database in any way.
- *
- * @var bool
- */
-$dryRunMode = false;
+    /**
+     * If set, the app kernel to ingest.
+     *
+     * @var string|null
+     */
+    private $restrictToAppKernel = null;
 
-/**
- * Use replace statements to replace duplicate metric/intance data.
- * Default behavior is to ignore duplicates.
- *
- * @var bool
- */
-$replace = false;
+    /**
+     * If set, the resource to ingest.
+     *
+     * @var string|null
+     */
+    private $restrictToResource = null;
 
-/**
- * Log level determined by "verbose", "debug" and "quiet".
- *
- * @var int
- */
-$logLevel = -1;
+    /**
+     * Remove ingested data for given time period prior to reingesting it.
+     *
+     * @var bool
+     */
+    private $removeIngestedDataVar = false;
 
-// Load timeframe options.
+    /**
+     * Use replace statements to replace duplicate metric/intance data.
+     * Default behavior is to ignore duplicates.
+     *
+     * @var bool
+     */
+    private $replace = false;
 
-/**
- * Ingestion start timestamp.
- *
- * @var int|null
- */
-$startTimestamp = null;
+    /**
+     * Recalculate the controls and control intervals
+     *
+     * @var bool
+     */
+    private $recalculateControls = false;
 
-/**
- * Ingestion end timestamp.
- *
- * @var int|null
- */
-$endTimestamp = null;
+    /**
+     * Logs for data on the ingestion process.
+     *
+     * @var IngestionLogEntry|null
+     */
+    private $ingestionLog = null;
 
-/**
- * A time period to use for ingestion.
- *
- * @see $validTimeframes
- *
- * @var string|null
- */
-$sinceLastLoadTime = null;
+    /**
+     * Number of app kernels ingested.
+     *
+     * This is not currently used.
+     *
+     * @var int
+     */
+    private $appKernelCounter = 0;
 
-/**
- * Ingestion timeperiod used in log messages.
- *
- * @var string
- */
-$ingestionTimePeriodStr = '';
+    /**
+     * Explorer class to query and parse the deployment engine.
+     *
+     * NOTE: This should be renamed to Akrr or AKRR.
+     *
+     * @var string
+     */
+    private $explorerType = 'Arr';
 
-// Loading restrictions
+    /**
+     * List of enabled resources from the app kernel database.
+     *
+     * @var array
+     */
+    private $dbResourceList = [];
+    private $dbAKList = [];
+    private $dbAKIdMap = [];
 
-/**
- * If set, the app kernel to ingest.
- *
- * @var string|null
- */
-$restrictToAppKernel = null;
-
-/**
- * If set, the resource to ingest.
- *
- * @var string|null
- */
-$restrictToResource  = null;
-
-/**
- * Deployment engine explorer.
- *
- * @var \AppKernel\iAppKernelExplorer
- */
-$deploymentExplorer = null;
-
-/**
- * List of enabled resources from the app kernel database.
- *
- * @var array
- */
-$dbResourceList = array();
-
-/**
- * Number of app kernels ingested.
- *
- * This is not currently used.
- *
- * @var int
- */
-$appKernelCounter = 0;
-
-// Structures to keep track of data for reporting ingestion results.
-
-/**
- * App kernel reports for each resource.
- *
- * @var array
- */
-$appKernelReport = array();
-
-/**
- * Summary of app kernel ingestion.
- *
- * @var array
- */
-$appKernelSummaryReport = array(
-    'examined'     => 0,
-    'loaded'       => 0,
-    'incomplete'   => 0,
-    'parse_error'  => 0,
-    'queued'       => 0,
-    'unknown_type' => 0,
-    'sql_error'    => 0,
-    'error'        => 0,
-    'duplicate'    => 0,
-    'exception'    => 0,
-);
-
-/**
- * List of all enabled resources to query.
- *
- * @var array
- */
-$resourceNicknames = array();
-
-/**
- * Timeframes available for the "last N" option
- *
- * @var array
- */
-$validTimeframes = array(
-    'hour'  => 3600,
-    'day'   => 86400,
-    'week'  => 604800,
-    'month' => 2618784,
-
-    // All data since the last successful load recorded in the database
-    'load'  => null,
-);
-
-/**
- * Remove ingested data for given time period prior to reingesting it.
- *
- * @var bool
- */
-$removeIngestedData = false;
-
-/**
- * Offset the ingesting starting date by "o" days.
- *
- * @var int
- */
-$offsetStartTimestampBy = 0;
-
-/**
- * Parse command line options.
- *
- * @var array
- */
-$options = array(
-    'h' => 'help',
-
-    // Calculate running averages and controls
-    'c' => 'calculate-controls',
-
-    // Re-calculate running averages, control and control intervals
-    'y' => 're-calculate-controls',
-
-    // Test or dry-run Mode
-    'd' => 'dry-run',
-
-    // Force replace all instance/metric data
-    'r' => 'replace',
-
-    // Start date (and optional time) for import
-    's:' => 'start:',
-
-    // End date (and optional time) for import
-    'e:' => 'end:',
-
-    // Import data using specified time period
-    'l:' => 'since-last:',
-
-    // Process only app kernels containing this string
-    'k:' => 'kernel',
-
-    // Process only the specified resource
-    'R:' => 'resource',
-
-    // Verbose mode.
-    'v' => 'verbose',
-
-    // Debug mode.
-    '' => 'debug',
-
-    // Quiet mode.
-    'q' => 'quiet',
-
-    // Remove ingested data for given time period prior to reingesting it
-    'm' => 'remove',
-
-    // offset the ingesting starting date by o days
-    'o:' => 'offset:',
-);
-
-$args = getopt(implode('', array_keys($options)), $options);
-
-foreach ($args as $arg => $value) {
-    switch ($arg) {
-        case 'c':
-        case 'calculate-controls':
-            $calculateControls = true;
-            break;
-        case 'y':
-        case 're-calculate-controls':
-            $recalculateControls = true;
-            break;
-        case 'e':
-        case 'end':
-            $value = trim($value);
-            if (!preg_match("/^[0-9]+$/", $value)) {
-                // End of the day
-                $endTimestamp = strtotime($value) + 86399;
-            } else {
-                $endTimestamp = $value;
-            }
-            break;
-        case 'd':
-        case 'dry-run':
-            $dryRunMode = true;
-            $logLevel = max($logLevel, Log::INFO);
-            break;
-        case 'r':
-        case 'replace':
-            $replace = true;
-            break;
-        case 'h':
-        case 'help':
-            usage_and_exit();
-            break;
-        case 'k':
-        case 'kernel':
-            $restrictToAppKernel = $value;
-            break;
-        case 'l':
-        case 'since-last':
-            $sinceLastLoadTime = $value;
-            break;
-        case 'R':
-        case 'resource':
-            $restrictToResource = $value;
-            break;
-        case 's':
-        case 'start':
-            $value = trim($value);
-            if (!preg_match("/^[0-9]+$/", $value)) {
-                $startTimestamp = strtotime($value);
-            } else {
-                $startTimestamp = $value;
-            }
-            break;
-        case 'm':
-        case 'remove':
-            $removeIngestedData = true;
-            break;
-        case 'o':
-        case 'offset':
-            $offsetStartTimestampBy = intval($value) * 3600 * 24;
-            break;
-        case 'q':
-        case 'quiet':
-            $logLevel = max($logLevel, Log::WARNING);
-            break;
-        case 'v':
-        case 'verbose':
-            $logLevel = max($logLevel, Log::INFO);
-            break;
-        case 'debug':
-            $logLevel = max($logLevel, Log::DEBUG);
-            break;
-        default:
-            break;
-    }
-}
-
-// Verify arguments
-//
-// The "load since last" flag or start/end flags must be specified.  If
-// start/end is specified only one is required.
-
-if (null !== $sinceLastLoadTime) {
-    if (!array_key_exists($sinceLastLoadTime, $validTimeframes)) {
-        usage_and_exit("Invalid timeframe for -l option.  Valid timeframes are: " . implode(", ", array_keys($validTimeframes)));
-    }
-} else {
-    if (null === $startTimestamp && null === $endTimestamp) {
-        usage_and_exit("Time period not specified");
-    } elseif (null !== $startTimestamp && !preg_match("/^[0-9]+$/", $startTimestamp)) {
-        usage_and_exit("Start time could not be parsed");
-    } elseif (null !== $endTimestamp && !preg_match("/^[0-9]+$/", $endTimestamp)) {
-        usage_and_exit("End time is not a unix timestamp");
-    }
-}
-
-$conf = array(
-    'file'            => false,
-    'mail'            => false,
-    'consoleLogLevel' => $logLevel,
-);
-$logger = Log::factory('xdmod-akrr', $conf);
-
-// Create handles to both databases
-try {
-    $db = new AppKernelDb($logger, 'appkernel');
-    $ingestionLog = new IngestionLogEntry();
-} catch (Exception $e) {
-    $logger->crit(array(
-        'message'    => "Error connecting to database: " . $e->getMessage(),
-        'stacktrace' => $e->getTraceAsString(),
-    ));
-    cleanup_and_exit(1);
-}
-
-// Determine the timeframe for the import
-if ($sinceLastLoadTime) {
-    $endTimestamp = time();
-
-    if ("load" == $sinceLastLoadTime) {
-        // Load the last ingestion time fron the database.  The production database takes priority.
-        $loaded = $db->loadMostRecentIngestionLogEntry($ingestionLog);
-        $startTimestamp = $ingestionLog->end_time + 1;
-    } else {
-        $startTimestamp = $endTimestamp - $validTimeframes[$sinceLastLoadTime];
-    }
-}
-
-if (null !== $startTimestamp && null === $endTimestamp) {
-    $endTimestamp = time();
-}
-
-// offset the start time
-$startTimestamp -= $offsetStartTimestampBy;
-
-// NOTE: "process_start_time" is needed for the log summary.
-$logger->notice(array(
-    'message'            => 'Ingestion start',
-    'process_start_time' => date('Y-m-d H:i:s'),
-));
-
-if ($dryRunMode) {
-    $logger->info("OPTION: Running in dryrun mode - discarding database updates");
-}
-
-if (null !== $restrictToResource) {
-    $logger->info("OPTION: Load only resource (nickname) '$restrictToResource'");
-}
-
-if (null !== $restrictToAppKernel) {
-    $logger->info("OPTION: Load only app kernels starting with '$restrictToAppKernel'");
-}
-
-$ingestionTimePeriodStr
-    = date("Y-m-d H:i:s", $startTimestamp)
-    . " to "
-    . date("Y-m-d H:i:s", $endTimestamp);
-
-$logger->notice(array(
-    'message'         => 'Ingestion data time period',
-    'data_start_time' => date("Y-m-d H:i:s", $startTimestamp),
-    'data_end_time'   => date("Y-m-d H:i:s", $endTimestamp),
-));
-
-// Reset and initialize the ingestion logs
-$ingestionLog->reset();
-$ingestionLog->source      = $explorerType;
-$ingestionLog->url         = null;
-$ingestionLog->last_update = time();
-$ingestionLog->start_time  = $startTimestamp;
-$ingestionLog->end_time    = $endTimestamp;
-
-// Instantiate the Explorer
-try {
-    $config = array(
-        'config_appkernel'   => 'appkernel',
-        'config_akrr'        => 'akrr-db',
-        'add_supremm_metrix' => false,
+    /**
+     * Deployment engine explorer.
+     *
+     * @var \AppKernel\iAppKernelExplorer
+     */
+    private $deploymentExplorer = null;
+    private $parser = null;
+    /**
+     * Summary of app kernel ingestion.
+     *
+     * @var array
+     */
+    private $appKernelSummaryReport = array(
+        'examined' => 0,
+        'loaded' => 0,
+        'incomplete' => 0,
+        'parse_error' => 0,
+        'queued' => 0,
+        'unknown_type' => 0,
+        'sql_error' => 0,
+        'error' => 0,
+        'duplicate' => 0,
+        'exception' => 0,
     );
-    $deploymentExplorer = AppKernel::explorer($explorerType, $config, $logger);
-    $deploymentExplorer->setQueryInterval($startTimestamp, $endTimestamp);
-} catch (Exception $e) {
-    $msg = "Error creating explorer ($explorerType): " . $e->getMessage();
-    $logger->crit(array(
-        'message'    => $msg,
-        'stacktrace' => $e->getTraceAsString(),
-    ));
-    $ingestionLog->setStatus(false, $msg);
-    cleanup_and_exit(1);
-}
 
-// Instantiate the Parser
-try {
-    $parser = AppKernel::parser($explorerType, null, $logger);
-} catch (Exception $e) {
-    $msg = "Error creating parser ($explorerType): " . $e->getMessage();
-    $logger->crit(array(
-        'message'    => $msg,
-        'stacktrace' => $e->getTraceAsString(),
-    ));
-    $ingestionLog->setStatus(false, $msg);
-    cleanup_and_exit(1);
-}
+    /**
+     * Timeframes available for the "last N" option
+     *
+     * @var array
+     */
+    public static $validTimeframes = array(
+        'hour' => 3600,
+        'day' => 86400,
+        'week' => 604800,
+        'month' => 2618784,
 
-// Get enabled resources configured in the app kernel database
+        // All data since the last successful load recorded in the database
+        'load' => null,
+    );
 
-// If we are restricting the resource do it now
-$options = array('inc_hidden' => true);
-if (null !== $restrictToResource) {
-    $options['filter' ] = $restrictToResource;
-}
+    /**
+     * AppKernelIngestor constructor.
+     * @param \Log|null $logger A Pear::Log object (http://pear.php.net/package/Log/
+     * @param array $config The configuration section for ingestion
+     * @param bool $config ['dryRunMode']
+     * @param int|null $config ['startTimestamp']
+     * @param int|null $config ['endTimestamp']
+     * @param string|null $config ['sinceLastLoadTime']
+     * @param int $config ['offsetStartTimestampBy']
+     * @param string|null $config ['restrictToAppKernel']
+     * @param string|null $config ['restrictToResource']
+     * @param bool $config ['removeIngestedData']
+     *
+     * @throws Exception on incorrect config
+     */
+    public function __construct(\Log $logger = null, $config = [])
+    {
+        $this->logger = $logger !== null ? $logger : \Log::singleton('null');
 
-try {
-    $dbResourceList = $db->loadResources($options);
-    $logger->debug("Loaded database resources: " . json_encode(array_keys($dbResourceList)));
-} catch (\PDOException $e) {
-    $msg = "Error querying database for resoures: " . formatPdoExceptionMessage($e);
-    $logger->crit(array(
-        'message'    => $msg,
-        'stacktrace' => $e->getTraceAsString(),
-    ));
-    $ingestionLog->setStatus(false, $msg);
-    cleanup_and_exit(1);
-}
-
-if (0 == count($dbResourceList)) {
-    $msg = "No resources enabled in the database, skipping import.";
-    $logger->warning($msg);
-    $ingestionLog->setStatus(true, $msg);
-    cleanup_and_exit(1);
-}
-
-try {
-    $dbAKList  = $db->loadAppKernelDefinitions();
-    $dbAKIdMap = $db->loadAppKernels(true, true);
-    $logger->debug('DB AK List: ' . json_encode($dbAKList));
-    $logger->debug('DB AK ID Map: ' . json_encode($dbAKIdMap));
-} catch (\PDOException $e) {
-    $msg = "Error querying database for appkernels: " . formatPdoExceptionMessage($e);
-    $logger->crit(array(
-        'message'    => $msg,
-        'stacktrace' => $e->getTraceAsString(),
-    ));
-    $ingestionLog->setStatus(false, $msg);
-    cleanup_and_exit(1);
-}
-
-$resourceNicknames = array_keys($dbResourceList);
-
-// remove old ingested data
-if ($removeIngestedData === true) {
-    $logger->notice('Removing old ingested data (if present) in new ingestion period');
-
-    $akdb = $db->getDB();
-
-    $sqlcond
-        = "collected >= '" . date("Y-m-d H:i:s", $startTimestamp)
-        . "' AND collected <= '" . date("Y-m-d H:i:s", $endTimestamp) . "'";
-    $sqlcondUNIX_TIMESTAMP
-        = "collected >= UNIX_TIMESTAMP('"
-        . date("Y-m-d H:i:s", $startTimestamp)
-        . "') AND collected <= UNIX_TIMESTAMP('"
-        . date("Y-m-d H:i:s", $endTimestamp) . "')";
-
-    if ($restrictToResource!==null){
-        $sqlcond .= " AND resource_id = '"
-            . $dbResourceList[$restrictToResource]->id . "'";
-        $sqlcondUNIX_TIMESTAMP .= " AND resource_id = '"
-            . $dbResourceList[$restrictToResource]->id . "'";
-    }
-
-    $sqlAKDefcond    = "";
-    $sqlAKcond       = "";
-    $sqlNumUnitsCond = "";
-
-    if ($restrictToAppKernel !== null) {
-        $sqlAKDefcond .= " AND ak_def_id = '"
-            . $dbAKList[$restrictToAppKernel]->id . "'";
-
-        $m_aks       = array();
-        $m_num_units = array();
-
-        $response = $akdb->query("SELECT ak_id, num_units FROM mod_appkernel.app_kernel WHERE ak_def_id='" . $dbAKList[$restrictToAppKernel]->id . "'");
-
-        foreach ($response as $v) {
-            $m_aks[]       = "ak_id='" . $v['ak_id'] . "'";
-            $m_num_units[] = "num_units=" . $v['num_units'] . "";
+        // set options
+        if (array_key_exists('dryRunMode', $config)) {
+            if (!is_bool($config['dryRunMode'])) {
+                throw new Exception("dryRunMode should be boolean!");
+            }
+            $this->dryRunMode = $config['dryRunMode'];
+            unset($config['dryRunMode']);
         }
-        $sqlAKcond       = " AND (" . implode(" OR ", $m_aks) . ")";
-        $sqlNumUnitsCond = " AND (" . implode(" OR ", $m_num_units) . ")";
+        if (array_key_exists('endTimestamp', $config)) {
+            if ($config['endTimestamp'] !== null && !is_integer($config['endTimestamp'])) {
+                throw new Exception("endTimestamp should be integer timestamp!");
+            }
+            $this->endTimestamp = $config['endTimestamp'];
+            unset($config['endTimestamp']);
+        }
+        if (array_key_exists('startTimestamp', $config)) {
+            if ($config['startTimestamp'] !== null && !is_integer($config['startTimestamp'])) {
+                throw new Exception("startTimestamp should be integer timestamp!");
+            }
+            $this->startTimestamp = $config['startTimestamp'];
+            unset($config['startTimestamp']);
+        }
+        if (array_key_exists('restrictToAppKernel', $config)) {
+            if ($config['restrictToAppKernel'] !== null && !is_string($config['restrictToAppKernel'])) {
+                throw new Exception("restrictToAppKernel should be string!");
+            }
+            $this->restrictToAppKernel = $config['restrictToAppKernel'];
+            unset($config['restrictToAppKernel']);
+        }
+        if (array_key_exists('restrictToResource', $config)) {
+            if ($config['restrictToResource'] !== null && !is_string($config['restrictToResource'])) {
+                throw new Exception("restrictToResource should be string!");
+            }
+            $this->restrictToResource = $config['restrictToResource'];
+            unset($config['restrictToResource']);
+        }
+        if (array_key_exists('removeIngestedData', $config)) {
+            if (!is_bool($config['removeIngestedData'])) {
+                throw new Exception("removeIngestedData should be boolean!");
+            }
+            $this->removeIngestedDataVar = $config['removeIngestedData'];
+            unset($config['removeIngestedData']);
+        }
+        if (array_key_exists('replace', $config)) {
+            if (!is_bool($config['replace'])) {
+                throw new Exception("replace should be boolean!");
+            }
+            $this->replace = $config['replace'];
+            unset($config['replace']);
+        }
+        if (array_key_exists('recalculateControls', $config)) {
+            if (!is_bool($config['recalculateControls'])) {
+                throw new Exception("recalculateControls should be boolean!");
+            }
+            $this->recalculateControls = $config['recalculateControls'];
+            unset($config['recalculateControls']);
+        }
+        /**
+         * A time period to use for ingestion.
+         *
+         * @see $validTimeframes
+         *
+         * @var string|null
+         */
+        $sinceLastLoadTime = null;
+        if (array_key_exists('sinceLastLoadTime', $config)) {
+            $sinceLastLoadTime = $config['sinceLastLoadTime'];
+            if ($sinceLastLoadTime !== null && !array_key_exists($sinceLastLoadTime,
+                    AppKernelIngestor::$validTimeframes)) {
+                throw new Exception("sinceLastLoadTime should be [hour,day,week,month,load]");
+            }
+            unset($config['sinceLastLoadTime']);
+        }
+        /**
+         * Offset the ingesting starting date by "o" days.
+         *
+         * @var int
+         */
+        $offsetStartTimestampBy = 0;
+        if (array_key_exists('offsetStartTimestampBy', $config)) {
+            $offsetStartTimestampBy = intval($config['offsetStartTimestampBy']);
+            unset($config['offsetStartTimestampBy']);
+        }
+
+        if (count($config) > 0) {
+            throw new Exception("Unknown config options: " . implode(",", array_keys($config)));
+        }
+
+        // Create handles to both databases
+        $this->db = new AppKernelDb($this->logger, 'appkernel');
+        $this->ingestionLog = new IngestionLogEntry();
+
+        // Determine the startTimestamp from sinceLastLoadTime the import
+        if ($sinceLastLoadTime !== null) {
+            $this->endTimestamp = time();
+
+            if ("load" == $sinceLastLoadTime) {
+                // Load the last ingestion time from the database.  The production database takes priority.
+                $loaded = $this->db->loadMostRecentIngestionLogEntry($this->ingestionLog);
+                if ($loaded === false) {
+                    throw new Exception("AppKernelIngestor::__construct can not load loadMostRecentIngestionLogEntry");
+                }
+                $this->startTimestamp = $this->ingestionLog->end_time + 1;
+            } else {
+                $this->startTimestamp = $this->endTimestamp - AppKernelIngestor::$validTimeframes[$sinceLastLoadTime];
+            }
+        }
+
+        if ($this->startTimestamp !== null && $this->endTimestamp === null) {
+            $this->endTimestamp = time();
+        }
+
+        // offset the start time
+        $this->startTimestamp -= $offsetStartTimestampBy;
+
+
+        // Get enabled resources configured in the app kernel database
+
+        // If we are restricting the resource do it now
+        $options = array('inc_hidden' => true);
+        if ($this->restrictToResource !== null) {
+            $options['filter'] = $this->restrictToResource;
+        }
+
+        try {
+            $this->dbResourceList = $this->db->loadResources($options);
+            $this->logger->debug("Loaded database resources: " . json_encode(array_keys($this->dbResourceList)));
+        } catch (\PDOException $e) {
+            $msg = "Error querying database for resoures: " . formatPdoExceptionMessage($e);
+            $this->logger->crit(array(
+                'message' => $msg,
+                'stacktrace' => $e->getTraceAsString(),
+            ));
+            $this->ingestionLog->setStatus(false, $msg);
+            return false;
+        }
+
+        if (count($this->dbResourceList) == 0) {
+            $msg = "No resources enabled in the database, skipping import.";
+            $this->logger->warning($msg);
+            $this->ingestionLog->setStatus(true, $msg);
+            return false;
+        }
+
+        try {
+            $this->dbAKList = $this->db->loadAppKernelDefinitions();
+            $this->dbAKIdMap = $this->db->loadAppKernels(true, true);
+            $this->logger->debug('DB AK List: ' . json_encode($this->dbAKList));
+            $this->logger->debug('DB AK ID Map: ' . json_encode($this->dbAKIdMap));
+        } catch (\PDOException $e) {
+            $msg = "Error querying database for appkernels: " . formatPdoExceptionMessage($e);
+            $this->logger->crit(array(
+                'message' => $msg,
+                'stacktrace' => $e->getTraceAsString(),
+            ));
+            $this->ingestionLog->setStatus(false, $msg);
+            return false;
+        }
     }
-    $akdb->execute("DELETE FROM mod_appkernel.metric_data WHERE " . $sqlcond . $sqlAKcond);
-    $logger->info("SELECT * FROM mod_appkernel.metric_data WHERE " . $sqlcond . $sqlAKcond);
-    $akdb->execute("DELETE FROM mod_appkernel.parameter_data WHERE " . $sqlcond . $sqlAKcond);
-    $akdb->execute("DELETE FROM mod_appkernel.ak_instance_debug WHERE " . $sqlcond . $sqlAKcond);
-    $akdb->execute("DELETE FROM mod_appkernel.ak_instance WHERE " . $sqlcond . $sqlAKcond);
-    $akdb->execute("DELETE FROM mod_appkernel.a_data WHERE " . $sqlcondUNIX_TIMESTAMP . $sqlAKDefcond . $sqlNumUnitsCond);
-    $akdb->execute("DELETE FROM mod_appkernel.a_data2 WHERE " . $sqlcondUNIX_TIMESTAMP . $sqlAKDefcond . $sqlNumUnitsCond);
-    $logger->info("SELECT * FROM mod_appkernel.a_data2 WHERE " . $sqlcondUNIX_TIMESTAMP . $sqlAKDefcond . $sqlNumUnitsCond);
-}
 
-// Iterate over each resource and query for all app kernels for that
-// resource and time period.  Use a single AppKernelData object and
-// re-initialize it for each app kernel instance.  This'll keep us lean
-// and mean.
-$parsedInstanceData = new InstanceData();
-$logger->info("Start processing application kernel data");
-
-if (null !== $restrictToAppKernel) {
-    $logger->info("Restrict to app kernels containing string '$restrictToAppKernel'");
-}
-
-foreach ($resourceNicknames as $resourceNickname) {
-    $logger->info("Start resource: $resourceNickname");
-
-    $resourceReport    = array();
-    $resource_id       = $dbResourceList[$resourceNickname]->id;
-    $resource_name     = $dbResourceList[$resourceNickname]->name;
-    $resource_nickname = $dbResourceList[$resourceNickname]->nickname;
-    $resource_visible  = $dbResourceList[$resourceNickname]->visible;
-
-    $options = array('resource' => $resourceNickname);
-
-    if (null !== $restrictToAppKernel) {
-        $options['app_kernel'] = $restrictToAppKernel;
+    public function __destruct()
+    {
+        if ($this->dryRunMode == false && $this->db !== null && $this->ingestionLog !== null) {
+            if ($this->db instanceof \AppKernel\AppKernelDb) {
+                if ($this->ingestionLog->source !== null) {
+                    $this->db->storeIngestionLogEntry($this->ingestionLog);
+                }
+            }
+        }
     }
 
-    $instanceList = array();
+    /**
+     * Remove Ingested Data (For clean re-ingestion)
+     */
+    public function removeIngestedData()
+    {
+        $this->logger->notice('Removing old ingested data (if present) in new ingestion period');
 
-    try {
-        $instanceListGroupedByAK = $deploymentExplorer->getAvailableInstances($options, true);
-        $numInstances = 0;
+        $akdb = $this->db->getDB();
+
+        $sqlcondDatetime = "collected >= :startDateTime AND collected <= :endDateTime";
+        $sqlcondTimestamp = "collected >= UNIX_TIMESTAMP(:startDateTime) AND collected <= UNIX_TIMESTAMP(:endDateTime)";
+
+        $sqlcondDatetimeParam = [
+            ':startDateTime' => date("Y-m-d H:i:s", $this->startTimestamp),
+            ':endDateTime' => date("Y-m-d H:i:s", $this->endTimestamp)
+        ];
+
+        if ($this->restrictToResource !== null) {
+            $sqlcondDatetime .= " AND resource_id = :resource_id";
+            $sqlcondTimestamp .= " AND resource_id = :resource_id";
+            $sqlcondDatetimeParam[':resource_id'] = $this->dbResourceList[$this->restrictToResource]->id;
+        }
+
+        $sqlAKDefcond = "";
+        $sqlAKDefcondParam = [];
+        $sqlAKcond = "";
+        $sqlAKcondParam = [];
+        $sqlNumUnitsCond = "";
+        $sqlNumUnitsCondParam = [];
+
+        if ($this->restrictToAppKernel !== null) {
+            $sqlAKDefcond .= " AND ak_def_id = :ak_def_id";
+            $sqlAKDefcondParam[':ak_def_id'] = $this->dbAKList[$this->restrictToAppKernel]->id;
+
+            $response = $akdb->query("SELECT ak_id, num_units FROM mod_appkernel.app_kernel WHERE ak_def_id=?",
+                [$this->dbAKList[$this->restrictToAppKernel]->id]);
+
+            foreach ($response as $i => $v) {
+                $sqlAKcondParam[':ak_id_' . $i] = $v['ak_id'];
+                $sqlNumUnitsCondParam[':num_units_' . $i] = $v['ak_id'];
+            }
+            $sqlAKcond = " AND ak_id IN (" . implode(",", array_keys($sqlAKcondParam)) . ")";
+            $sqlNumUnitsCond = " AND num_units IN (" . implode(",", array_keys($sqlNumUnitsCondParam)) . ")";
+        }
+
+        $sqlcond = $sqlcondDatetime . $sqlAKcond;
+        $sqlcondParam = array_merge($sqlcondDatetimeParam, $sqlAKcondParam);
+
+        $akdb->execute("DELETE FROM mod_appkernel.metric_data WHERE " . $sqlcond, $sqlcondParam);
+        $akdb->execute("DELETE FROM mod_appkernel.parameter_data WHERE " . $sqlcond, $sqlcondParam);
+        $akdb->execute("DELETE FROM mod_appkernel.ak_instance_debug WHERE " . $sqlcond, $sqlcondParam);
+        $akdb->execute("DELETE FROM mod_appkernel.ak_instance WHERE " . $sqlcond, $sqlcondParam);
+
+        $sqlcond = $sqlcondTimestamp . $sqlAKDefcond . $sqlNumUnitsCond;
+        $sqlcondParam = array_merge($sqlcondDatetimeParam, $sqlAKDefcondParam, $sqlNumUnitsCondParam);
+
+        $akdb->execute("DELETE FROM mod_appkernel.a_data WHERE " . $sqlcond, $sqlcondParam);
+        $akdb->execute("DELETE FROM mod_appkernel.a_data2 WHERE " . $sqlcond, $sqlcondParam);
+    }
+
+    /**
+     * Ingest AppKernel Instances executed on $resourceNickname and time period.
+     *
+     * @param string $resourceNickname
+     * @return bool true on success
+     */
+    public function ingestAppKernelInstances($resourceNickname)
+    {
+        // Use a single AppKernelData object and
+        // re-initialize it for each app kernel instance.  This'll keep us lean
+        // and mean.
+
+        $parsedInstanceData = new InstanceData();
+
+        $this->logger->info("Start resource: $resourceNickname");
+
+        $resourceReport = array();
+        $resource_id = $this->dbResourceList[$resourceNickname]->id;
+        $resource_name = $this->dbResourceList[$resourceNickname]->name;
+        $resource_nickname = $this->dbResourceList[$resourceNickname]->nickname;
+        $resource_visible = $this->dbResourceList[$resourceNickname]->visible;
+
+        $options = array('resource' => $resourceNickname);
+
+        if ($this->restrictToAppKernel !== null) {
+            $options['app_kernel'] = $this->restrictToAppKernel;
+        }
+
+        $instanceList = array();
+
+        try {
+            $instanceListGroupedByAK = $this->deploymentExplorer->getAvailableInstances($options, true);
+            $numInstances = 0;
+
+            foreach ($instanceListGroupedByAK as $ak_basename => $instanceListGroupedByNumUnits) {
+                foreach ($instanceListGroupedByNumUnits as $num_units => $instanceList) {
+                    $numInstances += count($instanceList);
+                }
+            }
+
+            $msg = "Resource: $resourceNickname found $numInstances instances";
+            if ($numInstances == 0) {
+                $this->logger->warning($msg . " from " . date("Y-m-d H:i:s", $this->startTimestamp) . " to " .
+                    date("Y-m-d H:i:s", $this->endTimestamp));
+            } else {
+                $this->logger->info($msg);
+            }
+        } catch (Exception $e) {
+            $msg = "Error retrieving app kernel instances: " . $e->getMessage();
+            $this->logger->crit(array(
+                'message' => $msg,
+                'stacktrace' => $e->getTraceAsString(),
+            ));
+            return false;
+        }
 
         foreach ($instanceListGroupedByAK as $ak_basename => $instanceListGroupedByNumUnits) {
-            foreach ($instanceListGroupedByNumUnits as $num_units => $instanceList) {
-                $numInstances += count($instanceList);
-            }
-        }
+            $this->logger->debug("Current AK: $ak_basename");
 
-        $msg = "Resource: $resourceNickname found $numInstances instances";
-        if (0 == $numInstances) {
-            $logger->warning("$msg from $ingestionTimePeriodStr");
-        } else {
-            $logger->info($msg);
-        }
-    } catch (Exception $e) {
-        $msg = "Error retrieving app kernel instances: " . $e->getMessage();
-        $logger->crit(array(
-            'message'    => $msg,
-            'stacktrace' => $e->getTraceAsString(),
-        ));
-    }
-
-    foreach ($instanceListGroupedByAK as $ak_basename => $instanceListGroupedByNumUnits) {
-        $logger->debug("Current AK: $ak_basename");
-
-        if (!isset($dbAKList[$ak_basename])) {
-            $logger->warning("$ak_basename not in AK list");
-            #continue;
-        }
-
-        $ak_def_id      = $dbAKList[$ak_basename]->id;
-        $ak_name        = $dbAKList[$ak_basename]->name;
-        $processor_unit = $dbAKList[$ak_basename]->processor_unit;
-        $ak_def_visible = $dbAKList[$ak_basename]->visible;
-
-        foreach ($instanceListGroupedByNumUnits as $num_units => $instanceList) {
-            if (!isset($dbAKIdMap[$ak_basename])) {
-                $logger->warning("$ak_basename not in AK id map");
+            if (!isset($dbAKList[$ak_basename])) {
+                $this->logger->warning("$ak_basename not in AK list");
                 #continue;
             }
 
-            $ak_id = $dbAKIdMap[$ak_basename][$num_units];
+            $ak_def_id = $this->dbAKList[$ak_basename]->id;
+            $ak_name = $this->dbAKList[$ak_basename]->name;
+            $processor_unit = $this->dbAKList[$ak_basename]->processor_unit;
+            $ak_def_visible = $this->dbAKList[$ak_basename]->visible;
 
-            foreach ($instanceList as $instanceId => $akInstance) {
-                $logger->info("Processing $akInstance");
-
-                if (!isset($resourceReport[$akInstance->akNickname])) {
-                    $resourceReport[$akInstance->akNickname] = array(
-                        'examined'     => 0,
-                        'loaded'       => 0,
-                        'incomplete'   => 0,
-                        'parse_error'  => 0,
-                        'queued'       => 0,
-                        'error'        => 0,
-                        'sql_error'    => 0,
-                        'unknown_type' => 0,
-                        'duplicate'    => 0,
-                        'exception'    => 0,
-                    );
+            foreach ($instanceListGroupedByNumUnits as $num_units => $instanceList) {
+                if (!isset($dbAKIdMap[$ak_basename])) {
+                    $this->logger->warning("$ak_basename not in AK id map");
+                    #continue;
                 }
 
-                $resourceReport[$akInstance->akNickname]['examined']++;
-                $appKernelSummaryReport['examined']++;
+                $ak_id = $this->dbAKIdMap[$ak_basename][$num_units];
 
-                try {
-                    try {
+                foreach ($instanceList as $instanceId => $akInstance) {
+                    $this->logger->info("Processing $akInstance");
 
-                        // The parser should throw 4 types of exception: general, inca error, queued job, invalid xml
-                        $success = $parser->parse($akInstance, $parsedInstanceData);
-
-                        // Set some data that will be needed for adding metrics and parameters
-                        // TODO These should be preset during InstanceData &$ak query
-                        $parsedInstanceData->db_resource_id       = $resource_id;
-                        $parsedInstanceData->db_resource_name     = $resource_name;
-                        $parsedInstanceData->db_resource_nickname = $resource_nickname;
-                        $parsedInstanceData->db_resource_visible  = $resource_visible;
-                        $parsedInstanceData->db_proc_unit_type    = $processor_unit;
-                        $parsedInstanceData->db_ak_id             = $ak_id;
-                        $parsedInstanceData->db_ak_def_id         = $ak_def_id;
-                        $parsedInstanceData->db_ak_def_name       = $ak_name;
-                        $parsedInstanceData->db_ak_def_visible    = $ak_def_visible;
-                    } catch(AppKernel\AppKernelException $e) {
-                        $msg = $e->getMessage();
-
-                        // Handle errors during parsing.  In most cases log the error, increment
-                        // a counter, and skip the saving of the data.
-
-                        switch ($e->getCode()) {
-                            case AppKernel\AppKernelException::ParseError:
-                                $resourceReport[$akInstance->akNickname]['parse_error']++;
-                                $appKernelSummaryReport['parse_error']++;
-                                $logger->err("Parse error: '$msg'");
-                                $logger->debug("Raw instance data:\n{$akInstance->data}\n");
-                                continue;
-                                break;
-                            case AppKernel\AppKernelException::Queued:
-                                $resourceReport[$akInstance->akNickname]['queued']++;
-                                $appKernelSummaryReport['queued']++;
-                                $logger->notice("Queued: '$msg'");
-                                continue;
-                                break;
-                            case AppKernel\AppKernelException::Error:
-                                $resourceReport[$akInstance->akNickname]['error']++;
-                                $appKernelSummaryReport['error']++;
-                                $logger->err("Error: '$msg'");
-                                continue;
-                                break;
-                            case AppKernel\AppKernelException::UnknownType:
-                                $resourceReport[$akInstance->akNickname]['unknown_type']++;
-                                $appKernelSummaryReport['unknown_type']++;
-                                $logger->warning("Unknown Type: '$msg'");
-                                continue;
-                                break;
-                            default:
-                                $logger->err(array(
-                                    'message'    => "AppKernelException: '$msg'",
-                                    'stacktrace' => $e->getTraceAsString(),
-                                ));
-                                continue;
-                                break;
-                        }
+                    if (!isset($resourceReport[$akInstance->akNickname])) {
+                        $resourceReport[$akInstance->akNickname] = array(
+                            'examined' => 0,
+                            'loaded' => 0,
+                            'incomplete' => 0,
+                            'parse_error' => 0,
+                            'queued' => 0,
+                            'error' => 0,
+                            'sql_error' => 0,
+                            'unknown_type' => 0,
+                            'duplicate' => 0,
+                            'exception' => 0,
+                        );
                     }
 
-                    $logger->debug(print_r($parsedInstanceData, 1));
+                    $resourceReport[$akInstance->akNickname]['examined']++;
+                    $this->appKernelSummaryReport['examined']++;
 
-                    // Store data in the appropriate databases.  Need a
-                    // better way to handle errors here so we know what
-                    // actually happened.  Use AppKernelException!!
                     try {
-                        $add_to_a_data = true;
-                        $calc_controls = true;
+                        try {
+                            // The parser should throw 4 types of exception: general, inca error, queued job, invalid xml
+                            $success = $this->parser->parse($akInstance, $parsedInstanceData);
 
-                        if (array_key_exists($resourceNickname, $dbResourceList)) {
-                            $stored = $db->storeAppKernelInstance(
-                                $parsedInstanceData,
-                                $replace,
-                                $add_to_a_data,
-                                $calc_controls,
-                                $dryRunMode
-                            );
+                            // Set some data that will be needed for adding metrics and parameters
+                            // TODO These should be preset during InstanceData &$ak query
+                            $parsedInstanceData->db_resource_id = $resource_id;
+                            $parsedInstanceData->db_resource_name = $resource_name;
+                            $parsedInstanceData->db_resource_nickname = $resource_nickname;
+                            $parsedInstanceData->db_resource_visible = $resource_visible;
+                            $parsedInstanceData->db_proc_unit_type = $processor_unit;
+                            $parsedInstanceData->db_ak_id = $ak_id;
+                            $parsedInstanceData->db_ak_def_id = $ak_def_id;
+                            $parsedInstanceData->db_ak_def_name = $ak_name;
+                            $parsedInstanceData->db_ak_def_visible = $ak_def_visible;
+                        } catch (AppKernel\AppKernelException $e) {
+                            $msg = $e->getMessage();
+
+                            // Handle errors during parsing.  In most cases log the error, increment
+                            // a counter, and skip the saving of the data.
+
+                            switch ($e->getCode()) {
+                                case AppKernel\AppKernelException::ParseError:
+                                    $resourceReport[$akInstance->akNickname]['parse_error']++;
+                                    $this->appKernelSummaryReport['parse_error']++;
+                                    $this->logger->err("Parse error: '$msg'");
+                                    $this->logger->debug("Raw instance data:\n{$akInstance->data}\n");
+                                    continue;
+                                    break;
+                                case AppKernel\AppKernelException::Queued:
+                                    $resourceReport[$akInstance->akNickname]['queued']++;
+                                    $this->appKernelSummaryReport['queued']++;
+                                    $this->logger->notice("Queued: '$msg'");
+                                    continue;
+                                    break;
+                                case AppKernel\AppKernelException::Error:
+                                    $resourceReport[$akInstance->akNickname]['error']++;
+                                    $this->appKernelSummaryReport['error']++;
+                                    $this->logger->err("Error: '$msg'");
+                                    continue;
+                                    break;
+                                case AppKernel\AppKernelException::UnknownType:
+                                    $resourceReport[$akInstance->akNickname]['unknown_type']++;
+                                    $this->appKernelSummaryReport['unknown_type']++;
+                                    $this->logger->warning("Unknown Type: '$msg'");
+                                    continue;
+                                    break;
+                                default:
+                                    $this->logger->err(array(
+                                        'message' => "AppKernelException: '$msg'",
+                                        'stacktrace' => $e->getTraceAsString(),
+                                    ));
+                                    continue;
+                                    break;
+                            }
                         }
-                    } catch (AppKernel\AppKernelException $e) {
-                        switch ($e->getCode()) {
-                            case AppKernel\AppKernelException::DuplicateInstance:
-                                $resourceReport[$akInstance->akNickname]['duplicate']++;
-                                $appKernelSummaryReport['duplicate']++;
-                                $logger->warning($e->getMessage());
-                                break;
-                            default:
-                                $logger->warning($e->getMessage());
-                                break;
+
+                        $this->logger->debug(print_r($parsedInstanceData, 1));
+
+                        // Store data in the appropriate databases.  Need a
+                        // better way to handle errors here so we know what
+                        // actually happened.  Use AppKernelException!!
+                        try {
+                            $add_to_a_data = true;
+                            $calc_controls = true;
+
+                            if (array_key_exists($resourceNickname, $this->dbResourceList)) {
+                                $stored = $this->db->storeAppKernelInstance(
+                                    $parsedInstanceData,
+                                    $this->replace,
+                                    $add_to_a_data,
+                                    $calc_controls,
+                                    $this->dryRunMode
+                                );
+                            }
+                        } catch (AppKernel\AppKernelException $e) {
+                            switch ($e->getCode()) {
+                                case AppKernel\AppKernelException::DuplicateInstance:
+                                    $resourceReport[$akInstance->akNickname]['duplicate']++;
+                                    $this->appKernelSummaryReport['duplicate']++;
+                                    $this->logger->warning($e->getMessage());
+                                    break;
+                                default:
+                                    $this->logger->warning($e->getMessage());
+                                    break;
+                            }
+                            continue;
                         }
+
+                        if (!$akInstance->completed) {
+                            $this->logger->err("$akInstance did not complete. message: '{$akInstance->message}'");
+                            $this->logger->debug("$akInstance did not complete. message: '{$akInstance->message}', stderr: '{$akInstance->stderr}'");
+                            $resourceReport[$akInstance->akNickname]['incomplete']++;
+                            $this->appKernelSummaryReport['incomplete']++;
+                        } elseif (false !== $stored) {
+                            $resourceReport[$akInstance->akNickname]['loaded']++;
+                            $this->appKernelSummaryReport['loaded']++;
+                            $this->appKernelCounter++;
+                        }
+                    } catch (\PDOException $e) {
+                        $msg = formatPdoExceptionMessage($e);
+                        $this->logger->err(array(
+                            'message' => $msg,
+                            'stacktrace' => $e->getTraceAsString(),
+                        ));
+                        $resourceReport[$akInstance->akNickname]['sql_error']++;
+                        $this->appKernelSummaryReport['sql_error']++;
+                        continue;
+                    } catch (Exception $e) {
+                        $this->logger->warning("Error: {$e->getMessage()} ({$e->getCode()}), skipping.");
+                        $resourceReport[$akInstance->akNickname]['exception']++;
+                        $this->appKernelSummaryReport['exception']++;
                         continue;
                     }
-
-                    if (!$akInstance->completed) {
-                        $logger->err("$akInstance did not complete. message: '{$akInstance->message}'");
-                        $logger->debug("$akInstance did not complete. message: '{$akInstance->message}', stderr: '{$akInstance->stderr}'");
-                        $resourceReport[$akInstance->akNickname]['incomplete']++;
-                        $appKernelSummaryReport['incomplete']++;
-                    } elseif (false !== $stored) {
-                        $resourceReport[$akInstance->akNickname]['loaded']++;
-                        $appKernelSummaryReport['loaded']++;
-                        $appKernelCounter++;
-                    }
-                } catch (\PDOException $e) {
-                    $msg = formatPdoExceptionMessage($e);
-                    $logger->err(array(
-                        'message'    => $msg,
-                        'stacktrace' => $e->getTraceAsString(),
-                    ));
-                    $resourceReport[$akInstance->akNickname]['sql_error']++;
-                    $appKernelSummaryReport['sql_error']++;
-                    continue;
-                } catch (Exception $e) {
-                    $logger->warning("Error: {$e->getMessage()} ({$e->getCode()}), skipping.");
-                    $resourceReport[$akInstance->akNickname]['exception']++;
-                    $appKernelSummaryReport['exception']++;
-                    continue;
                 }
             }
         }
+
+        $appKernelReport[$resourceNickname] = $resourceReport;
+
+        $this->logger->info("End resource: $resourceNickname");
+
+        unset($parsedInstanceData);
+        return true;
     }
 
-    $appKernelReport[$resourceNickname] = $resourceReport;
+    /**
+     * Format the summary report.
+     *
+     * @param array $reportData
+     *
+     * @return string
+     */
+    public function format_summary_report(array $reportData)
+    {
+        $reportString = "";
 
-    $logger->info("End resource: $resourceNickname");
-}
+        foreach ($reportData as $resourceNickname => $resourceData) {
+            $reportString .= "Resource nickname: $resourceNickname\n";
 
-if (!$dryRunMode) {
-    $logger->info("Loaded $appKernelCounter application kernels");
+            foreach ($resourceData as $appKernelName => $akData) {
+                $reportString .= "  App Kernel: $appKernelName\n";
+                $tmp = array();
 
-    try {
-        if ($calculateControls || $recalculateControls) {
-            $logger->info("Caculate running average and control values");
-            $db->calculateControls($recalculateControls, $recalculateControls, 20, 5, $restrictToResource, $restrictToAppKernel);
+                foreach ($akData as $key => $value) {
+                    $tmp[] = "$key = $value";
+                }
+
+                $reportString .= "    " . implode(", ", $tmp) . "\n";
+            }
         }
-    } catch (\PDOException $e) {
-        $msg = formatPdoExceptionMessage($e);
-        $logger->err(array(
-            'message'    => $msg,
-            'stacktrace' => $e->getTraceAsString(),
+
+        return $reportString;
+    }
+
+    /**
+     * @return bool true on success
+     */
+    public function run()
+    {
+        // NOTE: "process_start_time" is needed for the log summary.
+        $this->logger->notice(array(
+            'message' => 'Ingestion start',
+            'process_start_time' => date('Y-m-d H:i:s'),
         ));
-    } catch (Exception $e) {
-        $logger->err(array(
-            'message'    => "Error: {$e->getMessage()} ({$e->getCode()})",
-            'stacktrace' => $e->getTraceAsString(),
+
+        if ($this->dryRunMode) {
+            $this->logger->info("OPTION: Running in dryrun mode - discarding database updates");
+        }
+
+        if ($this->restrictToResource !== null) {
+            $this->logger->info("OPTION: Load only resource (nickname) '$this->restrictToResource'");
+        }
+
+        if ($this->restrictToAppKernel !== null) {
+            $this->logger->info("OPTION: Load only app kernels starting with '$this->restrictToAppKernel'");
+        }
+
+        $this->logger->notice(array(
+            'message' => 'Ingestion data time period',
+            'data_start_time' => date("Y-m-d H:i:s", $this->startTimestamp),
+            'data_end_time' => date("Y-m-d H:i:s", $this->endTimestamp),
         ));
-    }
-}
 
-$summaryReport
-    = "Summary report for " . date("Y-m-d H:i:s", $startTimestamp)
-    . " to " . date("Y-m-d H:i:s", $endTimestamp) . "\n"
-    . "examined = {$appKernelSummaryReport['examined']}, "
-    . "loaded = {$appKernelSummaryReport['loaded']}, "
-    . "incomplete = {$appKernelSummaryReport['incomplete']}, "
-    . "parse error = {$appKernelSummaryReport['parse_error']}, "
-    . "queued = {$appKernelSummaryReport['queued']}, "
-    . "unknown type = {$appKernelSummaryReport['unknown_type']}, "
-    . "sql_error = {$appKernelSummaryReport['sql_error']}, "
-    . "error = {$appKernelSummaryReport['error']}, "
-    . "duplicate = {$appKernelSummaryReport['duplicate']}, "
-    . "exception = {$appKernelSummaryReport['exception']}\n"
-    . format_summary_report($appKernelReport);
+        // Reset and initialize the ingestion logs
+        $this->ingestionLog->reset();
+        $this->ingestionLog->source = $this->explorerType;
+        $this->ingestionLog->url = null;
+        $this->ingestionLog->last_update = time();
+        $this->ingestionLog->start_time = $this->startTimestamp;
+        $this->ingestionLog->end_time = $this->endTimestamp;
 
-$logger->info($summaryReport);
-
-// NOTE: This is needed for the log summary.
-$logger->notice(array(
-    'message'              => 'Summary data',
-    'records_examined'     => $appKernelSummaryReport['examined'],
-    'records_loaded'       => $appKernelSummaryReport['loaded'],
-    'records_incomplete'   => $appKernelSummaryReport['incomplete'],
-    'records_parse_error'  => $appKernelSummaryReport['parse_error'],
-    'records_queued'       => $appKernelSummaryReport['queued'],
-    'records_unknown_type' => $appKernelSummaryReport['unknown_type'],
-    'records_sql_error'    => $appKernelSummaryReport['sql_error'],
-    'records_error'        => $appKernelSummaryReport['error'],
-    'records_duplicate'    => $appKernelSummaryReport['duplicate'],
-    'records_exception'    => $appKernelSummaryReport['exception']
-));
-
-// Test sending errors and queued info
-
-$ingestionLog->num = $appKernelCounter;
-
-if (0 == $appKernelSummaryReport['sql_error']) {
-    $ingestionLog->setStatus(true, serialize($appKernelSummaryReport));
-} else {
-    $ingestionLog->setStatus(false, "SQL errors present");
-}
-
-$ingestionLog->reportObj = serialize($appKernelReport);
-
-// NOTE: "process_end_time" is needed for the log summary.
-$logger->notice(array(
-    'message'          => 'Ingestion End',
-    'process_end_time' => date('Y-m-d H:i:s'),
-));
-
-cleanup_and_exit(0);
-
-/**
- * Format the summary report.
- *
- * @param array $reportData
- *
- * @return string
- */
-function format_summary_report(array $reportData)
-{
-    $reportString = "";
-
-    foreach ($reportData as $resourceNickname => $resourceData) {
-        $reportString .= "Resource nickname: $resourceNickname\n";
-
-        foreach ($resourceData as $appKernelName => $akData) {
-            $reportString .= "  App Kernel: $appKernelName\n";
-            $tmp = array();
-
-            foreach ($akData as $key => $value) {
-                $tmp[] = "$key = $value";
-            }
-
-            $reportString .= "    " . implode(", ", $tmp) . "\n";
+        // Instantiate the Explorer
+        try {
+            $config = array(
+                'config_appkernel' => 'appkernel',
+                'config_akrr' => 'akrr-db',
+                'add_supremm_metrix' => false,
+            );
+            $this->deploymentExplorer = AppKernel::explorer($this->explorerType, $config, $this->logger);
+            $this->deploymentExplorer->setQueryInterval($this->startTimestamp, $this->endTimestamp);
+        } catch (Exception $e) {
+            $msg = "Error creating explorer ($this->explorerType): " . $e->getMessage();
+            $this->logger->crit(array(
+                'message' => $msg,
+                'stacktrace' => $e->getTraceAsString(),
+            ));
+            $this->ingestionLog->setStatus(false, $msg);
+            return false;
         }
-    }
 
-    return $reportString;
-}
+        // Instantiate the Parser
+        try {
+            $this->parser = AppKernel::parser($this->explorerType, null, $this->logger);
+        } catch (Exception $e) {
+            $msg = "Error creating parser ($this->explorerType): " . $e->getMessage();
+            $this->logger->crit(array(
+                'message' => $msg,
+                'stacktrace' => $e->getTraceAsString(),
+            ));
+            $this->ingestionLog->setStatus(false, $msg);
+            return false;
+        }
 
-/**
- * Format the error report.
- *
- * @param array $reportData
- *
- * @return string
- */
-function format_error_report(array $reportData)
-{
-    $reportString = "";
+        $resourceNicknames = array_keys($this->dbResourceList);
 
-    foreach ($reportData as $resourceNickname => $resourceData) {
-        $reportString .= "\nResource nickname: $resourceNickname\n";
+        // remove old ingested data
+        if ($this->removeIngestedDataVar === true) {
+            $this->removeIngestedData();
+        }
 
-        foreach ($resourceData as $appKernelName => $info) {
-            $reportString
-                .= "  App kernel: $appKernelName (errors = "
-                . (isset($info['error']) ? count($info['error']) : 0)
-                . ", queued = "
-                . (isset($info['queued']) ? count($info['queued']) : 0)
-                . ")\n";
+        // Iterate over each resource and query for all app kernels for that
+        // resource and time period.
+        $this->logger->info("Start processing application kernel data");
 
-            if (isset($info['error'])) {
-                $reportString .= "    Errors:\n";
+        if ($this->restrictToAppKernel !== null) {
+            $this->logger->info("Restrict to app kernels containing string '$this->restrictToAppKernel'");
+        }
 
-                foreach ($info['error'] as $value) {
-                    $reportString .= "      $value\n";
-                }
-            }
-
-            if (isset($info['queued'])) {
-                $reportString .= "    Queued:\n";
-
-                foreach ($info['queued'] as $value) {
-                    $reportString .= "      $value\n";
-                }
+        foreach ($resourceNicknames as $resourceNickname) {
+            $status = $this->ingestAppKernelInstances($resourceNickname);
+            if ($status == false) {
+                return false;
             }
         }
-    }
 
-    return $reportString;
-}
+        $this->logger->info("Loaded $this->appKernelCounter application kernels");
 
-/**
- * Display usage text and exit.
- *
- * @param string $msg Optional message.
- */
-function usage_and_exit($msg = null)
-{
-    global $validTimeframes;
-
-    if (null !== $msg) {
-        echo "\n$msg\n";
-    }
-
-    $timeframes = implode(', ', array_keys($validTimeframes));
-
-    echo <<<"EOF"
-
-Usage: xdmod-akrr-ingestor [[-l *timeframe*]|[-s *start-date*] [-e *end-date*]]
-
-    -h, --help
-        Display this help.
-
-    -v, --verbose
-        Output info level logging.
-
-    --debug
-        Output debug level logging.
-
-    -q, --quiet
-        Output warning level logging.
-
-    -d, --dry-run
-        Run in dry-run mode.  Do not update database.
-
-    -r, --replace
-        Force replacement of all instance/metric data.  Default
-        behavior is to ignore duplicates.
-
-    -m, --remove
-         Remove ingested data for given time period prior to reingesting
-         it.
-
-    -c, --calculate-controls
-        Calculate the running average and control values.
-
-    -y, --re-calculate-controls
-        Re-calculate the running average, control values and control
-        intervals.
-
-    -l, --since-last *timeframe*
-        Import data for time period.
-        Valid timeframes are $timeframes.
-
-    -s, --start *start-date*
-        Start timestamp or date for import.
-
-    -e, --end *end-date*
-        End timestamp or date for import.
-
-    -o, --offset *days*
-        Offset the ingesting starting date by *days* (previous) days.
-
-    -k, --kernel *app-kernel*
-        Ingest only app kernels matching this string.
-
-    -R, --resource *resource-name*
-        Ingest app kernels for this resource only.
-
-If a start time is specified without an end time then data will be
-loaded from the start to the current time.  If an end time is specified
-without a start time then data will be loaded from the beginning to the
-end time.
-
-Examples:
-
-Ingest all application kernels since the last load and calculate control
-regions.
-
-    xdmod-akrr-ingestor -v -c -l load
-
-
-EOF;
-
-    cleanup_and_exit(1);
-}
-
-/**
- * Clean up and exit.
- *
- * @param int $exitCode Optional exit code.
- */
-function cleanup_and_exit($exitCode = 0)
-{
-    global $dryRunMode, $ingestionLog, $logger, $db;
-
-    if (!$dryRunMode) {
-        if ($db instanceof \AppKernel\AppKernelDb) {
-            $db->storeIngestionLogEntry($ingestionLog);
+        if (!$this->dryRunMode) {
+            try {
+                $this->logger->info("Caculate running average and control values");
+                $this->db->calculateControls($this->recalculateControls, $this->recalculateControls, 20, 5,
+                    $this->restrictToResource, $this->restrictToAppKernel);
+            } catch (\PDOException $e) {
+                $msg = formatPdoExceptionMessage($e);
+                $this->logger->err(array(
+                    'message' => $msg,
+                    'stacktrace' => $e->getTraceAsString(),
+                ));
+            } catch (Exception $e) {
+                $this->logger->err(array(
+                    'message' => "Error: {$e->getMessage()} ({$e->getCode()})",
+                    'stacktrace' => $e->getTraceAsString(),
+                ));
+            }
         }
-    }
 
-    if ($logger instanceof \Log) {
-        $logger->close();
-    }
+        $summaryReport
+            = "Summary report for " . date("Y-m-d H:i:s", $this->startTimestamp)
+            . " to " . date("Y-m-d H:i:s", $this->endTimestamp) . "\n"
+            . "examined = {$this->appKernelSummaryReport['examined']}, "
+            . "loaded = {$this->appKernelSummaryReport['loaded']}, "
+            . "incomplete = {$this->appKernelSummaryReport['incomplete']}, "
+            . "parse error = {$this->appKernelSummaryReport['parse_error']}, "
+            . "queued = {$this->appKernelSummaryReport['queued']}, "
+            . "unknown type = {$this->appKernelSummaryReport['unknown_type']}, "
+            . "sql_error = {$this->appKernelSummaryReport['sql_error']}, "
+            . "error = {$this->appKernelSummaryReport['error']}, "
+            . "duplicate = {$this->appKernelSummaryReport['duplicate']}, "
+            . "exception = {$this->appKernelSummaryReport['exception']}\n";
+        //. $this->format_summary_report($this->appKernelReport);
 
-    exit($exitCode);
-}
+        $this->logger->info($summaryReport);
 
-/**
- * Format a PDO exception message.
- *
- * @param PDOException $e
- *
- * @return string
- */
-function formatPdoExceptionMessage(PDOException $e)
-{
-    $msg = "";
+        // NOTE: This is needed for the log summary.
+        $this->logger->notice(array(
+            'message' => 'Summary data',
+            'records_examined' => $this->appKernelSummaryReport['examined'],
+            'records_loaded' => $this->appKernelSummaryReport['loaded'],
+            'records_incomplete' => $this->appKernelSummaryReport['incomplete'],
+            'records_parse_error' => $this->appKernelSummaryReport['parse_error'],
+            'records_queued' => $this->appKernelSummaryReport['queued'],
+            'records_unknown_type' => $this->appKernelSummaryReport['unknown_type'],
+            'records_sql_error' => $this->appKernelSummaryReport['sql_error'],
+            'records_error' => $this->appKernelSummaryReport['error'],
+            'records_duplicate' => $this->appKernelSummaryReport['duplicate'],
+            'records_exception' => $this->appKernelSummaryReport['exception']
+        ));
 
-    // If there are 3 elements in the errorInfo array we can assume
-    // that this was a driver error so display a useful message instead
-    // of the generic PDO message.
+        // Test sending errors and queued info
 
-    if (3 == count($e->errorInfo)) {
+        $this->ingestionLog->num = $this->appKernelCounter;
 
-        // MySQL error
-        list ($sqlstate, $driverCode, $driverMsg) = $e->errorInfo;
-
-        $msg = "Database Error ($driverCode): '$driverMsg'";
-        $trace = $e->getTrace();
-
-        if (count($trace) >= 3) {
-            $msg .= " at {$trace[2]['file']}:{$trace[1]['line']} {$trace[2]['function']}()";
+        if ($this->appKernelSummaryReport['sql_error'] == 0) {
+            $this->ingestionLog->setStatus(true, serialize($this->appKernelSummaryReport));
+        } else {
+            $this->ingestionLog->setStatus(false, "SQL errors present");
         }
-    } else {
 
-        // PDO layer error
-        $msg = "Database Error (" . $e->getCode() . ") '" . $e->getMessage() . "'";
-        $trace = $e->getTrace();
+        //$this->ingestionLog->reportObj = serialize($this->appKernelReport);
 
-        if (count($trace) >= 3) {
-            $msg .= " at {$trace[1]['file']}:{$trace[1]['line']} {$trace[1]['function']}()";
-        }
+        // NOTE: "process_end_time" is needed for the log summary.
+        $this->logger->notice(array(
+            'message' => 'Ingestion End',
+            'process_end_time' => date('Y-m-d H:i:s'),
+        ));
+
+        return true;
     }
-
-    return $msg;
 }
