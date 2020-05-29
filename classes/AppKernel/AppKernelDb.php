@@ -2,6 +2,7 @@
 
 namespace AppKernel;
 
+use PDO;
 use xd_utilities;
 use CCR\DB;
 use Exception;
@@ -66,7 +67,7 @@ class AppKernelDb
 
     // List of key/value pairs where the key is the resource nickname and the
     // value is the database resource id
-    private $resourceList = array();
+    private $resourceList = null;
 
     // Multi-dimensional array of app kernels already in the database mapping to
     // the database id.  App kernels are uniquely identified by the name, number
@@ -207,8 +208,10 @@ class AppKernelDb
 
         // Initialize default criteria to be overrided if necessary
 
-        $sqlCriteria = array('inc_disabled' => "enabled = 1",
-            'inc_hidden' => "visible = 1");
+        $sqlCriteria = array(
+            'inc_disabled' => "enabled = 1",
+            'inc_hidden' => "visible = 1"
+        );
 
         if (null !== $criteria) {
             foreach ($criteria as $key => $value) {
@@ -266,7 +269,6 @@ class AppKernelDb
         }
 
         return $this->appKernelDefinitions;
-
     }
 
     // --------------------------------------------------------------------------------
@@ -306,10 +308,12 @@ class AppKernelDb
 
     private function extractOperator(&$value, &$op)
     {
-        $validOperators = array('=' => '=',
+        $validOperators = array(
+            '=' => '=',
             '!' => '!=',
             '>' => '>',
-            '<' => '<');
+            '<' => '<'
+        );
         $op = "=";
         $operatorFound = false;
 
@@ -325,7 +329,6 @@ class AppKernelDb
         }
 
         return $operatorFound;
-
     }
 
     /**
@@ -355,7 +358,6 @@ class AppKernelDb
     {
         $metricWheres = array();
         foreach ($metrics as $metric) {
-
             if (preg_match('/ak_(?P<ak>\d+)_metric_(?P<metric>\d+)_(?P<pu>\d+)/', $metric, $matches)) {
                 $metricWheres[] = "(vt.ak_def_id = {$matches['ak']} and vt.metric_id = {$matches['metric']} and vt.num_units = {$matches['pu']})";
             } else {
@@ -369,8 +371,13 @@ class AppKernelDb
 
     // --------------------------------------------------------------------------------
 
-    public function getResources($start_date = null, $end_date = null, array $pu_counts = array(), array $metrics = array(), $user = null)
-    {
+    public function getResources(
+        $start_date = null,
+        $end_date = null,
+        array $pu_counts = array(),
+        array $metrics = array(),
+        $user = null
+    ) {
         $processorCountWheres = $this->getProcessorCountWheres($pu_counts);
         $metricWheres = $this->getMetricWheres($metrics);
 
@@ -411,7 +418,8 @@ class AppKernelDb
                 );
 
                 // get resource_id for all associated resources
-                $rr = $this->getResourceListing(date_format(date_sub(date_create(), date_interval_create_from_date_string("90 days")), 'Y-m-d'), date_format(date_create(), 'Y-m-d'));
+                $rr = $this->getResourceListing(date_format(date_sub(date_create(),
+                    date_interval_create_from_date_string("90 days")), 'Y-m-d'), date_format(date_create(), 'Y-m-d'));
 
                 $organizations_resources_id = array();
                 foreach ($rr as $r) {
@@ -446,7 +454,6 @@ class AppKernelDb
      */
     public function getResourceListing($start_date = null, $end_date = null)
     {
-
         // Order by descending end_date and processors
 
         $ts = "";
@@ -460,7 +467,6 @@ class AppKernelDb
         $query_params = array();
 
         if (isset($start_date) && isset($end_date)) {
-
             /*
 
             Account for ALL resources (in other words, an overlap between the supplied timeframe and the resource timeframe)
@@ -482,7 +488,6 @@ class AppKernelDb
 
             $query_params[':ts_start_date_lte'] = $end_date;
             $query_params[':ts_end_date_gte'] = $start_date;
-
         }
 
         $query = "
@@ -537,8 +542,12 @@ class AppKernelDb
      * @param array $metrics Metrics string IDs (ak_<ak_def_id>_metric_<metric_id>)
      * @return array of ProcessingUnit
      */
-    public function getProcessingUnits($start_date = null, $end_date = null, array $resource_ids = array(), array $metrics = array())
-    {
+    public function getProcessingUnits(
+        $start_date = null,
+        $end_date = null,
+        array $resource_ids = array(),
+        array $metrics = array()
+    ) {
         $processingUnitList = array();
         $metricWheres = $this->getMetricWheres($metrics);
 
@@ -554,8 +563,15 @@ class AppKernelDb
             $params[':end_date'] = $end_date;
         }
         if (count($resource_ids) > 0) {
-            $sql .= ' AND vt.resource_id in (:resource_ids)';
-            $params[':resource_ids'] = implode(',', array_map('intval', $resource_ids));
+            $sql .= ' AND vt.resource_id in (';
+            for($i=0; $i < count($resource_ids); $i++) {
+                $sql .= ':resource_id_' . $i;
+                if($i < count($resource_ids) - 1) {
+                    $sql .= ',';
+                }
+                $params[':resource_id_' . $i] = $resource_ids[$i];
+            }
+            $sql .= ')';
         }
         if (count($metricWheres) > 0) {
             $sql .= " and ( " . implode(' or ', $metricWheres) . " ) ";
@@ -575,15 +591,19 @@ class AppKernelDb
     }
 
     /**
-     * Get list of unique appkernels on $resource_ids
+     * Get list of unique appkernels on $resource_ids. In case of multiple resources appkernel should be
+     * at least at one.
      *
      * @param array $resource_ids
      * @param array $node_counts
      * @param array $core_counts
      * @return array
      */
-    public function getUniqueAppKernels(array $resource_ids = array(), array $node_counts = array(), array $core_counts = array())
-    {
+    public function getUniqueAppKernels(
+        array $resource_ids = array(),
+        array $node_counts = array(),
+        array $core_counts = array()
+    ) {
         $processorCountWheres = $this->getProcessorCountWheres($node_counts, $core_counts);
 
         $sql = "SELECT distinct vt.ak_def_id, vt.ak_name, akd.description, akd.ak_base_name, akd.processor_unit, " .
@@ -593,8 +613,15 @@ class AppKernelDb
         $params = array();
 
         if (count($resource_ids) > 0) {
-            $sql .= ' AND vt.resource_id in (:resource_ids)';
-            $params[':resource_ids'] = implode(',', array_map('intval', $resource_ids));
+            $sql .= ' AND vt.resource_id in (';
+            for($i=0; $i < count($resource_ids); $i++) {
+                $sql .= ':resource_id_' . $i;
+                if($i < count($resource_ids) - 1) {
+                    $sql .= ',';
+                }
+                $params[':resource_id_' . $i] = intval($resource_ids[$i]);
+            }
+            $sql .= ')';
         }
         if (count($processorCountWheres) > 0) {
             $sql .= " AND ( " . implode(' OR ', $processorCountWheres) . " ) ";
@@ -632,8 +659,13 @@ class AppKernelDb
      * @param array $pu_counts
      * @return array
      */
-    public function getMetrics($ak_def_id, $start_date = null, $end_date = null, array $resource_ids = array(), array $pu_counts = array())
-    {
+    public function getMetrics(
+        $ak_def_id,
+        $start_date = null,
+        $end_date = null,
+        array $resource_ids = array(),
+        array $pu_counts = array()
+    ) {
         $processorCountWheres = $this->getProcessorCountWheres($pu_counts);
 
         $sql = "SELECT distinct vt.metric_id, vt.metric, vt.unit, vt.processor_unit, vt.num_units " .
@@ -654,8 +686,15 @@ class AppKernelDb
             $params[':end_date'] = $end_date;
         }
         if (count($resource_ids) > 0) {
-            $sql .= 'AND vt.resource_id in (:resource_ids) ';
-            $params[':resource_ids'] = implode(',', array_map('intval', $resource_ids));
+            $sql .= ' AND vt.resource_id in (';
+            for($i=0; $i < count($resource_ids); $i++) {
+                $sql .= ':resource_id_' . $i;
+                if($i < count($resource_ids) - 1) {
+                    $sql .= ',';
+                }
+                $params[':resource_id_' . $i] = intval($resource_ids[$i]);
+            }
+            $sql .= ')';
         }
         if (count($processorCountWheres) > 0) {
             $sql .= "AND ( " . implode(' OR ', $processorCountWheres) . " ) ";
@@ -668,7 +707,6 @@ class AppKernelDb
         $metrics = array();
         foreach ($results as $row) {
             $metrics[$row['metric_id']] = new InstanceMetric($row['metric'], null, $row['unit'], $row['metric_id']);
-
         }
         return $metrics;
     }
@@ -686,16 +724,15 @@ class AppKernelDb
         $debugMode = false,
         $datesAsEpoch = true,
         $maximizeQueryCacheUsage = true
-    )
-    {
-
+    ) {
         $restrictions = array(
             'ak' => $akId,
             'start' => $startTime,
             'end' => $endTime,
             'metadata_only' => $metadataOnly,
             'debug' => $debugMode,
-            'dates_as_epoch' => $datesAsEpoch);
+            'dates_as_epoch' => $datesAsEpoch
+        );
 
         if ($maximizeQueryCacheUsage === false) //this will make the queries as specific as possible
         {
@@ -784,7 +821,6 @@ class AppKernelDb
                 $prevEnvVersion = $row['env_version'];
             }
             $prev->set($row['ak_name'], $row['resource'], $row['metric'], $row['num_units']);
-
         }
 
         if (null !== $dataset) {
@@ -812,8 +848,10 @@ class AppKernelDb
 
         // Initialize default criteria to be overrided if necessary
 
-        $sqlCriteria = array('inc_disabled' => "enabled = 1",
-            'inc_hidden' => "visible = 1");
+        $sqlCriteria = array(
+            'inc_disabled' => "enabled = 1",
+            'inc_hidden' => "visible = 1"
+        );
 
         if (null !== $criteria) {
             foreach ($criteria as $key => $value) {
@@ -856,7 +894,6 @@ class AppKernelDb
         }
 
         return $this->resourceList;
-
     }
 
     // --------------------------------------------------------------------------------
@@ -1233,7 +1270,6 @@ class AppKernelDb
         }
 
         return $retval;
-
     }
 
     // --------------------------------------------------------------------------------
@@ -1596,8 +1632,13 @@ class AppKernelDb
     //   instance.
     // --------------------------------------------------------------------------------
 
-    public function storeAppKernelInstance(InstanceData $ak, $replace = false, $add_to_a_data = true, $calc_controls = true, $dryRunMode = false)
-    {
+    public function storeAppKernelInstance(
+        InstanceData $ak,
+        $replace = false,
+        $add_to_a_data = true,
+        $calc_controls = true,
+        $dryRunMode = false
+    ) {
         // Get the list of existing app kernels if we haven't done so already
 
         if (null === $this->appKernelDefinitions) {
@@ -1708,8 +1749,17 @@ class AppKernelDb
 
         $sql = ($replace ? 'replace' : 'insert') . " INTO ak_instance (ak_id, collected, resource_id, instance_id, job_id, " .
             "status, ak_def_id, env_version,controlStatus) VALUES (?, FROM_UNIXTIME(?), ?, ?, ?, ?, ?, ?, ?)";
-        $params = array($akId, $ak->deployment_time, $resourceId, $ak->deployment_instance_id, $ak->deployment_job_id,
-            $status, $appKernelDefinitionId, $ak->environmentVersion(), $controlStatus);
+        $params = array(
+            $akId,
+            $ak->deployment_time,
+            $resourceId,
+            $ak->deployment_instance_id,
+            $ak->deployment_job_id,
+            $status,
+            $appKernelDefinitionId,
+            $ak->environmentVersion(),
+            $controlStatus
+        );
         if (!$dryRunMode) {
             $numRows = $this->db->execute($sql, $params);
         }
@@ -1740,10 +1790,20 @@ class AppKernelDb
         $sql = ($replace ? 'replace' : 'insert') . " INTO ak_instance_debug (ak_id, collected, resource_id, instance_id, " .
             "message, stderr, walltime, cputime, memory, ak_error_cause, ak_error_message, ak_queue_time) " .
             "VALUES (?, FROM_UNIXTIME(?), ?, ?, COMPRESS(?), COMPRESS(?), ?, ?, ?, COMPRESS(?), COMPRESS(?), ?)";
-        $params = array($akId, $ak->deployment_time, $resourceId, $ak->deployment_instance_id, $ak->deployment_message,
-            $ak->deployment_stderr, $ak->deployment_walltime, $ak->deployment_cputime,
-            $ak->deployment_memory, $ak->ak_error_cause, $ak->ak_error_message,
-            $ak->ak_queue_time);
+        $params = array(
+            $akId,
+            $ak->deployment_time,
+            $resourceId,
+            $ak->deployment_instance_id,
+            $ak->deployment_message,
+            $ak->deployment_stderr,
+            $ak->deployment_walltime,
+            $ak->deployment_cputime,
+            $ak->deployment_memory,
+            $ak->ak_error_cause,
+            $ak->ak_error_message,
+            $ak->ak_queue_time
+        );
         if (!$dryRunMode) {
             $numRows = $this->db->execute($sql, $params);
         }
@@ -1761,8 +1821,14 @@ class AppKernelDb
     // @param $metric An AppKernelMetric containing the metric information
     // --------------------------------------------------------------------------------
 
-    private function addMetricData(InstanceData $ak, InstanceMetric $metric, $replace, $add_to_a_data = true, $calc_controls = true, $dryRunMode = false)
-    {
+    private function addMetricData(
+        InstanceData $ak,
+        InstanceMetric $metric,
+        $replace,
+        $add_to_a_data = true,
+        $calc_controls = true,
+        $dryRunMode = false
+    ) {
         $guid = $metric->guid();
 
 
@@ -1775,7 +1841,8 @@ class AppKernelDb
                 $this->log("$sql  " . print_r($params, 1), PEAR_LOG_DEBUG);
             }
             $this->akMetrics[$ak->deployment_ak_base_name][$ak->deployment_num_proc_units][$guid] = $this->akMetricGuids[$guid];
-            $this->log("-> Associated metric '{$metric->name}' (id = {$metric->id}) with app kernel '{$ak->deployment_ak_name}' (ak_id = {$ak->db_ak_id})", PEAR_LOG_DEBUG);
+            $this->log("-> Associated metric '{$metric->name}' (id = {$metric->id}) with app kernel '{$ak->deployment_ak_name}' (ak_id = {$ak->db_ak_id})",
+                PEAR_LOG_DEBUG);
         }
 
         //metric_data
@@ -1795,7 +1862,8 @@ class AppKernelDb
                 $rows = $this->db->query($sql, $params);
 
                 if (count($rows) > 1) {
-                    $this->log("a_tree has more then one entries for ak_def_id, resource_id, metric_id, num_units", PEAR_LOG_ERR);
+                    $this->log("a_tree has more then one entries for ak_def_id, resource_id, metric_id, num_units",
+                        PEAR_LOG_ERR);
                 }
 
                 $start_time = $ak->deployment_time;
@@ -1812,7 +1880,12 @@ class AppKernelDb
                 }
                 if (count($rows) != 0) {
                     $sql = "DELETE FROM a_tree WHERE ak_def_id=? AND resource_id=? AND metric_id=? AND num_units=?";
-                    $params = array($ak->db_ak_def_id, $ak->db_resource_id, $metric->id, $ak->deployment_num_proc_units);
+                    $params = array(
+                        $ak->db_ak_def_id,
+                        $ak->db_resource_id,
+                        $metric->id,
+                        $ak->deployment_num_proc_units
+                    );
                     if (!$dryRunMode) {
                         $rows = $this->db->execute($sql, $params);
                     }
@@ -1825,9 +1898,18 @@ class AppKernelDb
                     " ?, ?, ?, ?, " .
                     "  FROM_UNIXTIME(?),  FROM_UNIXTIME(?), ?)";
                 $params = array(
-                    $ak->db_ak_def_name, $ak->db_resource_name, $metric->name, $metric->unit, $ak->db_proc_unit_type,
-                    $ak->deployment_num_proc_units, $ak->db_ak_def_id, $ak->db_resource_id, $metric->id,
-                    $start_time, $end_time, $status
+                    $ak->db_ak_def_name,
+                    $ak->db_resource_name,
+                    $metric->name,
+                    $metric->unit,
+                    $ak->db_proc_unit_type,
+                    $ak->deployment_num_proc_units,
+                    $ak->db_ak_def_id,
+                    $ak->db_resource_id,
+                    $metric->id,
+                    $start_time,
+                    $end_time,
+                    $status
                 );
                 if (!$dryRunMode) {
                     $numRows = $this->db->execute($sql, $params);
@@ -1842,9 +1924,20 @@ class AppKernelDb
                     " VALUES (?, ?, ?, ?, ?, " .
                     " ?, ?, ?, ?, " .
                     " ?, ?, ?, ?)";
-                $params = array($ak->db_ak_def_name, $ak->db_resource_name, $metric->name, $ak->deployment_num_proc_units, $ak->db_proc_unit_type,
-                    $ak->deployment_time, $ak->environmentVersion, $metric->unit, $metric->value,
-                    $ak->db_ak_def_id, $ak->db_resource_id, $metric->id, $ak->status
+                $params = array(
+                    $ak->db_ak_def_name,
+                    $ak->db_resource_name,
+                    $metric->name,
+                    $ak->deployment_num_proc_units,
+                    $ak->db_proc_unit_type,
+                    $ak->deployment_time,
+                    $ak->environmentVersion,
+                    $metric->unit,
+                    $metric->value,
+                    $ak->db_ak_def_id,
+                    $ak->db_resource_id,
+                    $metric->id,
+                    $ak->status
                 );
                 if (!$dryRunMode) {
                     $numRows = $this->db->execute($sql, $params);
@@ -1858,7 +1951,8 @@ class AppKernelDb
                 $rows = $this->db->query($sql, $params);
 
                 if (count($rows) > 1) {
-                    $this->log("a_tree2 has more then one entries for ak_def_id, resource_id, metric_id, num_units", PEAR_LOG_ERR);
+                    $this->log("a_tree2 has more then one entries for ak_def_id, resource_id, metric_id, num_units",
+                        PEAR_LOG_ERR);
                 }
 
                 $start_time = $ak->deployment_time;
@@ -1877,7 +1971,12 @@ class AppKernelDb
 
                 if (count($rows) !== 0) {
                     $sql = "DELETE FROM a_tree2 WHERE ak_def_id=? AND resource_id=? AND metric_id=? AND num_units=?";
-                    $params = array($ak->db_ak_def_id, $ak->db_resource_id, $metric->id, $ak->deployment_num_proc_units);
+                    $params = array(
+                        $ak->db_ak_def_id,
+                        $ak->db_resource_id,
+                        $metric->id,
+                        $ak->deployment_num_proc_units
+                    );
                     if (!$dryRunMode) {
                         $rows = $this->db->execute($sql, $params);
                     }
@@ -1890,9 +1989,18 @@ class AppKernelDb
                     " ?, ?, ?, ?, " .
                     "  FROM_UNIXTIME(?),  FROM_UNIXTIME(?), ?)";
                 $params = array(
-                    $ak->db_ak_def_name, $ak->db_resource_name, $metric->name, $metric->unit, $ak->db_proc_unit_type,
-                    $ak->deployment_num_proc_units, $ak->db_ak_def_id, $ak->db_resource_id, $metric->id,
-                    $start_time, $end_time, $status
+                    $ak->db_ak_def_name,
+                    $ak->db_resource_name,
+                    $metric->name,
+                    $metric->unit,
+                    $ak->db_proc_unit_type,
+                    $ak->deployment_num_proc_units,
+                    $ak->db_ak_def_id,
+                    $ak->db_resource_id,
+                    $metric->id,
+                    $start_time,
+                    $end_time,
+                    $status
                 );
                 if (!$dryRunMode) {
                     $numRows = $this->db->execute($sql, $params);
@@ -1907,9 +2015,20 @@ class AppKernelDb
                     " VALUES (?, ?, ?, ?, ?, " .
                     " ?, ?, ?, ?, " .
                     " ?, ?, ?, ?)";
-                $params = array($ak->db_ak_def_name, $ak->db_resource_name, $metric->name, $ak->deployment_num_proc_units, $ak->db_proc_unit_type,
-                    $ak->deployment_time, $ak->environmentVersion, $metric->unit, $metric->value,
-                    $ak->db_ak_def_id, $ak->db_resource_id, $metric->id, $ak->status
+                $params = array(
+                    $ak->db_ak_def_name,
+                    $ak->db_resource_name,
+                    $metric->name,
+                    $ak->deployment_num_proc_units,
+                    $ak->db_proc_unit_type,
+                    $ak->deployment_time,
+                    $ak->environmentVersion,
+                    $metric->unit,
+                    $metric->value,
+                    $ak->db_ak_def_id,
+                    $ak->db_resource_id,
+                    $metric->id,
+                    $ak->status
                 );
                 if (!$dryRunMode) {
                     $numRows = $this->db->execute($sql, $params);
@@ -1943,12 +2062,20 @@ class AppKernelDb
                 $this->log("$sql  " . print_r($params, 1), PEAR_LOG_DEBUG);
             }
             $this->akParameters[$ak->deployment_ak_base_name][$ak->deployment_num_proc_units][$guid] = $this->akParameterGuids[$guid];
-            $this->log("-> Associated parameter '{$parameter->name}' (id = {$parameter->id}) with app kernel '{$ak->deployment_ak_name}' (ak_id = {$ak->db_ak_id})", PEAR_LOG_DEBUG);
+            $this->log("-> Associated parameter '{$parameter->name}' (id = {$parameter->id}) with app kernel '{$ak->deployment_ak_name}' (ak_id = {$ak->db_ak_id})",
+                PEAR_LOG_DEBUG);
         }
 
         $sql = ($replace ? 'replace' : 'insert') . " INTO parameter_data (parameter_id, ak_id, collected, " .
             "resource_id, value_string, value_md5) VALUES (?, ?, FROM_UNIXTIME(?), ?, COMPRESS(?), ?)";
-        $params = array($parameter->id, $ak->db_ak_id, $ak->deployment_time, $ak->db_resource_id, $parameter->value, md5($parameter->value));
+        $params = array(
+            $parameter->id,
+            $ak->db_ak_id,
+            $ak->deployment_time,
+            $ak->db_resource_id,
+            $parameter->value,
+            md5($parameter->value)
+        );
         if (!$dryRunMode) {
             $numRows = $this->db->execute($sql, $params);
         }
@@ -2009,8 +2136,10 @@ class AppKernelDb
         }
 
         // The metric didn't exist for that ak
-        $sql = "SELECT * FROM metric WHERE guid='$guid'";
-        $result = $this->db->query($sql);
+        $sql = "SELECT * FROM metric WHERE guid=?";
+        $params = array($guid);
+        $result = $this->db->query($sql, $params);
+
         if (count($result) > 0) {
             $metricId = $result[0]['metric_id'];
 
@@ -2020,7 +2149,8 @@ class AppKernelDb
             $numRows = $this->db->execute($sql, $params);
 
             $this->akMetricGuids[$metric->guid()] = $metricId;
-            $this->log("Add metric to ak: name='{$metric->name}', unit='{$metric->unit}' ak='{$ak->deployment_ak_name}' (id = $metricId)", PEAR_LOG_DEBUG);
+            $this->log("Add metric to ak: name='{$metric->name}', unit='{$metric->unit}' ak='{$ak->deployment_ak_name}' (id = $metricId)",
+                PEAR_LOG_DEBUG);
 
             return $metricId;
         }
@@ -2033,10 +2163,10 @@ class AppKernelDb
         $numRows = $this->db->execute($sql, $params);
         $metricId = $this->db->handle()->lastInsertId();
         $this->akMetricGuids[$metric->guid()] = $metricId;
-        $this->log("Created new metric: name='{$metric->name}', unit='{$metric->unit}' (id = $metricId)", PEAR_LOG_DEBUG);
+        $this->log("Created new metric: name='{$metric->name}', unit='{$metric->unit}' (id = $metricId)",
+            PEAR_LOG_DEBUG);
 
         return $metricId;
-
     }
 
     // --------------------------------------------------------------------------------
@@ -2069,10 +2199,10 @@ class AppKernelDb
         $numRows = $this->db->execute($sql, $params);
         $parameterId = $this->db->handle()->lastInsertId();
         $this->akParameterGuids[$guid] = $parameterId;
-        $this->log("Created new parameter: name='{$parameter->name}' unit='{$parameter->unit}' tag='{$parameter->tag}' (id = $parameterId)", PEAR_LOG_DEBUG);
+        $this->log("Created new parameter: name='{$parameter->name}' unit='{$parameter->unit}' tag='{$parameter->tag}' (id = $parameterId)",
+            PEAR_LOG_DEBUG);
 
         return $parameterId;
-
     }
 
     // --------------------------------------------------------------------------------
@@ -2116,21 +2246,36 @@ class AppKernelDb
 
     public function getControlRegions($resource_id, $ak_def_id)
     {
-        $controlRegionDefQuery =
-            "SELECT control_region_def_id,resource_id,ak_def_id,
-                                control_region_type,
-                                control_region_starts,
-                                control_region_ends,
-                                control_region_points,
-                                comment
-                         FROM control_region_def
-                         WHERE resource_id = " . $resource_id . "
-                           AND ak_def_id = " . $ak_def_id .
-            "
-                         ORDER BY control_region_starts;
-                    ";
-        $controlRegionDef = $this->db->query($controlRegionDefQuery);
-        return $controlRegionDef;
+        $sql =
+            "SELECT control_region_def_id,resource_id,ak_def_id,control_region_type,control_region_starts," .
+            "       control_region_ends,control_region_points,comment " .
+            "FROM control_region_def " .
+            "WHERE resource_id = :resource_id AND ak_def_id = :ak_def_id " .
+            "ORDER BY control_region_starts";
+        $params = [
+            ":resource_id" => $resource_id,
+            ":ak_def_id" => $ak_def_id,
+        ];
+        return $this->db->query($sql, $params);;
+    }
+
+    /**
+     * Get array with ak_id for ak_def_id
+     * @param $ak_def_id
+     * @return array
+     */
+    protected function getAppKernelIdsForAppKernelDefId($ak_def_id) {
+        $ak_def_id = intval($ak_def_id);
+        $sql = "SELECT ak_id FROM mod_appkernel.app_kernel WHERE ak_def_id=:ak_def_id";
+        $params = [":ak_def_id" => $ak_def_id];
+        $response = $this->db->query($sql, $params);
+
+        $ak_ids = [];
+        foreach ($response as $v) {
+            $ak_ids[] = intval($v['ak_id']);
+        }
+
+        return $ak_ids;
     }
 
     public function newControlRegions(
@@ -2143,94 +2288,127 @@ class AppKernelDb
         $comment,
         $update = false,
         $control_region_def_id = null
-    )
-    {
+    ) {
         $resource_id = intval($resource_id);
         $ak_def_id = intval($ak_def_id);
-        $control_region_type = "'" . $control_region_type . "'";
-        $startDateTime = "'" . $startDateTime . "'";
-        $n_points = ($n_points !== null ? intval($n_points) : 'NULL');
-        $endDateTime = ($endDateTime !== null ? "'" . $endDateTime . "'" : 'NULL');
-        $comment = ($comment !== null ? "'" . $comment . "'" : 'NULL');
+        $n_points = ($n_points !== null ? intval($n_points) : null);
+
+        $ak_ids = $this->getAppKernelIdsForAppKernelDefId($ak_def_id);
+        $ak_ids_in_sql_param = [];
+        $ak_ids_in_sql = '';
+        for($i=0; $i < count($ak_ids); $i++) {
+            $ak_ids_in_sql .= ':ak_id_' . $i;
+            if($i < count($ak_ids) - 1) {
+                $ak_ids_in_sql .= ',';
+            }
+            $ak_ids_in_sql_param[':ak_id_' . $i] = $ak_ids[$i];
+        }
+
 
         //make query for control recalculation
-        $sqlAKcond = array();
-        $response = $this->db->query("SELECT ak_id FROM mod_appkernel.app_kernel WHERE ak_def_id='{$ak_def_id}'");
-        foreach ($response as $v) {
-            $sqlAKcond[] = "ak_id='" . $v['ak_id'] . "'";
-        }
-        $sqlAKcond = implode(" OR ", $sqlAKcond);
+        $sql =
+            "SELECT control_region_def_id,resource_id,ak_def_id,control_region_type,control_region_starts," .
+            "       control_region_ends,control_region_points,comment " .
+            "FROM control_region_def " .
+            "WHERE resource_id = :resource_id  AND ak_def_id = :ak_def_id AND control_region_starts>:start_date_time " .
+            "ORDER BY control_region_starts";
+        $params = [
+            ":resource_id" => $resource_id,
+            ":ak_def_id" => $ak_def_id,
+            ":start_date_time" => $startDateTime,
+        ];
+        $controlRegionDef = $this->db->query($sql, $params);
 
-        $controlRegionDefQuery =
-            "SELECT control_region_def_id,resource_id,ak_def_id,
-                    control_region_type,
-                    control_region_starts,
-                    control_region_ends,
-                    control_region_points,
-                    comment
-             FROM control_region_def
-             WHERE resource_id = " . $resource_id . "
-               AND ak_def_id = " . $ak_def_id . "
-               AND control_region_starts>$startDateTime
-             ORDER BY control_region_starts;
-        ";
-        $controlRegionDef = $this->db->query($controlRegionDefQuery);
+        $metric_data_update_sql =
+            "UPDATE metric_data " .
+            "SET control = null, " .
+            "    running_average = null, " .
+            "    controlStatus = 'undefined' " .
+            "WHERE ak_id IN (" . $ak_ids_in_sql . ") AND resource_id=:resource_id " .
+            "  AND collected >= :start_date_time";
 
-        $metric_data_updateQuery = "UPDATE metric_data
-            SET control = null,
-                running_average = null,
-                controlStatus = 'undefined'
-            WHERE ({$sqlAKcond}) AND resource_id=$resource_id
-              AND collected >= $startDateTime";
+        $metric_data_update_params = array_merge([
+            ":resource_id" => $resource_id,
+            ":start_date_time" => $startDateTime,
+        ], $ak_ids_in_sql_param);
+
         if (count($controlRegionDef) > 0) {
             $new_region_end_collected = $controlRegionDef[0]['control_region_starts'];
-            $metric_data_updateQuery .= " AND collected<'$new_region_end_collected';";
-        } else {
-            $metric_data_updateQuery .= ";";
+            $metric_data_update_sql .= " AND collected<:new_region_end_collected";
+            $metric_data_update_params[":new_region_end_collected"] = $new_region_end_collected;
         }
 
         //insert of update control_region_def
+        $sql = "SELECT control_region_def_id FROM  control_region_def WHERE ";
+        $params = [];
         if ($control_region_def_id != null && $update) {
-            $sql = "SELECT control_region_def_id FROM  control_region_def
-                WHERE control_region_def_id={$control_region_def_id}
-                ";
+            $sql .= "control_region_def_id={$control_region_def_id}";
+            $params[":control_region_def_id"] = $control_region_def_id;
         } else {
-            $sql = "SELECT control_region_def_id FROM  control_region_def
-                WHERE resource_id = {$resource_id} AND ak_def_id = {$ak_def_id} AND control_region_starts={$startDateTime}
-                ";
+            $sql .= "resource_id=:resource_id AND ak_def_id=:ak_def_id AND control_region_starts=:start_date_time";
+            $params[":resource_id"] = $resource_id;
+            $params[":ak_def_id"] = $ak_def_id;
+            $params[":start_date_time"] = $startDateTime;
         }
-        $control_region_def_id = $this->db->query($sql);
+        $control_region_def_id = $this->db->query($sql, $params);
         if (count($control_region_def_id) > 0) {
             if ($update) {
-                $sql = "UPDATE control_region_def
-                    SET control_region_starts={$startDateTime},
-                        control_region_type={$control_region_type},
-                        control_region_ends={$endDateTime},
-                        control_region_points={$n_points},
-                        comment={$comment}
-                    WHERE control_region_def_id={$control_region_def_id[0]['control_region_def_id']}";
-                $this->db->execute($sql);
-                $this->db->execute($metric_data_updateQuery);
+                $sql =
+                    "UPDATE control_region_def " .
+                    "SET control_region_starts=:start_date_time," .
+                    "    control_region_type=:control_region_type," .
+                    "    control_region_ends=:end_date_time," .
+                    "    control_region_points=:control_region_points," .
+                    "    comment=:comment " .
+                    "WHERE control_region_def_id=:control_region_def_id";
+                $params = [
+                    ":start_date_time" => $startDateTime,
+                    ":control_region_type" => $control_region_type,
+                    ":end_date_time" => $endDateTime,
+                    ":control_region_points" => $n_points,
+                    ":comment" => $comment,
+                    ":control_region_def_id" => $control_region_def_id[0]['control_region_def_id']
+                ];
+                $this->db->execute($sql, $params);
+                $this->db->execute($metric_data_update_sql, $metric_data_update_params);
 
-                return array('success' => true,
-                    'message' => "Control region time interval was updated");
+                return array(
+                    'success' => true,
+                    'message' => "Control region time interval was updated"
+                );
             } else {
-                return array('success' => false,
-                    'message' => "Control region already exists for such time interval");
+                return array(
+                    'success' => false,
+                    'message' => "Control region already exists for such time interval"
+                );
             }
         } else {
             if ($update) {
-                return array('success' => false,
-                    'message' => "Such control region time interval do not exist, can not update it.");
+                return array(
+                    'success' => false,
+                    'message' => "Such control region time interval do not exist, can not update it."
+                );
             } else {
-                $sql = "INSERT INTO control_region_def
-                    (resource_id,ak_def_id,control_region_type,control_region_starts,control_region_ends,control_region_points,comment)
-                    VALUES({$resource_id},{$ak_def_id},{$control_region_type},{$startDateTime},{$endDateTime},{$n_points},
-                    {$comment})";
-                $this->db->execute($sql);
-                $this->db->execute($metric_data_updateQuery);
-                return array('success' => true,
-                    'message' => "Control region time interval was created");
+                $sql =
+                    "INSERT INTO control_region_def " .
+                    "(resource_id,ak_def_id,control_region_type," .
+                    "control_region_starts,control_region_ends,control_region_points,comment) " .
+                    "VALUES(?,?,?,?,?,?,?) ";
+                $params = [
+                    $resource_id,
+                    $ak_def_id,
+                    $control_region_type,
+                    $startDateTime,
+                    $endDateTime,
+                    $n_points,
+                    $comment
+                ];
+                $this->db->execute($sql, $params);
+                $this->db->execute($metric_data_update_sql);
+                return array(
+                    'success' => true,
+                    'message' => "Control region time interval was created"
+                );
             }
         }
     }
@@ -2250,8 +2428,10 @@ class AppKernelDb
         ";
         $controlRegionDefToDelete = $this->db->query($controlRegionDefQuery);
         if (count($controlRegionDefToDelete) === 0) {
-            return array('success' => false,
-                'message' => "Such control region time interval do not exist, can not delete it.");
+            return array(
+                'success' => false,
+                'message' => "Such control region time interval do not exist, can not delete it."
+            );
         }
         $controlRegionDefToDelete = $controlRegionDefToDelete[0];
         $resource_id = $controlRegionDefToDelete['resource_id'];
@@ -2298,8 +2478,10 @@ class AppKernelDb
 
         $this->db->execute("DELETE FROM control_region_def WHERE control_region_def_id=$control_region_def_id");
         $this->db->execute($metric_data_updateQuery);
-        return array('success' => true,
-            'message' => "Control region time interval was deleted");
+        return array(
+            'success' => true,
+            'message' => "Control region time interval was deleted"
+        );
     }
 
     public function setInitialControlRegions($initial = true, $envbased = false, $controlIntervalSize = 20)
@@ -2328,9 +2510,11 @@ class AppKernelDb
                 ORDER BY ak_def_id,resource_id"
             );
             foreach ($initial_regions_start as $first_run) {
-                $this->log("Adding initial control region for app kernel: {$first_run['ak_name']} on resource: {$resourceIdMap[$first_run['resource_id']]['name']}", PEAR_LOG_INFO);
+                $this->log("Adding initial control region for app kernel: {$first_run['ak_name']} on resource: {$resourceIdMap[$first_run['resource_id']]['name']}",
+                    PEAR_LOG_INFO);
                 $t = date_format(date_create($first_run['collected']), "Y-m-d") . " 00:00:00";
-                $t = date_format(date_sub(date_create($t), date_interval_create_from_date_string('5 days')), "Y-m-d H:i:s");
+                $t = date_format(date_sub(date_create($t), date_interval_create_from_date_string('5 days')),
+                    "Y-m-d H:i:s");
                 $sql = "INSERT INTO control_region_def
                     (resource_id,ak_def_id,control_region_type,control_region_starts,control_region_points,comment)
                     VALUES({$first_run['resource_id']},{$first_run['ak_def_id']},'data_points','{$t}',{$controlIntervalSize},
@@ -2363,7 +2547,8 @@ class AppKernelDb
                     $collected = $newenv_regions_start[$i]['collected'];
                     $ak_name = $newenv_regions_start[$i]['ak_name'];
                     $t = $collected;
-                    $this->log("Adding control region due enviroment change, app kernel: {$newenv_regions_start[$i]['ak_name']} on resource: {$resourceIdMap[$newenv_regions_start[$i]['resource_id']]['name']}", PEAR_LOG_INFO);
+                    $this->log("Adding control region due enviroment change, app kernel: {$newenv_regions_start[$i]['ak_name']} on resource: {$resourceIdMap[$newenv_regions_start[$i]['resource_id']]['name']}",
+                        PEAR_LOG_INFO);
 
                     $sql = "INSERT INTO control_region_def
                                     (resource_id,ak_def_id,control_region_type,control_region_starts,control_region_points,comment)
@@ -2376,10 +2561,17 @@ class AppKernelDb
         }
     }
 
-    // --------------------------------------------------------------------------------
-    // Calcualte the running average and control values for each metric value
-    // @author: Amin Ghadersohi
-    // --------------------------------------------------------------------------------
+    /**
+     * Calculates the running average and control values for each metric value
+     *
+     * @param bool $recalculateControlIntervals
+     * @param bool $recalculateControls
+     * @param int $controlIntervalSize
+     * @param int $runningAverageSize
+     * @param null $restrictToResource
+     * @param null $restrictToAppKernel
+     * @throws Exception
+     */
     public function calculateControls(
         $recalculateControlIntervals = false,
         $recalculateControls = false,
@@ -2387,9 +2579,9 @@ class AppKernelDb
         $runningAverageSize = 5,
         $restrictToResource = null,
         $restrictToAppKernel = null
-    )
-    {
+    ) {
         $this->log("Calculating control metrics");
+        $runningAverageSize = intval($runningAverageSize);
         if ($runningAverageSize < 1) {
             echo "calculateControls: runningAverageSize must be greater than zero. Aborting...\n";
             return;
@@ -2400,10 +2592,8 @@ class AppKernelDb
         //Get akId2akDefIdMap
         $akId2akDefIdMap = array();
         $akDefId2akIdMap = array();
-        $sql =
-            "SELECT ak_base_name as name, ak_id, num_units, ak_def_id, control_criteria
-            FROM app_kernel_def
-            JOIN app_kernel USING(ak_def_id)";
+        $sql = "SELECT ak_base_name as name, ak_id, num_units, ak_def_id, control_criteria " .
+            "FROM app_kernel_def JOIN app_kernel USING(ak_def_id)";
         $result = $this->db->query($sql);
         foreach ($result as $row) {
             $akId2akDefIdMap[$row['ak_id']] = array(
@@ -2417,7 +2607,8 @@ class AppKernelDb
             }
             $akDefId2akIdMap[$row['ak_def_id']][] = $row['ak_id'];
         }
-        //Get resourceIdMap
+
+        // Get resourceIdMap
         $resourceIdMap = array();
         $sql = "SELECT resource_id, resource, nickname, description , enabled, visible FROM resource";
         $result = $this->db->query($sql);
@@ -2427,27 +2618,33 @@ class AppKernelDb
             );
         }
 
-        //Conditions for $restrictToResource
-        $sqlResourceCond = null;
+        // Conditions for $restrictToResource
+        $resource_id = null;
         if ($restrictToResource !== null) {
-            $sqlResourceCond = "resource_id = '" . $this->resourceList[$restrictToResource]->id . "'";
+            if (!isset($this->resourceList)) {
+                $this->loadResources();
+            }
+            $resource_id = $this->resourceList[$restrictToResource]->id;
         }
-        //Conditions for $restrictToAppKernel
-        $sqlAKDefCond = null;
-        $sqlAKcond = null;
+        // Conditions for $restrictToAppKernel
+        $ak_ids = null;
+        $ak_ids_in_sql_param = [];
+        $ak_ids_in_sql = '';
         if ($restrictToAppKernel !== null) {
             if (!isset($this->appKernelDefinitions)) {
                 $this->loadAppKernelDefinitions();
             }
-            $dbAKList = $this->appKernelDefinitions;
-            $sqlAKDefCond = "ak_def_id = '" . $dbAKList[$restrictToAppKernel]->id . "'";
 
-            $m_aks = array();
-            $response = $this->db->query("SELECT ak_id FROM mod_appkernel.app_kernel WHERE ak_def_id='" . $dbAKList[$restrictToAppKernel]->id . "'");
-            foreach ($response as $v) {
-                $m_aks[] = "ak_id='" . $v['ak_id'] . "'";
+            $ak_def_id =$this->appKernelDefinitions[$restrictToAppKernel]->id;
+            $ak_ids = $this->getAppKernelIdsForAppKernelDefId($ak_def_id);
+
+            for($i=0; $i < count($ak_ids); $i++) {
+                $ak_ids_in_sql .= ':ak_id_' . $i;
+                if($i < count($ak_ids) - 1) {
+                    $ak_ids_in_sql .= ',';
+                }
+                $ak_ids_in_sql_param[':ak_id_' . $i] = $ak_ids[$i];
             }
-            $sqlAKcond = implode(" OR ", $m_aks);
         }
 
         // first, load the metric attributes that help figure out whether a larger value is better or a smaller value
@@ -2511,26 +2708,25 @@ class AppKernelDb
 
         if ($recalculateControls) {
             $time_start = microtime(true);
-            $dataQuery = "update metric_data
-            set control = null,
-                running_average = null,
-                controlStatus = 'undefined'";
-            if ($sqlResourceCond || $sqlAKcond) {
-                $dataQuery .= "\n WHERE ";
-            }
-            if ($sqlResourceCond) {
-                $dataQuery .= "\n ( " . $sqlResourceCond . " ) ";
-            }
-            if ($sqlResourceCond || $sqlAKcond) {
-                $dataQuery .= " AND ";
-            }
-            if ($sqlAKcond) {
-                $dataQuery .= "\n ( " . $sqlAKcond . " ) ";
+            $sql = "UPDATE metric_data SET control = null,running_average = null,controlStatus = 'undefined'";
+            $params = [];
+
+            if ($resource_id!==null && $ak_ids!==null) {
+                $sql .= " WHERE resource_id=:resource_id AND ak_id IN (" . $ak_ids_in_sql . ")";
+                $params[':resource_id'] = $resource_id;
+                $params = array_merge($params, $ak_ids_in_sql_param);
+            } elseif ($resource_id===null && $ak_ids!==null) {
+                $sql .= " WHERE ak_id IN (" . $ak_ids_in_sql . ")";
+                $params = array_merge($params, $ak_ids_in_sql_param);
+            }  elseif ($resource_id!==null && $ak_ids===null) {
+                $sql .= " WHERE resource_id=:resource_id";
+                $params[':resource_id'] = $resource_id;
             }
 
-            $this->db->execute($dataQuery);
+            $this->db->execute($sql, $params);
             $time_end = microtime(true);
-            $this->log("Timing(update metric_data set control = null, running_average = null)=" . ($time_end - $time_start), PEAR_LOG_DEBUG);
+            $this->log("Timing(update metric_data set control = null, running_average = null)=" . ($time_end - $time_start),
+                PEAR_LOG_DEBUG);
         }
 
         // Get a list of possible unique datasets (datasetsQuery).
@@ -2543,27 +2739,28 @@ class AppKernelDb
 
         //this query enumeterates all possible unique datasets by their key (resource_id, ak_id, metric_id)
         $time_start = microtime(true);
-        $datasetsQuery =
-            "SELECT distinct ak_id, metric_id, resource_id
-            FROM `metric_data`
-            ";
-        if ($sqlResourceCond || $sqlAKcond) {
-            $datasetsQuery .= "\n WHERE ";
+
+        $sql = "SELECT distinct ak_id, metric_id, resource_id FROM `metric_data`";
+        $params = [];
+        if ($resource_id!==null && $ak_ids!==null) {
+            $sql .= " WHERE resource_id=:resource_id AND ak_id IN (" . $ak_ids_in_sql . ")";
+            $params[':resource_id'] = $resource_id;
+            $params = array_merge($params, $ak_ids_in_sql_param);
+        } elseif ($resource_id===null && $ak_ids!==null) {
+            $sql .= " WHERE ak_id IN (" . $ak_ids_in_sql . ")";
+            $params = array_merge($params, $ak_ids_in_sql_param);
+        }  elseif ($resource_id!==null && $ak_ids===null) {
+            $sql .= " WHERE resource_id=:resource_id";
+            $params[':resource_id'] = $resource_id;
         }
-        if ($sqlResourceCond) {
-            $datasetsQuery .= "\n ( " . $sqlResourceCond . " ) ";
-        }
-        if ($sqlResourceCond || $sqlAKcond) {
-            $datasetsQuery .= " AND ";
-        }
-        if ($sqlAKcond) {
-            $datasetsQuery .= "\n ( " . $sqlAKcond . " ) ";
-        }
-        $datasetsQuery .= "\nORDER BY 1, 2, 3\n";
-        $datasets = $this->db->query($datasetsQuery);
+        $sql .= " ORDER BY 1, 2, 3";
+        $datasets = $this->db->query($sql, $params);
         $datasetsLength = count($datasets);
         $time_end = microtime(true);
-        $this->log("Timing(Get a list of possible unique datasets (datasetsQuery))=" . ($time_end - $time_start), PEAR_LOG_DEBUG);
+
+        $this->log(
+            "Timing(Get a list of possible unique datasets (datasetsQuery))=" . ($time_end - $time_start),
+            PEAR_LOG_DEBUG);
 
         $time_start_bigcycle = microtime(true);
         $progressVerbosity = 1;
@@ -2580,8 +2777,14 @@ class AppKernelDb
             'N_sqlupdate2' => 0
         );
         foreach ($datasets as $di => $dataset) {
+            $dataset_params = [
+                ":resource_id" => $dataset["resource_id"],
+                ":ak_id" => $dataset["ak_id"],
+                ":metric_id" => $dataset["metric_id"]
+            ];
             if ($progressVerbosity === 1) {
-                $message = "Calculating running average and control values. " . number_format(100.0 * $di / $datasetsLength, 2) . "% " . json_encode($dataset);
+                $message = "Calculating running average and control values. " .
+                    number_format(100.0 * $di / $datasetsLength,2) . "% " . json_encode($dataset);
                 $this->log($message, PEAR_LOG_DEBUG);
             }
             $control_criteria = $this->control_criteria;
@@ -2589,79 +2792,89 @@ class AppKernelDb
                 $control_criteria = $akId2akDefIdMap[$dataset['ak_id']]['control_criteria'];
             }
 
-            //if we dont know whether smaller or larger is better it (hopefully :) ) means we don't want to calculate control on it so skip
+            // if we dont know whether smaller or larger is better it (hopefully :) ) means
+            // we don't want to calculate control on it so skip
             if (!isset($metricIdToLargerMap[$dataset['metric_id']])) {
-                $this->log("Skipping metric {$dataset['metric_id']} {$metricsLookupById[$dataset['metric_id']]['name']} as there was no value in metric_attributes for its larger/smaller property", PEAR_LOG_WARNING);
+                $this->log(
+                    "Skipping metric {$dataset['metric_id']} {$metricsLookupById[$dataset['metric_id']]['name']} " .
+                    "as there was no value in metric_attributes for its larger/smaller property",
+                    PEAR_LOG_WARNING);
                 continue;
             }
 
             $time_start0 = microtime(true);
 
-            //whether larger values are good for this metric or not
+            // whether larger values are good for this metric or not
             $larger = $metricIdToLargerMap[$dataset['metric_id']];
 
             $dataQuery =
-                "SELECT md.collected, md.value_string, aki.env_version,md.controlStatus
-                FROM `metric_data` md,
-                         `ak_instance` aki
-                WHERE md.resource_id = :resource_id
-                and md.ak_id = :ak_id
-                and md.metric_id = :metric_id
-                and md.control is NULL
-                and md.value_string is not NULL
-                and aki.ak_id = md.ak_id
-                and aki.collected = md.collected
-                and aki.resource_id = md.resource_id
-                ORDER BY collected";
-            $data = $this->db->query($dataQuery, $dataset);
+                "SELECT md.collected, md.value_string, aki.env_version,md.controlStatus " .
+                "FROM `metric_data` md, `ak_instance` aki " .
+                "WHERE md.resource_id = :resource_id AND md.ak_id = :ak_id AND md.metric_id = :metric_id" .
+                "  AND md.control is NULL AND md.value_string is not NULL" .
+                "  AND aki.ak_id = md.ak_id AND aki.collected = md.collected AND aki.resource_id = md.resource_id " .
+                "ORDER BY collected";
+            $data = $this->db->query($dataQuery, $dataset_params);
             $time_query = microtime(true);
             $timing['dataQuery'] += $time_query - $time_start0;
             $timing['N_dataQuery']++;
 
             $length = count($data);
-            //only process datasets of length 1+
+            // only process datasets of length 1+
             if ($length > 0) {
                 $time_start = microtime(true);
                 //query for the control region definitions if none present initiate a new one
                 $controlRegionDef = array();
                 while (true) {
                     $controlRegionDefQuery =
-                        "SELECT control_region_def_id,resource_id,ak_def_id,
-                                control_region_type,
-                                control_region_starts,
-                                control_region_ends,
-                                control_region_points
-                         FROM control_region_def
-                         WHERE resource_id = " . $dataset['resource_id'] . "
-                           AND ak_def_id = " . $akId2akDefIdMap[$dataset['ak_id']]['ak_def_id'] .
-                        "
-                         ORDER BY control_region_starts;
-                    ";
-                    $controlRegionDef = $this->db->query($controlRegionDefQuery);
-                    //if there is no control regions initiate the first one
+                        "SELECT control_region_def_id,resource_id,ak_def_id,control_region_type," .
+                        "    control_region_starts,control_region_ends,control_region_points " .
+                        "FROM control_region_def " .
+                        "WHERE resource_id = :resource_id AND ak_def_id = :ak_def_id " .
+                        "ORDER BY control_region_starts";
+                    $controlRegionDefParams = [
+                        ":resource_id" => $dataset['resource_id'],
+                        ":ak_def_id" => $akId2akDefIdMap[$dataset['ak_id']]['ak_def_id']
+                    ];
+                    $controlRegionDef = $this->db->query($controlRegionDefQuery, $controlRegionDefParams);
+
+                    // if there is no control regions initiate the first one
                     if (count($controlRegionDef) == 0) {
-                        $this->log("Adding initial control region for app kernel: {$akId2akDefIdMap[$dataset['ak_id']]['name']} on resource: {$resourceIdMap[$dataset['resource_id']]['name']}", PEAR_LOG_INFO);
+                        $this->log(
+                            "Adding initial control region for app kernel: {$akId2akDefIdMap[$dataset['ak_id']]['name']} " .
+                            "on resource: {$resourceIdMap[$dataset['resource_id']]['name']}",
+                            PEAR_LOG_INFO);
                         $t = date_format(date_create($data[0]['collected']), "Y-m-d") . " 00:00:00";
-                        $t = date_format(date_sub(date_create($t), date_interval_create_from_date_string('5 days')), "Y-m-d H:i:s");
-                        $sql = "INSERT INTO control_region_def
-                            (resource_id,ak_def_id,control_region_type,control_region_starts,control_region_points,comment)
-                            VALUES({$dataset['resource_id']},{$akId2akDefIdMap[$dataset['ak_id']]['ak_def_id']},'data_points','{$t}',{$controlIntervalSize},
-                            'initial control region')
-                        ";
-                        $this->db->execute($sql);
+                        $t = date_format(date_sub(date_create($t), date_interval_create_from_date_string('5 days')),
+                            "Y-m-d H:i:s");
+                        $sql =
+                            "INSERT INTO control_region_def " .
+                            "(resource_id,ak_def_id,control_region_type,control_region_starts,control_region_points,comment) " .
+                            "VALUES(?,?,?,?,?,?)";
+                        $params = [
+                            $dataset['resource_id'],
+                            $akId2akDefIdMap[$dataset['ak_id']]['ak_def_id'],
+                            'data_points',
+                            $t,
+                            $controlIntervalSize,
+                            'initial control region'
+                        ];
+                        $this->db->execute($sql, $params);
                     } elseif (date_create($controlRegionDef[0]['control_region_starts']) > date_create($data[0]['collected'])) {
-                        $this->log("Updating initial control region for app kernel: {$akId2akDefIdMap[$dataset['ak_id']]['name']} on resource: {$resourceIdMap[$dataset['resource_id']]['name']}", PEAR_LOG_INFO);
+                        $this->log(
+                            "Updating initial control region for app kernel: " .
+                            "{$akId2akDefIdMap[$dataset['ak_id']]['name']} on resource: " .
+                            "{$resourceIdMap[$dataset['resource_id']]['name']}",
+                            PEAR_LOG_INFO);
                         $t = date_format(date_create($data[0]['collected']), "Y-m-d") . " 00:00:00";
-                        $t = date_format(date_sub(date_create($t), date_interval_create_from_date_string('5 days')), "Y-m-d H:i:s");
-                        $sql = "UPDATE control_region_def
-                                SET control_region_starts='{$t}'
-                              WHERE control_region_def_id={$controlRegionDef[0]['control_region_def_id']}
-                        ";
-                        $this->db->execute($sql);
+                        $t = date_format(date_sub(date_create($t), date_interval_create_from_date_string('5 days')),
+                            "Y-m-d H:i:s");
+                        $sql = "UPDATE control_region_def SET control_region_starts=? WHERE control_region_def_id=?";
+                        $params = [$t, $controlRegionDef[0]['control_region_def_id']];
+                        $this->db->execute($sql, $params);
                     } else {
                         break;
                     }
-
                 }
                 //query for the control region definitions if none present initiate a new one
                 $num_recalculated_CR = 0;
@@ -2681,14 +2894,20 @@ class AppKernelDb
                             r.controlMin,
                             r.controlMax
                          FROM control_region_def AS d,control_regions AS r
-                         WHERE d.resource_id = {$dataset['resource_id']}
-                           AND d.ak_def_id = {$akId2akDefIdMap[$dataset['ak_id']]['ak_def_id']}
-                           AND r.ak_id = {$dataset['ak_id']}
-                           AND r.metric_id = {$dataset['metric_id']}
+                         WHERE d.resource_id = :resource_id
+                           AND d.ak_def_id = :ak_def_id
+                           AND r.ak_id = :ak_id
+                           AND r.metric_id = :metric_id
                            AND r.control_region_def_id=d.control_region_def_id
                          ORDER BY d.control_region_starts;
                     ";
-                    $controlRegions = $this->db->query($controlRegionQuery);
+                    $controlRegionParams = [
+                        ":resource_id" => $dataset['resource_id'],
+                        ":ak_def_id" => $akId2akDefIdMap[$dataset['ak_id']]['ak_def_id'],
+                        ":ak_id" => $dataset['ak_id'],
+                        ":metric_id" => $dataset['metric_id']
+                    ];
+                    $controlRegions = $this->db->query($controlRegionQuery, $controlRegionParams);
                     //if there is no control regions initiate the first one
                     if (count($controlRegions) !== count($controlRegionDef)) {
                         $CRdefs = array();
@@ -2701,17 +2920,17 @@ class AppKernelDb
                             if (key_exists($cr['control_region_def_id'], $CRdefs)) {
                                 $CR[$cr['control_region_def_id']] = $cr;
                             } else {
-                                $sql = "DELETE FROM control_regions WHERE control_region_id={$cr['control_region_id']}";
-                                $this->db->execute($sql);
+                                $sql = "DELETE FROM control_regions WHERE control_region_id=?";
+                                $params = [$cr['control_region_id']];
+                                $this->db->execute($sql, $params);
                             }
                         }
 
                         foreach ($controlRegionDef as $crdef) {
                             if (!key_exists($crdef['control_region_def_id'], $CR)) {
-                                $sql = "INSERT INTO control_regions
-                                        (control_region_def_id,ak_id,metric_id)
-                                    VALUES({$crdef['control_region_def_id']},{$dataset['ak_id']},{$dataset['metric_id']})";
-                                $this->db->execute($sql);
+                                $sql = "INSERT INTO control_regions (control_region_def_id,ak_id,metric_id) VALUES(?,?,?)";
+                                $params = [$crdef['control_region_def_id'],$dataset['ak_id'],$dataset['metric_id']];
+                                $this->db->execute($sql, $params);
                             }
                         }
                         continue;
@@ -2724,28 +2943,21 @@ class AppKernelDb
                                 $completed = 0;
                                 //caculate controls for that region
                                 //Query for calculation properties of the control interval
+                                $controlIntervalDataQuery =
+                                    "SELECT md.resource_id,md.ak_id,md.metric_id,md.collected,md.value_string
+                                     FROM `metric_data` md
+                                     WHERE md.resource_id = :resource_id AND md.ak_id = :ak_id AND md.metric_id = :metric_id
+                                       AND md.collected >= :control_region_starts";
+                                $controlIntervalDataParams = $dataset_params;
+                                $controlIntervalDataParams[":control_region_starts"] = $controlRegion['control_region_starts'];
+
                                 if ($controlRegion['control_region_type'] == 'data_points') {
-                                    $controlIntervalDataQuery =
-                                        "SELECT md.resource_id,md.ak_id,md.metric_id,md.collected,md.value_string
-                                         FROM `metric_data` md
-                                         WHERE md.resource_id = :resource_id
-                                         and md.ak_id = :ak_id
-                                         and md.metric_id = :metric_id
-                                         and md.collected >= '{$controlRegion['control_region_starts']}'
-                                         LIMIT {$controlRegion['control_region_points']}
-                                         ";
+                                     $controlIntervalDataQuery .= " LIMIT " . intval($controlRegion['control_region_points']);
                                 } else {
-                                    $controlIntervalDataQuery =
-                                        "SELECT md.resource_id,md.ak_id,md.metric_id,md.collected,md.value_string
-                                         FROM `metric_data` md
-                                         WHERE md.resource_id = :resource_id
-                                         and md.ak_id = :ak_id
-                                         and md.metric_id = :metric_id
-                                         and md.collected >= '{$controlRegion['control_region_starts']}'
-                                         and md.collected <= '{$controlRegion['control_region_ends']}'
-                                         ";
+                                    $controlIntervalDataQuery .= " AND md.collected <= :control_region_ends";
+                                    $controlIntervalDataParams[":control_region_ends"] = $controlRegion['control_region_ends'];
                                 }
-                                $controlIntervalData = $this->db->query($controlIntervalDataQuery, $dataset);
+                                $controlIntervalData = $this->db->query($controlIntervalDataQuery, $controlIntervalDataParams);
                                 if ($controlRegion['control_region_type'] == 'data_points') {
                                     if (count($controlIntervalData) == $controlRegion['control_region_points']) {
                                         $completed = 1;
@@ -2767,7 +2979,6 @@ class AppKernelDb
                                 $controlEnd = null;
 
                                 if ($controlLength > 0) {
-
                                     $controlMin = min($controlValues);
                                     $controlMax = max($controlValues);
 
@@ -2792,7 +3003,6 @@ class AppKernelDb
 
                                                 $controlStart = array_sum($startRegion) / count($startRegion);
                                                 $controlEnd = array_sum($endRegion) / count($endRegion);
-
                                             }
                                         }
                                     }
@@ -2810,22 +3020,36 @@ class AppKernelDb
 
                                     $updateStatement =
                                         "UPDATE control_regions
-                                         set completed = {$completed},
-                                             controlStart = {$controlStart},
-                                             controlEnd = {$controlEnd},
-                                             controlMin = {$controlMin},
-                                             controlMax = {$controlMax}
-                                     WHERE control_region_id = {$controlRegion['control_region_id']}";
+                                         SET completed = :completed,
+                                             controlStart = :controlStart,
+                                             controlEnd = :controlEnd,
+                                             controlMin = :controlMin,
+                                             controlMax = :controlMax
+                                         WHERE control_region_id = :control_region_id";
+                                    $updateStatementParams = [
+                                        ":control_region_id" => $controlRegion['control_region_id'],
+                                        ":completed" => $completed,
+                                        ":controlStart" => $controlStart,
+                                        ":controlEnd" => $controlEnd,
+                                        ":controlMin" => $controlMin,
+                                        ":controlMax" => $controlMax
+                                    ];
 
                                     foreach ($controlIntervalData as $data_point) {
                                         $controlStatusUpdateStatement = "UPDATE metric_data
-                                            SET controlStatus='control_region_time_interval'
-                                            WHERE resource_id = {$data_point['resource_id']}
-                                            and ak_id = {$data_point['ak_id']}
-                                            and metric_id = {$data_point['metric_id']}
-                                            and collected = '{$data_point['collected']}'
-                                            ";
-                                        $this->db->execute($controlStatusUpdateStatement);
+                                            SET controlStatus=:controlStatus
+                                            WHERE resource_id = :resource_id
+                                            and ak_id = :ak_id
+                                            and metric_id = :metric_id
+                                            and collected = :collected";
+                                        $controlStatusUpdateStatementParams = [
+                                            "controlStatus" => 'control_region_time_interval',
+                                            "resource_id" => $data_point['resource_id'],
+                                            "ak_id" => $data_point['ak_id'],
+                                            "metric_id" => $data_point['metric_id'],
+                                            "collected" =>$data_point['collected'],
+                                        ];
+                                        $this->db->execute($controlStatusUpdateStatement, $controlStatusUpdateStatementParams);
                                         for ($i = 0; $i < $length; $i++) {
                                             if ($data[$i]['collected'] === $data_point['collected']) {
                                                 $data[$i]['controlStatus'] = 'control_region_time_interval';
@@ -2836,14 +3060,14 @@ class AppKernelDb
                                 } else {
                                     $updateStatement =
                                         "UPDATE control_regions
-                                         set completed = 0,
-                                             controlStart = NULL,
-                                             controlEnd = NULL,
-                                             controlMin = NULL,
-                                             controlMax = NULL
-                                     WHERE control_region_id = {$controlRegion['control_region_id']}";
+                                         SET completed = 0,controlStart = NULL,controlEnd = NULL,
+                                             controlMin = NULL,controlMax = NULL
+                                         WHERE control_region_id = :control_region_id";
+                                    $updateStatementParams = [
+                                        ":control_region_id" => $controlRegion['control_region_id']
+                                    ];
                                 }
-                                $this->db->execute($updateStatement);
+                                $this->db->execute($updateStatement, $updateStatementParams);
                             }
                         }
                         if ($num_recalculated_CR == 0) { //no recalculation is done
@@ -2854,7 +3078,6 @@ class AppKernelDb
                     } else { //already been here once
                         break;
                     }
-
                 }
                 $time_end = microtime(true);
                 $timing['contRegCalc'] += $time_end - $time_start;
@@ -2862,7 +3085,10 @@ class AppKernelDb
 
                 $time_start_1 = microtime(true);
                 //set last fake controlRegions for ease of controlRegion search
-                $controlRegions[] = array('control_region_starts' => date_format(date_add(date_create("now"), date_interval_create_from_date_string('1 year')), "Y-m-d H:i:s"));
+                $controlRegions[] = array(
+                    'control_region_starts' => date_format(date_add(date_create("now"),
+                        date_interval_create_from_date_string('1 year')), "Y-m-d H:i:s")
+                );
                 //Set $controlApplicationRegions
                 for ($idControlRegion = 0; $idControlRegion < count($controlRegions); $idControlRegion++) {
                     $controlRegions[$idControlRegion]['control_region_starts_timestamp'] = date_timestamp_get(date_create($controlRegions[$idControlRegion]['control_region_starts']));
@@ -2879,6 +3105,7 @@ class AppKernelDb
                 $update_controlMax = "";
                 $update_controlStatus = "";
                 $collected_array = array();
+                $collected_array_2 = array();
 
                 for ($i = 0; $i < $length; $i++) {
                     //get control region
@@ -2897,6 +3124,7 @@ class AppKernelDb
                     $controlEnd = $controlRegion['controlEnd'];
 
                     // set $controlDiff to 1 if $controlDiff is near zero
+                    $controlDiff = abs($controlEnd - $controlStart);
                     if ($controlDiff / max($controlEnd, $controlStart, 1.0) < 1e-12) {
                         $controlDiff = 1;
                     }
@@ -2918,7 +3146,7 @@ class AppKernelDb
                         $ra_count = count($ra_values);
                         if ($ra_count < $runningAverageSize) ///try to find the previous points and continue the running average
                         {
-                            $dataQuery2 =
+                            $dataQuery2 = $this->db->prepare(
                                 "SELECT md.collected, md.value_string, aki.env_version
                                 FROM `metric_data` md,
                                          `ak_instance` aki
@@ -2930,14 +3158,18 @@ class AppKernelDb
                                 and aki.ak_id = md.ak_id
                                 and aki.collected = md.collected
                                 and aki.resource_id = md.resource_id
-                                ORDER BY collected desc
-                                limit $runningAverageSize";
-                            $data2 = $this->db->query($dataQuery2, $dataset);
+                                ORDER BY collected DESC
+                                LIMIT :running_average_size");
+                            $dataQuery2->bindValue(":resource_id",$dataset_params[":resource_id"]);
+                            $dataQuery2->bindValue(":ak_id",$dataset_params[":ak_id"]);
+                            $dataQuery2->bindValue(":metric_id",$dataset_params[":metric_id"]);
+                            $dataQuery2->bindValue(":running_average_size",$runningAverageSize, PDO::PARAM_INT);
+
+                            $data2 = $dataQuery2->execute();
                             $data2Count = count($data2);
                             for ($j = 0; $j < $data2Count && $j < $runningAverageSize - $ra_count; $j++) {
                                 $ra_values[] = $data2[$j]['value_string'];
                             }
-
                         }
 
                         $runningAverage = array_sum($ra_values) / count($ra_values);
@@ -2968,7 +3200,7 @@ class AppKernelDb
                         }
 
                         //Update DB
-                        if ($runningAverage === null) {
+                       /* if ($runningAverage === null) {
                             $runningAverage = 'NULL';
                         }
                         if ($control === null) {
@@ -2986,12 +3218,12 @@ class AppKernelDb
                         }
                         if ($controlMax === null) {
                             $controlMax = 'NULL';
-                        }
+                        }*/
                         if ($data[$i]['controlStatus'] === 'control_region_time_interval') {
                             $controlStatus = 'control_region_time_interval';
                         }
 
-                        $update_running_average .= " WHEN '{$data[$i]['collected']}' THEN $runningAverage \n";
+                        /*$update_running_average .= " WHEN '{$data[$i]['collected']}' THEN $runningAverage \n";
                         $update_control .= " WHEN '{$data[$i]['collected']}' THEN $control \n";
                         $update_controlStart .= " WHEN '{$data[$i]['collected']}' THEN $controlStart \n";
                         $update_controlEnd .= " WHEN '{$data[$i]['collected']}' THEN $controlEnd \n";
@@ -2999,97 +3231,98 @@ class AppKernelDb
                         $update_controlMax .= " WHEN '{$data[$i]['collected']}' THEN $controlMax \n";
                         $update_controlStatus .= " WHEN '{$data[$i]['collected']}' THEN '$controlStatus' \n";
 
-                        $collected_array[] = "'" . $data[$i]['collected'] . "'";
+                        $collected_array[] = "'" . $data[$i]['collected'] . "'";*/
+                        $collected_array_2[":collected" . $i] = $data[$i]['collected'];
 
                         $Nallupdate_metric_data += 1;
                         if ($Nallupdate_metric_data >= 500 || $i >= $length - 1) {//
                             $time_start_sqlupdate = microtime(true);
-                            $collected_array = implode(',', $collected_array);
-                            $allupdate_metric_data = "UPDATE metric_data SET
-                                running_average = CASE collected
-                                {$update_running_average}
-                                ELSE running_average
-                                END
-                                , control = CASE collected
-                                {$update_control}
-                                ELSE control
-                                END
-                                , controlStart = CASE collected
-                                {$update_controlStart}
-                                ELSE controlStart
-                                END
-                                , controlEnd = CASE collected
-                                {$update_controlEnd}
-                                ELSE controlEnd
-                                END
-                                , controlMin = CASE collected
-                                {$update_controlMin}
-                                ELSE controlMin
-                                END
-                                , controlMax = CASE collected
-                                {$update_controlMax}
-                                ELSE controlMax
-                                END
-                                , controlStatus = CASE collected
-                                {$update_controlStatus}
-                                ELSE controlStatus
-                                END
-                                WHERE resource_id = {$dataset['resource_id']}
-                                 and ak_id = {$dataset['ak_id']}
-                                 and metric_id = {$dataset['metric_id']} and collected IN ({$collected_array}) ;";
+                            //$collected_array = implode(',', $collected_array);
 
-                            $this->db->execute($allupdate_metric_data);
+                            $update_metric_data_params = [
+                                ":resource_id" => $dataset_params[":resource_id"],
+                                ":collected" => $data[$i]['collected'],
+                                ":runningAverage" => $runningAverage,
+                                ":control" => $control,
+                                ":controlStart" => $controlStart,
+                                ":controlEnd" => $controlEnd,
+                                ":controlMin" => $controlMin,
+                                ":controlMax" => $controlMax,
+                                ":controlStatus" => $controlStatus,
+                            ];
+
+                            $allupdate_metric_data =
+                                "UPDATE metric_data SET
+                                running_average = CASE collected WHEN :collected THEN :runningAverage
+                                    ELSE running_average END,
+                                control = CASE collected WHEN :collected THEN :control
+                                    ELSE control END,
+                                controlStart = CASE collected WHEN :collected THEN :controlStart
+                                    ELSE controlStart END,
+                                controlEnd = CASE collected WHEN :collected THEN :controlEnd
+                                    ELSE controlEnd END,
+                                controlMin = CASE collected WHEN :collected THEN :controlMin
+                                    ELSE controlMin END,
+                                controlMax = CASE collected WHEN :collected THEN :controlMax
+                                    ELSE controlMax END,
+                                controlStatus = CASE collected WHEN :collected THEN :controlStatus
+                                    ELSE controlStatus END
+                                WHERE resource_id = :resource_id AND ak_id = :ak_id AND metric_id = :metric_id
+                                  AND collected IN (".implode(',',array_keys($collected_array_2)).")";
+
+                            $allupdate_metric_data_params = array_merge([
+                                ":ak_id" => $dataset_params[":ak_id"],
+                                ":metric_id" => $dataset_params[":metric_id"]],
+                                $update_metric_data_params, $collected_array_2);
+
+                            $this->db->execute($allupdate_metric_data, $allupdate_metric_data_params);
                             $time_end_sqlupdate1 = microtime(true);
                             $timing['sqlupdate1'] += $time_end_sqlupdate1 - $time_start_sqlupdate;
 
                             $allupdate_a_data2 = "UPDATE a_data2 SET
-                                running_average = CASE FROM_UNIXTIME(collected)
-                                {$update_running_average}
-                                ELSE running_average
-                                END
-                                , control = CASE FROM_UNIXTIME(collected)
-                                {$update_control}
-                                ELSE control
-                                END
-                                , controlStart = CASE FROM_UNIXTIME(collected)
-                                {$update_controlStart}
-                                ELSE controlStart
-                                END
-                                , controlEnd = CASE FROM_UNIXTIME(collected)
-                                {$update_controlEnd}
-                                ELSE controlEnd
-                                END
-                                , controlMin = CASE FROM_UNIXTIME(collected)
-                                {$update_controlMin}
-                                ELSE controlMin
-                                END
-                                , controlMax = CASE FROM_UNIXTIME(collected)
-                                {$update_controlMax}
-                                ELSE controlMax
-                                END
-                                , controlStatus = CASE FROM_UNIXTIME(collected)
-                                {$update_controlStatus}
-                                ELSE controlStatus
-                                END
-                            WHERE resource_id = {$dataset['resource_id']}
-                                and ak_def_id = {$akId2akDefIdMap[$dataset['ak_id']]['ak_def_id']}
-                                and num_units = {$akId2akDefIdMap[$dataset['ak_id']]['num_units']}
-                                and metric_id = {$dataset['metric_id']} and FROM_UNIXTIME(collected) IN ({$collected_array}) ;";
+                                running_average = CASE FROM_UNIXTIME(collected) WHEN :collected THEN :runningAverage
+                                    ELSE running_average END,
+                                control = CASE collected WHEN :collected THEN :control
+                                    ELSE control END,
+                                controlStart = CASE FROM_UNIXTIME(collected) WHEN :collected THEN :controlStart
+                                    ELSE controlStart END,
+                                controlEnd = CASE FROM_UNIXTIME(collected) WHEN :collected THEN :controlEnd
+                                    ELSE controlEnd END,
+                                controlMin = CASE FROM_UNIXTIME(collected) WHEN :collected THEN :controlMin
+                                    ELSE controlMin END,
+                                controlMax = CASE FROM_UNIXTIME(collected) WHEN :collected THEN :controlMax
+                                    ELSE controlMax END,
+                                controlStatus = CASE FROM_UNIXTIME(collected) WHEN :collected THEN :controlStatus
+                                    ELSE controlStatus END
+                            WHERE resource_id = :resource_id AND ak_def_id = :ak_def_id AND num_units = :num_units
+                              AND metric_id = :metric_id
+                              AND FROM_UNIXTIME(collected) IN (" . implode(', ', array_keys($collected_array_2)) . ")";
 
-                            $this->db->execute($allupdate_a_data2);
+                            $allupdate_a_data2_params = array_merge(
+                                [
+                                    ":ak_def_id" => $akId2akDefIdMap[$dataset['ak_id']]['ak_def_id'],
+                                    ":num_units" => $akId2akDefIdMap[$dataset['ak_id']]['num_units'],
+                                    ":metric_id" => $dataset_params[":metric_id"]
+                                ],
+                                $update_metric_data_params, $collected_array_2);
+
+                            $this->db->execute($allupdate_a_data2, $allupdate_a_data2_params);
                             $time_end_sqlupdate2 = microtime(true);
 
                             // ak_instance
                             if ($metrics_walltime_id !== null && $dataset['metric_id'] === $metrics_walltime_id) {
-                                $allupdate_ak_instance = "UPDATE ak_instance SET
-                                controlStatus = CASE collected
-                                    {$update_controlStatus}
-                                ELSE controlStatus
-                                END
-                                WHERE resource_id = {$dataset['resource_id']}
-                                    and ak_id = {$dataset['ak_id']}
-                                    and collected IN ({$collected_array}) ;";
-                                $this->db->execute($allupdate_ak_instance);
+                                $allupdate_ak_instance =
+                                    "UPDATE ak_instance SET
+                                        controlStatus = CASE collected WHEN :collected THEN :controlStatus ELSE controlStatus  END
+                                    WHERE resource_id = :resource_id AND ak_id = :ak_id
+                                      and collected IN (" . implode(', ', array_keys($collected_array_2)) . ")";
+                                $allupdate_ak_instance_params =  array_merge([
+                                    ":resource_id" => $dataset_params[":resource_id"],
+                                    ":ak_id" => $dataset_params[":ak_id"],
+                                    ":collected" => $data[$i]['collected'],
+                                    ":controlStatus" => $controlStatus ],
+                                    $collected_array_2);
+                                $this->db->execute($allupdate_ak_instance, $allupdate_ak_instance_params);
                             }
 
                             $timing['sqlupdate1'] += $time_end_sqlupdate1 - $time_start_sqlupdate;
@@ -3097,15 +3330,6 @@ class AppKernelDb
 
                             $timing['N_sqlupdate1'] += $Nallupdate_metric_data;
                             $timing['N_sqlupdate2'] += $Nallupdate_metric_data;
-
-                            $update_running_average = "";
-                            $update_control = "";
-                            $update_controlStart = "";
-                            $update_controlEnd = "";
-                            $update_controlMin = "";
-                            $update_controlMax = "";
-                            $update_controlStatus = "";
-                            $collected_array = array();
 
                             $Nallupdate_metric_data = 0;
                         }
@@ -3122,12 +3346,17 @@ class AppKernelDb
         $t_bigcycle = $time_end_bigcycle - $time_start_bigcycle;
 
         $this->log("Timing(Cycle for calculating running average and control values)=" . ($t_bigcycle), PEAR_LOG_DEBUG);
-        $this->log("    Timing(data for control calc)=" . sprintf("%.4f", $timing['dataQuery']) . " (" . sprintf("%.2f", 100.0 * $timing['dataQuery'] / $t_bigcycle) . "%)", PEAR_LOG_DEBUG);
-        $this->log("    Timing(Control region calculation)=" . sprintf("%.4f", $timing['contRegCalc']) . " (" . sprintf("%.2f", 100.0 * $timing['contRegCalc'] / $t_bigcycle) . "%)", PEAR_LOG_DEBUG);
-        $this->log("    Timing(data for control calc)=" . sprintf("%.4f", $timing['contCalc']) . " (" . sprintf("%.2f", 100.0 * $timing['contCalc'] / $t_bigcycle) . "%)", PEAR_LOG_DEBUG);
-        $this->log("        Timing(sql update)=" . sprintf("%.4f", $timing['sqlupdate1']) . " (" . sprintf("%.2f", 100.0 * $timing['sqlupdate1'] / $t_bigcycle) . "%)", PEAR_LOG_DEBUG);
-        $this->log("        Timing(sql update)=" . sprintf("%.4f", $timing['sqlupdate2']) . " (" . sprintf("%.2f", 100.0 * $timing['sqlupdate2'] / $t_bigcycle) . "%)", PEAR_LOG_DEBUG);
-
+        $this->log("    Timing(data for control calc)=" . sprintf("%.4f", $timing['dataQuery']) . " (" . sprintf("%.2f",
+                100.0 * $timing['dataQuery'] / $t_bigcycle) . "%)", PEAR_LOG_DEBUG);
+        $this->log("    Timing(Control region calculation)=" . sprintf("%.4f",
+                $timing['contRegCalc']) . " (" . sprintf("%.2f", 100.0 * $timing['contRegCalc'] / $t_bigcycle) . "%)",
+            PEAR_LOG_DEBUG);
+        $this->log("    Timing(data for control calc)=" . sprintf("%.4f", $timing['contCalc']) . " (" . sprintf("%.2f",
+                100.0 * $timing['contCalc'] / $t_bigcycle) . "%)", PEAR_LOG_DEBUG);
+        $this->log("        Timing(sql update)=" . sprintf("%.4f", $timing['sqlupdate1']) . " (" . sprintf("%.2f",
+                100.0 * $timing['sqlupdate1'] / $t_bigcycle) . "%)", PEAR_LOG_DEBUG);
+        $this->log("        Timing(sql update)=" . sprintf("%.4f", $timing['sqlupdate2']) . " (" . sprintf("%.2f",
+                100.0 * $timing['sqlupdate2'] / $t_bigcycle) . "%)", PEAR_LOG_DEBUG);
     }
 
     // --------------------------------------------------------------------------------
@@ -3140,7 +3369,6 @@ class AppKernelDb
         $this->db->handle()->beginTransaction();
 
         try {
-
             // Create a table containing data needed to generate a hierarchical tree
             // view of the application kernels including a start and end date for the
             // collection of metrics.
@@ -3329,7 +3557,6 @@ class AppKernelDb
         $this->db->handle()->commit();
 
         return true;
-
     }
 
     // --------------------------------------------------------------------------------
@@ -3352,10 +3579,12 @@ class AppKernelDb
 
                 foreach ($akInstances as $akInstance) {
                     $timestamp = strtotime($akInstance->deployment_time);
-                    $options = array('ak_def_id' => $appKernelDef->id,
+                    $options = array(
+                        'ak_def_id' => $appKernelDef->id,
                         'collected' => $timestamp,
                         'resource_id' => $resource->id,
-                        'num_units' => 1);
+                        'num_units' => 1
+                    );
                     $this->loadAppKernelInstanceInfo($options, $instanceData);
                     $recalculatedEnvVersion = $instanceData->environmentVersion();
 
@@ -3372,8 +3601,13 @@ class AppKernelDb
                         try {
                             $sql = "UPDATE ak_instance SET env_version=? WHERE " .
                                 "ak_id=? AND collected=FROM_UNIXTIME(?) AND resource_id=? AND env_version=?";
-                            $params = array($recalculatedEnvVersion, $instanceData->db_ak_id,
-                                $timestamp, $resource->id, $instanceData->environmentVersion);
+                            $params = array(
+                                $recalculatedEnvVersion,
+                                $instanceData->db_ak_id,
+                                $timestamp,
+                                $resource->id,
+                                $instanceData->environmentVersion
+                            );
                             $this->db->execute($sql, $params);
                             print "      UPDATE ak_instance SET env_version='$recalculatedEnvVersion' WHERE " .
                                 "ak_id={$instanceData->db_ak_id} AND collected=FROM_UNIXTIME($timestamp) AND " .
@@ -3382,7 +3616,6 @@ class AppKernelDb
                             $this->log("Error executing query '$sql': " . $e->getMessage());
                             $this->db->handle()->rollback();
                         }
-
                     }
                 }
             }
@@ -3480,8 +3713,7 @@ class Dataset
         $description,
         $rawNumProcUnits,
         $resourceDescription = 'resource description'
-    )
-    {
+    ) {
         $this->akName = $name;
         $this->akId = $akId;
         $this->resourceName = $resource;
@@ -3529,21 +3761,30 @@ class Dataset
             $duration_info['end'] = date('Y-m-d', $this->timeVector[$length - 1]);
 
             $title['title'] = "App Kernel Data";
-            $title2['parameters'] = array("App Kernel = " . $this->akName,
+            $title2['parameters'] = array(
+                "App Kernel = " . $this->akName,
                 "Resource = " . $this->resourceName,
                 "Metric = " . $this->metric,
-                "Processing Units = " . $this->numProcUnits);
+                "Processing Units = " . $this->numProcUnits
+            );
             $headers = array('Date', 'Value', 'Control', 'Changed');
             for ($i = 0; $i < $length; $i++) {
-                $rows[$this->timeVector[$i]] = array(date('Y-m-d H:i:s', $this->timeVector[$i]), $this->valueVector[$i], $this->controlVector[$i], $this->versionVector[$i] == 1 ? 'yes' : 'no');
+                $rows[$this->timeVector[$i]] = array(
+                    date('Y-m-d H:i:s', $this->timeVector[$i]),
+                    $this->valueVector[$i],
+                    $this->controlVector[$i],
+                    $this->versionVector[$i] == 1 ? 'yes' : 'no'
+                );
             }
         }
 
-        return array('title' => $title,
+        return array(
+            'title' => $title,
             'title2' => $title2,
             'duration' => $duration_info,
             'headers' => $headers,
-            'rows' => $rows);
+            'rows' => $rows
+        );
     }
 
     // --------------------------------------------------------------------------------

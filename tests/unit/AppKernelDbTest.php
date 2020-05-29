@@ -13,9 +13,9 @@ use AppKernel\InstanceData;
 function create_instance_data($db_ak_id, $deployment_num_proc_units, $deployment_time, $status)
 {
     $ak = new InstanceData;
-    $ak->db_ak_id = $db_ak_id;
-    $ak->deployment_num_proc_units = strtotime($deployment_num_proc_units);
-    $ak->deployment_time = $deployment_time;
+    $ak->db_ak_id = intval($db_ak_id);
+    $ak->deployment_num_proc_units = intval($deployment_num_proc_units);
+    $ak->deployment_time = strtotime($deployment_time);
     $ak->status = $status;
     return $ak;
 }
@@ -87,7 +87,7 @@ final class AppKernelDbTest extends TestCase
         ];
         return [
             [[], [], [], 27, null],
-            [[28, 1], [], [], null, $akd_list],
+            [[28, 1], [], [], 26, null],
             [[28], [], [], null, $akd_list],
             [[28], [1], [], null, [
                 29 => new AppKernelDefinition(29, "Enzo", "enzo", null, "node", true, true, 1537780756, 1589170859),
@@ -220,13 +220,13 @@ final class AppKernelDbTest extends TestCase
                 create_instance_data(81, 2, "2020-05-01 10:57:03", "success"),
                 create_instance_data(82, 4, "2020-05-01 10:56:56", "success"),
             ]],
-            [23,28,45, [
+            [23, 28, 45, [
                 create_instance_data(80, 1, "2020-05-01 11:57:11", "success"),
                 create_instance_data(81, 2, "2020-05-01 10:57:03", "success"),
                 create_instance_data(82, 4, "2020-05-01 10:56:56", "success"),
                 create_instance_data(82, 4, "2020-05-01 10:34:33", "success")
             ]],
-            [23001,null, 0, null]
+            [23001, null, 0, null]
         ];
     }
 
@@ -240,7 +240,7 @@ final class AppKernelDbTest extends TestCase
 
         if ($expected === null && $n_expected === null) {
             print(count($actual) . ", [\n");
-            foreach (array_slice($actual,0,min(10,count($actual))) as $val) {
+            foreach (array_slice($actual, 0, min(10, count($actual))) as $val) {
                 print("create_instance_data($val->db_ak_id, $val->deployment_num_proc_units, \"$val->deployment_time\", \"$val->status\"),\n");
             }
             print("]\n");
@@ -266,4 +266,59 @@ final class AppKernelDbTest extends TestCase
             }
         }
     }
+
+    public function testNewControlRegions()
+    {
+        $ak_db = new \AppKernel\AppKernelDb();
+
+        // update initial control for 5 points
+        $ak_db->newControlRegions(
+            $resource_id=28,
+            $ak_def_id=23,
+            $control_region_type='data_points',
+            $startDateTime="2020-03-28",
+            $endDateTime=null,
+            $n_points=5,
+            $comment="short initial control region",
+            $update = true,
+            $control_region_def_id = null
+        );
+        $ak_db->calculateControls(false, false, 20, 5, "UBHPC_32core", "namd");
+
+        $control_regions = $ak_db->getControlRegions($resource_id = 28, $ak_def_id = 23);
+
+        $this->assertSame(1, count($control_regions));
+        $this->assertEquals([
+            'control_region_def_id' => "8",
+            'resource_id' => "28",
+            'ak_def_id' => "23",
+            'control_region_type' => "data_points",
+            'control_region_starts' => "2020-03-28 00:00:00",
+            'control_region_ends' => null,
+            'control_region_points' => "5",
+            'comment' => "short initial control region"
+        ], $control_regions[0]);
+
+        var_dump($control_regions);
+
+
+//        $actual = $ak_db->newControlRegions(
+//            $resource_id=28,
+//            $ak_def_id=23,
+//            $control_region_type='data_points',
+//            $startDateTime="2020-04-01",
+//            $endDateTime=null,
+//            $n_points=5,
+//            $comment="test",
+//            $update = true,
+//            $control_region_def_id = null
+//        );
+//        $ak_db->calculateControls(false, false, 20, 5, "UBHPC_32core", "namd");
+//
+//        var_dump($control_regions);
+
+        #print_r($actual);
+    }
+
+
 }
