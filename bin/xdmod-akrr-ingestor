@@ -48,6 +48,8 @@ $ingestingConfig = [
     'replace' => false,
     /** @var bool Recalculate the controls and control intervals */
     'recalculateControls' => false,
+    /** @var integer Control Interval Size for initial control regions*/
+    'controlIntervalSize' => 20
 ];
 
 /**
@@ -96,6 +98,9 @@ $options = array(
 
     // offset the ingesting starting date by o days
     'o:' => 'offset:',
+
+    // Control Interval Size for initial control regions
+    'i:' => 'control-interval:',
 );
 
 $args = getopt(implode('', array_keys($options)), $options);
@@ -132,6 +137,10 @@ foreach ($args as $arg => $value) {
         case 'k':
         case 'kernel':
             $ingestingConfig['restrictToAppKernel'] = $value;
+            break;
+        case 'i':
+        case 'control-interval':
+            $ingestingConfig['controlIntervalSize'] = intval($value);
             break;
         case 'l':
         case 'since-last':
@@ -284,6 +293,9 @@ Usage: xdmod-akrr-ingestor [[-l *timeframe*]|[-s *start-date*] [-e *end-date*]]
 
     -R, --resource *resource-name*
         Ingest app kernels for this resource only.
+
+    -i, --control-interval *control interval size*
+        Control interval size for new control regions. Default: 20.
 
 If a start time is specified without an end time then data will be
 loaded from the start to the current time.  If an end time is specified

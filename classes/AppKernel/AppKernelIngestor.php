@@ -91,6 +91,13 @@ class AppKernelIngestor
      */
     private $recalculateControls = false;
 
+
+    /**
+     * Control Interval Size for initial control regions
+     *
+     * @var int
+     */
+    private $controlIntervalSize = 20;
     /**
      * Logs for data on the ingestion process.
      *
@@ -240,6 +247,13 @@ class AppKernelIngestor
             }
             $this->recalculateControls = $config['recalculateControls'];
             unset($config['recalculateControls']);
+        }
+        if (array_key_exists('controlIntervalSize', $config)) {
+            if (!is_bool($config['controlIntervalSize'])) {
+                throw new Exception("controlIntervalSize should be boolean!");
+            }
+            $this->recalculateControls = $config['controlIntervalSize'];
+            unset($config['controlIntervalSize']);
         }
         /**
          * A time period to use for ingestion.
@@ -765,7 +779,7 @@ class AppKernelIngestor
         if (!$this->dryRunMode) {
             try {
                 $this->logger->info("Caculate running average and control values");
-                $this->db->calculateControls($this->recalculateControls, 20, 5,
+                $this->db->calculateControls($this->recalculateControls, $this->controlIntervalSize, 5,
                     $this->restrictToResource, $this->restrictToAppKernel);
             } catch (\PDOException $e) {
                 $msg = formatPdoExceptionMessage($e);
