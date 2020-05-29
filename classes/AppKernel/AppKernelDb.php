@@ -564,9 +564,9 @@ class AppKernelDb
         }
         if (count($resource_ids) > 0) {
             $sql .= ' AND vt.resource_id in (';
-            for($i=0; $i < count($resource_ids); $i++) {
+            for ($i = 0; $i < count($resource_ids); $i++) {
                 $sql .= ':resource_id_' . $i;
-                if($i < count($resource_ids) - 1) {
+                if ($i < count($resource_ids) - 1) {
                     $sql .= ',';
                 }
                 $params[':resource_id_' . $i] = $resource_ids[$i];
@@ -614,9 +614,9 @@ class AppKernelDb
 
         if (count($resource_ids) > 0) {
             $sql .= ' AND vt.resource_id in (';
-            for($i=0; $i < count($resource_ids); $i++) {
+            for ($i = 0; $i < count($resource_ids); $i++) {
                 $sql .= ':resource_id_' . $i;
-                if($i < count($resource_ids) - 1) {
+                if ($i < count($resource_ids) - 1) {
                     $sql .= ',';
                 }
                 $params[':resource_id_' . $i] = intval($resource_ids[$i]);
@@ -687,9 +687,9 @@ class AppKernelDb
         }
         if (count($resource_ids) > 0) {
             $sql .= ' AND vt.resource_id in (';
-            for($i=0; $i < count($resource_ids); $i++) {
+            for ($i = 0; $i < count($resource_ids); $i++) {
                 $sql .= ':resource_id_' . $i;
-                if($i < count($resource_ids) - 1) {
+                if ($i < count($resource_ids) - 1) {
                     $sql .= ',';
                 }
                 $params[':resource_id_' . $i] = intval($resource_ids[$i]);
@@ -2264,7 +2264,8 @@ class AppKernelDb
      * @param $ak_def_id
      * @return array
      */
-    protected function getAppKernelIdsForAppKernelDefId($ak_def_id) {
+    protected function getAppKernelIdsForAppKernelDefId($ak_def_id)
+    {
         $ak_def_id = intval($ak_def_id);
         $sql = "SELECT ak_id FROM mod_appkernel.app_kernel WHERE ak_def_id=:ak_def_id";
         $params = [":ak_def_id" => $ak_def_id];
@@ -2296,9 +2297,9 @@ class AppKernelDb
         $ak_ids = $this->getAppKernelIdsForAppKernelDefId($ak_def_id);
         $ak_ids_in_sql_param = [];
         $ak_ids_in_sql = '';
-        for($i=0; $i < count($ak_ids); $i++) {
+        for ($i = 0; $i < count($ak_ids); $i++) {
             $ak_ids_in_sql .= ':ak_id_' . $i;
-            if($i < count($ak_ids) - 1) {
+            if ($i < count($ak_ids) - 1) {
                 $ak_ids_in_sql .= ',';
             }
             $ak_ids_in_sql_param[':ak_id_' . $i] = $ak_ids[$i];
@@ -2564,7 +2565,6 @@ class AppKernelDb
     /**
      * Calculates the running average and control values for each metric value
      *
-     * @param bool $recalculateControlIntervals
      * @param bool $recalculateControls
      * @param int $controlIntervalSize
      * @param int $runningAverageSize
@@ -2573,7 +2573,6 @@ class AppKernelDb
      * @throws Exception
      */
     public function calculateControls(
-        $recalculateControlIntervals = false,
         $recalculateControls = false,
         $controlIntervalSize = 20,
         $runningAverageSize = 5,
@@ -2635,12 +2634,12 @@ class AppKernelDb
                 $this->loadAppKernelDefinitions();
             }
 
-            $ak_def_id =$this->appKernelDefinitions[$restrictToAppKernel]->id;
+            $ak_def_id = $this->appKernelDefinitions[$restrictToAppKernel]->id;
             $ak_ids = $this->getAppKernelIdsForAppKernelDefId($ak_def_id);
 
-            for($i=0; $i < count($ak_ids); $i++) {
+            for ($i = 0; $i < count($ak_ids); $i++) {
                 $ak_ids_in_sql .= ':ak_id_' . $i;
-                if($i < count($ak_ids) - 1) {
+                if ($i < count($ak_ids) - 1) {
                     $ak_ids_in_sql .= ',';
                 }
                 $ak_ids_in_sql_param[':ak_id_' . $i] = $ak_ids[$i];
@@ -2711,14 +2710,14 @@ class AppKernelDb
             $sql = "UPDATE metric_data SET control = null,running_average = null,controlStatus = 'undefined'";
             $params = [];
 
-            if ($resource_id!==null && $ak_ids!==null) {
+            if ($resource_id !== null && $ak_ids !== null) {
                 $sql .= " WHERE resource_id=:resource_id AND ak_id IN (" . $ak_ids_in_sql . ")";
                 $params[':resource_id'] = $resource_id;
                 $params = array_merge($params, $ak_ids_in_sql_param);
-            } elseif ($resource_id===null && $ak_ids!==null) {
+            } elseif ($resource_id === null && $ak_ids !== null) {
                 $sql .= " WHERE ak_id IN (" . $ak_ids_in_sql . ")";
                 $params = array_merge($params, $ak_ids_in_sql_param);
-            }  elseif ($resource_id!==null && $ak_ids===null) {
+            } elseif ($resource_id !== null && $ak_ids === null) {
                 $sql .= " WHERE resource_id=:resource_id";
                 $params[':resource_id'] = $resource_id;
             }
@@ -2742,14 +2741,14 @@ class AppKernelDb
 
         $sql = "SELECT distinct ak_id, metric_id, resource_id FROM `metric_data`";
         $params = [];
-        if ($resource_id!==null && $ak_ids!==null) {
+        if ($resource_id !== null && $ak_ids !== null) {
             $sql .= " WHERE resource_id=:resource_id AND ak_id IN (" . $ak_ids_in_sql . ")";
             $params[':resource_id'] = $resource_id;
             $params = array_merge($params, $ak_ids_in_sql_param);
-        } elseif ($resource_id===null && $ak_ids!==null) {
+        } elseif ($resource_id === null && $ak_ids !== null) {
             $sql .= " WHERE ak_id IN (" . $ak_ids_in_sql . ")";
             $params = array_merge($params, $ak_ids_in_sql_param);
-        }  elseif ($resource_id!==null && $ak_ids===null) {
+        } elseif ($resource_id !== null && $ak_ids === null) {
             $sql .= " WHERE resource_id=:resource_id";
             $params[':resource_id'] = $resource_id;
         }
@@ -2784,7 +2783,7 @@ class AppKernelDb
             ];
             if ($progressVerbosity === 1) {
                 $message = "Calculating running average and control values. " .
-                    number_format(100.0 * $di / $datasetsLength,2) . "% " . json_encode($dataset);
+                    number_format(100.0 * $di / $datasetsLength, 2) . "% " . json_encode($dataset);
                 $this->log($message, PEAR_LOG_DEBUG);
             }
             $control_criteria = $this->control_criteria;
@@ -2929,7 +2928,7 @@ class AppKernelDb
                         foreach ($controlRegionDef as $crdef) {
                             if (!key_exists($crdef['control_region_def_id'], $CR)) {
                                 $sql = "INSERT INTO control_regions (control_region_def_id,ak_id,metric_id) VALUES(?,?,?)";
-                                $params = [$crdef['control_region_def_id'],$dataset['ak_id'],$dataset['metric_id']];
+                                $params = [$crdef['control_region_def_id'], $dataset['ak_id'], $dataset['metric_id']];
                                 $this->db->execute($sql, $params);
                             }
                         }
@@ -2952,12 +2951,13 @@ class AppKernelDb
                                 $controlIntervalDataParams[":control_region_starts"] = $controlRegion['control_region_starts'];
 
                                 if ($controlRegion['control_region_type'] == 'data_points') {
-                                     $controlIntervalDataQuery .= " LIMIT " . intval($controlRegion['control_region_points']);
+                                    $controlIntervalDataQuery .= " LIMIT " . intval($controlRegion['control_region_points']);
                                 } else {
                                     $controlIntervalDataQuery .= " AND md.collected <= :control_region_ends";
                                     $controlIntervalDataParams[":control_region_ends"] = $controlRegion['control_region_ends'];
                                 }
-                                $controlIntervalData = $this->db->query($controlIntervalDataQuery, $controlIntervalDataParams);
+                                $controlIntervalData = $this->db->query($controlIntervalDataQuery,
+                                    $controlIntervalDataParams);
                                 if ($controlRegion['control_region_type'] == 'data_points') {
                                     if (count($controlIntervalData) == $controlRegion['control_region_points']) {
                                         $completed = 1;
@@ -3043,13 +3043,14 @@ class AppKernelDb
                                             and metric_id = :metric_id
                                             and collected = :collected";
                                         $controlStatusUpdateStatementParams = [
-                                            "controlStatus" => 'control_region_time_interval',
-                                            "resource_id" => $data_point['resource_id'],
-                                            "ak_id" => $data_point['ak_id'],
-                                            "metric_id" => $data_point['metric_id'],
-                                            "collected" =>$data_point['collected'],
+                                            ":controlStatus" => 'control_region_time_interval',
+                                            ":resource_id" => $data_point['resource_id'],
+                                            ":ak_id" => $data_point['ak_id'],
+                                            ":metric_id" => $data_point['metric_id'],
+                                            ":collected" => $data_point['collected'],
                                         ];
-                                        $this->db->execute($controlStatusUpdateStatement, $controlStatusUpdateStatementParams);
+                                        $this->db->execute($controlStatusUpdateStatement,
+                                            $controlStatusUpdateStatementParams);
                                         for ($i = 0; $i < $length; $i++) {
                                             if ($data[$i]['collected'] === $data_point['collected']) {
                                                 $data[$i]['controlStatus'] = 'control_region_time_interval';
@@ -3104,8 +3105,9 @@ class AppKernelDb
                 $update_controlMin = "";
                 $update_controlMax = "";
                 $update_controlStatus = "";
-                $collected_array = array();
-                $collected_array_2 = array();
+                $update_param = [];
+                $controlStatusParam = [];
+                $collected_array = [];
 
                 for ($i = 0; $i < $length; $i++) {
                     //get control region
@@ -3160,12 +3162,13 @@ class AppKernelDb
                                 and aki.resource_id = md.resource_id
                                 ORDER BY collected DESC
                                 LIMIT :running_average_size");
-                            $dataQuery2->bindValue(":resource_id",$dataset_params[":resource_id"]);
-                            $dataQuery2->bindValue(":ak_id",$dataset_params[":ak_id"]);
-                            $dataQuery2->bindValue(":metric_id",$dataset_params[":metric_id"]);
-                            $dataQuery2->bindValue(":running_average_size",$runningAverageSize, PDO::PARAM_INT);
+                            $dataQuery2->bindValue(":resource_id", $dataset_params[":resource_id"]);
+                            $dataQuery2->bindValue(":ak_id", $dataset_params[":ak_id"]);
+                            $dataQuery2->bindValue(":metric_id", $dataset_params[":metric_id"]);
+                            $dataQuery2->bindValue(":running_average_size", $runningAverageSize, PDO::PARAM_INT);
 
-                            $data2 = $dataQuery2->execute();
+                            $dataQuery2->execute();
+                            $data2 = $dataQuery2->fetchAll();
                             $data2Count = count($data2);
                             for ($j = 0; $j < $data2Count && $j < $runningAverageSize - $ra_count; $j++) {
                                 $ra_values[] = $data2[$j]['value_string'];
@@ -3199,112 +3202,77 @@ class AppKernelDb
                             $control = 0;
                         }
 
-                        //Update DB
-                       /* if ($runningAverage === null) {
-                            $runningAverage = 'NULL';
-                        }
-                        if ($control === null) {
-                            $control = 'NULL';
-                            $controlStatus = 'undefined';
-                        }
-                        if ($controlStart === null) {
-                            $controlStart = 'NULL';
-                        }
-                        if ($controlEnd === null) {
-                            $controlEnd = 'NULL';
-                        }
-                        if ($controlMin === null) {
-                            $controlMin = 'NULL';
-                        }
-                        if ($controlMax === null) {
-                            $controlMax = 'NULL';
-                        }*/
                         if ($data[$i]['controlStatus'] === 'control_region_time_interval') {
                             $controlStatus = 'control_region_time_interval';
                         }
 
-                        /*$update_running_average .= " WHEN '{$data[$i]['collected']}' THEN $runningAverage \n";
-                        $update_control .= " WHEN '{$data[$i]['collected']}' THEN $control \n";
-                        $update_controlStart .= " WHEN '{$data[$i]['collected']}' THEN $controlStart \n";
-                        $update_controlEnd .= " WHEN '{$data[$i]['collected']}' THEN $controlEnd \n";
-                        $update_controlMin .= " WHEN '{$data[$i]['collected']}' THEN $controlMin \n";
-                        $update_controlMax .= " WHEN '{$data[$i]['collected']}' THEN $controlMax \n";
-                        $update_controlStatus .= " WHEN '{$data[$i]['collected']}' THEN '$controlStatus' \n";
+                        $update_param[":collected" . $i] = $data[$i]['collected'];
+                        $update_param[":runningAverage" . $i] = $runningAverage;
+                        $update_param[":control" . $i] = $control;
+                        $update_param[":controlStart" . $i] = $controlStart;
+                        $update_param[":controlEnd" . $i] = $controlEnd;
+                        $update_param[":controlMin" . $i] = $controlMin;
+                        $update_param[":controlMax" . $i] = $controlMax;
+                        $update_param[":controlStatus" . $i] = $controlStatus;
+                        $controlStatusParam[":controlStatus" . $i] = $controlStatus;
 
-                        $collected_array[] = "'" . $data[$i]['collected'] . "'";*/
-                        $collected_array_2[":collected" . $i] = $data[$i]['collected'];
+                        $update_running_average .= " WHEN :collected$i THEN :runningAverage$i \n";
+                        $update_control .= " WHEN :collected$i THEN :control$i \n";
+                        $update_controlStart .= " WHEN :collected$i THEN :controlStart$i \n";
+                        $update_controlEnd .= " WHEN :collected$i THEN :controlEnd$i \n";
+                        $update_controlMin .= " WHEN :collected$i THEN :controlMin$i \n";
+                        $update_controlMax .= " WHEN :collected$i THEN :controlMax$i \n";
+                        $update_controlStatus .= " WHEN :collected$i THEN :controlStatus$i \n";
+
+                        $collected_array[":collected" . $i] = $data[$i]['collected'];
 
                         $Nallupdate_metric_data += 1;
-                        if ($Nallupdate_metric_data >= 500 || $i >= $length - 1) {//
+                        if ($Nallupdate_metric_data >= 500 || $i >= $length - 1) {
                             $time_start_sqlupdate = microtime(true);
-                            //$collected_array = implode(',', $collected_array);
 
-                            $update_metric_data_params = [
-                                ":resource_id" => $dataset_params[":resource_id"],
-                                ":collected" => $data[$i]['collected'],
-                                ":runningAverage" => $runningAverage,
-                                ":control" => $control,
-                                ":controlStart" => $controlStart,
-                                ":controlEnd" => $controlEnd,
-                                ":controlMin" => $controlMin,
-                                ":controlMax" => $controlMax,
-                                ":controlStatus" => $controlStatus,
-                            ];
-
-                            $allupdate_metric_data =
-                                "UPDATE metric_data SET
-                                running_average = CASE collected WHEN :collected THEN :runningAverage
-                                    ELSE running_average END,
-                                control = CASE collected WHEN :collected THEN :control
-                                    ELSE control END,
-                                controlStart = CASE collected WHEN :collected THEN :controlStart
-                                    ELSE controlStart END,
-                                controlEnd = CASE collected WHEN :collected THEN :controlEnd
-                                    ELSE controlEnd END,
-                                controlMin = CASE collected WHEN :collected THEN :controlMin
-                                    ELSE controlMin END,
-                                controlMax = CASE collected WHEN :collected THEN :controlMax
-                                    ELSE controlMax END,
-                                controlStatus = CASE collected WHEN :collected THEN :controlStatus
-                                    ELSE controlStatus END
+                            $allupdate_metric_data = "UPDATE metric_data SET
+                                running_average = CASE collected {$update_running_average} ELSE running_average END,
+                                control = CASE collected {$update_control} ELSE control END,
+                                controlStart = CASE collected {$update_controlStart} ELSE controlStart END,
+                                controlEnd = CASE collected {$update_controlEnd} ELSE controlEnd END,
+                                controlMin = CASE collected {$update_controlMin} ELSE controlMin END,
+                                controlMax = CASE collected {$update_controlMax} ELSE controlMax END,
+                                controlStatus = CASE collected {$update_controlStatus} ELSE controlStatus END
                                 WHERE resource_id = :resource_id AND ak_id = :ak_id AND metric_id = :metric_id
-                                  AND collected IN (".implode(',',array_keys($collected_array_2)).")";
+                                  AND collected IN (" . implode(',', array_keys($collected_array)) . ")";
 
-                            $allupdate_metric_data_params = array_merge([
-                                ":ak_id" => $dataset_params[":ak_id"],
-                                ":metric_id" => $dataset_params[":metric_id"]],
-                                $update_metric_data_params, $collected_array_2);
+                            $allupdate_metric_data_params = array_merge(
+                                [
+                                    ":resource_id" => $dataset_params[":resource_id"],
+                                    ":ak_id" => $dataset_params[":ak_id"],
+                                    ":metric_id" => $dataset_params[":metric_id"]
+                                ],
+                                $update_param, $collected_array);
 
                             $this->db->execute($allupdate_metric_data, $allupdate_metric_data_params);
                             $time_end_sqlupdate1 = microtime(true);
                             $timing['sqlupdate1'] += $time_end_sqlupdate1 - $time_start_sqlupdate;
 
                             $allupdate_a_data2 = "UPDATE a_data2 SET
-                                running_average = CASE FROM_UNIXTIME(collected) WHEN :collected THEN :runningAverage
-                                    ELSE running_average END,
-                                control = CASE collected WHEN :collected THEN :control
-                                    ELSE control END,
-                                controlStart = CASE FROM_UNIXTIME(collected) WHEN :collected THEN :controlStart
-                                    ELSE controlStart END,
-                                controlEnd = CASE FROM_UNIXTIME(collected) WHEN :collected THEN :controlEnd
-                                    ELSE controlEnd END,
-                                controlMin = CASE FROM_UNIXTIME(collected) WHEN :collected THEN :controlMin
-                                    ELSE controlMin END,
-                                controlMax = CASE FROM_UNIXTIME(collected) WHEN :collected THEN :controlMax
-                                    ELSE controlMax END,
-                                controlStatus = CASE FROM_UNIXTIME(collected) WHEN :collected THEN :controlStatus
-                                    ELSE controlStatus END
+                                running_average = CASE FROM_UNIXTIME(collected) {$update_running_average} ELSE running_average END,
+                                control = CASE FROM_UNIXTIME(collected) {$update_control} ELSE control END,
+                                controlStart = CASE FROM_UNIXTIME(collected) {$update_controlStart} ELSE controlStart END,
+                                controlEnd = CASE FROM_UNIXTIME(collected) {$update_controlEnd} ELSE controlEnd END,
+                                controlMin = CASE FROM_UNIXTIME(collected) {$update_controlMin} ELSE controlMin END,
+                                controlMax = CASE FROM_UNIXTIME(collected) {$update_controlMax} ELSE controlMax END,
+                                controlStatus = CASE FROM_UNIXTIME(collected) {$update_controlStatus} ELSE controlStatus END
                             WHERE resource_id = :resource_id AND ak_def_id = :ak_def_id AND num_units = :num_units
                               AND metric_id = :metric_id
-                              AND FROM_UNIXTIME(collected) IN (" . implode(', ', array_keys($collected_array_2)) . ")";
+                              AND FROM_UNIXTIME(collected) IN (" . implode(', ', array_keys($collected_array)) . ")";
 
                             $allupdate_a_data2_params = array_merge(
                                 [
+                                    ":resource_id" => $dataset_params[":resource_id"],
                                     ":ak_def_id" => $akId2akDefIdMap[$dataset['ak_id']]['ak_def_id'],
                                     ":num_units" => $akId2akDefIdMap[$dataset['ak_id']]['num_units'],
                                     ":metric_id" => $dataset_params[":metric_id"]
                                 ],
-                                $update_metric_data_params, $collected_array_2);
+                                $update_param, $collected_array);
 
                             $this->db->execute($allupdate_a_data2, $allupdate_a_data2_params);
                             $time_end_sqlupdate2 = microtime(true);
@@ -3313,15 +3281,15 @@ class AppKernelDb
                             if ($metrics_walltime_id !== null && $dataset['metric_id'] === $metrics_walltime_id) {
                                 $allupdate_ak_instance =
                                     "UPDATE ak_instance SET
-                                        controlStatus = CASE collected WHEN :collected THEN :controlStatus ELSE controlStatus  END
+                                        controlStatus = CASE collected {$update_controlStatus} ELSE controlStatus END
                                     WHERE resource_id = :resource_id AND ak_id = :ak_id
-                                      and collected IN (" . implode(', ', array_keys($collected_array_2)) . ")";
-                                $allupdate_ak_instance_params =  array_merge([
-                                    ":resource_id" => $dataset_params[":resource_id"],
-                                    ":ak_id" => $dataset_params[":ak_id"],
-                                    ":collected" => $data[$i]['collected'],
-                                    ":controlStatus" => $controlStatus ],
-                                    $collected_array_2);
+                                      and collected IN (" . implode(', ', array_keys($collected_array)) . ")";
+                                $allupdate_ak_instance_params = array_merge(
+                                    [
+                                        ":resource_id" => $dataset_params[":resource_id"],
+                                        ":ak_id" => $dataset_params[":ak_id"],
+                                    ],
+                                    $controlStatusParam, $collected_array);
                                 $this->db->execute($allupdate_ak_instance, $allupdate_ak_instance_params);
                             }
 
@@ -3332,6 +3300,17 @@ class AppKernelDb
                             $timing['N_sqlupdate2'] += $Nallupdate_metric_data;
 
                             $Nallupdate_metric_data = 0;
+
+                            $update_running_average = "";
+                            $update_control = "";
+                            $update_controlStart = "";
+                            $update_controlEnd = "";
+                            $update_controlMin = "";
+                            $update_controlMax = "";
+                            $update_controlStatus = "";
+                            $update_param = [];
+                            $controlStatusParam = [];
+                            $collected_array = [];
                         }
                     }
                 }

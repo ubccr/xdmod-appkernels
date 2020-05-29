@@ -9,6 +9,7 @@ use AppKernel;
 //use AppKernel\IngestionLogEntry;
 //use AppKernel\InstanceData;
 use Exception;
+use PDOException;
 
 /**
  * Class AppKernelIngestor
@@ -764,7 +765,7 @@ class AppKernelIngestor
         if (!$this->dryRunMode) {
             try {
                 $this->logger->info("Caculate running average and control values");
-                $this->db->calculateControls($this->recalculateControls, $this->recalculateControls, 20, 5,
+                $this->db->calculateControls($this->recalculateControls, 20, 5,
                     $this->restrictToResource, $this->restrictToAppKernel);
             } catch (\PDOException $e) {
                 $msg = formatPdoExceptionMessage($e);
@@ -832,4 +833,44 @@ class AppKernelIngestor
 
         return true;
     }
+}
+
+/**
+ * Format a PDO exception message.
+ *
+ * @param PDOException $e
+ *
+ * @return string
+ */
+function formatPdoExceptionMessage(PDOException $e)
+{
+    $msg = "";
+
+    // If there are 3 elements in the errorInfo array we can assume
+    // that this was a driver error so display a useful message instead
+    // of the generic PDO message.
+
+    if (3 == count($e->errorInfo)) {
+
+        // MySQL error
+        list ($sqlstate, $driverCode, $driverMsg) = $e->errorInfo;
+
+        $msg = "Database Error ($driverCode): '$driverMsg'";
+        $trace = $e->getTrace();
+
+        if (count($trace) >= 3) {
+            $msg .= " at {$trace[2]['file']}:{$trace[1]['line']} {$trace[2]['function']}()";
+        }
+    } else {
+
+        // PDO layer error
+        $msg = "Database Error (" . $e->getCode() . ") '" . $e->getMessage() . "'";
+        $trace = $e->getTrace();
+
+        if (count($trace) >= 3) {
+            $msg .= " at {$trace[1]['file']}:{$trace[1]['line']} {$trace[1]['function']}()";
+        }
+    }
+
+    return $msg;
 }
