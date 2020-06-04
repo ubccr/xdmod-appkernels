@@ -249,10 +249,10 @@ class AppKernelIngestor
             unset($config['recalculateControls']);
         }
         if (array_key_exists('controlIntervalSize', $config)) {
-            if (!is_bool($config['controlIntervalSize'])) {
-                throw new Exception("controlIntervalSize should be boolean!");
+            if (!is_integer($config['controlIntervalSize'])) {
+                throw new Exception("controlIntervalSize should be integer!");
             }
-            $this->recalculateControls = $config['controlIntervalSize'];
+            $this->controlIntervalSize = $config['controlIntervalSize'];
             unset($config['controlIntervalSize']);
         }
         /**
@@ -297,10 +297,12 @@ class AppKernelIngestor
             if ("load" == $sinceLastLoadTime) {
                 // Load the last ingestion time from the database.  The production database takes priority.
                 $loaded = $this->db->loadMostRecentIngestionLogEntry($this->ingestionLog);
-                if ($loaded === false) {
-                    throw new Exception("AppKernelIngestor::__construct can not load loadMostRecentIngestionLogEntry");
+                if ($loaded === true) {
+                    $this->startTimestamp = $this->ingestionLog->end_time + 1;
+                } else {
+                    // first run, set to 2001-01-01
+                    $this->startTimestamp = 978325200;
                 }
-                $this->startTimestamp = $this->ingestionLog->end_time + 1;
             } else {
                 $this->startTimestamp = $this->endTimestamp - AppKernelIngestor::$validTimeframes[$sinceLastLoadTime];
             }
@@ -865,7 +867,6 @@ function formatPdoExceptionMessage(PDOException $e)
     // of the generic PDO message.
 
     if (3 == count($e->errorInfo)) {
-
         // MySQL error
         list ($sqlstate, $driverCode, $driverMsg) = $e->errorInfo;
 
@@ -876,7 +877,6 @@ function formatPdoExceptionMessage(PDOException $e)
             $msg .= " at {$trace[2]['file']}:{$trace[1]['line']} {$trace[2]['function']}()";
         }
     } else {
-
         // PDO layer error
         $msg = "Database Error (" . $e->getCode() . ") '" . $e->getMessage() . "'";
         $trace = $e->getTrace();
