@@ -657,6 +657,7 @@ class AppKernelDb
      * @param null $end_date
      * @param array $resource_ids
      * @param array $pu_counts
+     * @param array $metric_names
      * @return array
      */
     public function getMetrics(
@@ -664,7 +665,8 @@ class AppKernelDb
         $start_date = null,
         $end_date = null,
         array $resource_ids = array(),
-        array $pu_counts = array()
+        array $pu_counts = array(),
+        array $metric_names =  array()
     ) {
         $processorCountWheres = $this->getProcessorCountWheres($pu_counts);
 
@@ -696,6 +698,19 @@ class AppKernelDb
             }
             $sql .= ')';
         }
+        if (count($metric_names) > 0) {
+            $sql .= ' AND vt.metric in (';
+            for ($i = 0; $i < count($metric_names); $i++) {
+                $sql .= ':metric_name_' . $i;
+                if ($i < count($metric_names) - 1) {
+                    $sql .= ',';
+                }
+                $params[':metric_name_' . $i] = $metric_names[$i];
+            }
+            $sql .= ')';
+        }
+
+
         if (count($processorCountWheres) > 0) {
             $sql .= "AND ( " . implode(' OR ', $processorCountWheres) . " ) ";
         }
