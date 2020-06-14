@@ -17,7 +17,7 @@ build:
         pull: false
         options: "--user root -e HOME=/root --shm-size 2g"
     ci:
-        - ./tests/unit/runtests.sh
+        - ./tests/runtests.sh
     on_failure:
         - cat /var/log/xdmod/*
 jobs:
