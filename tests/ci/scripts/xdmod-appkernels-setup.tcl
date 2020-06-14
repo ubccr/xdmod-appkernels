@@ -22,7 +22,8 @@ selectMenuOption 9
 # MySQL DB
 answerQuestion {DB Hostname or IP} {}
 answerQuestion {DB Port} {}
-answerQuestion {DB Username} {}
+answerQuestion {DB Username} akrruser
+providePassword {DB Password:} akrruser
 provideInput {Try again (yes, skip, abort)? \[yes\]} skip
 
 # AKRR REST API
