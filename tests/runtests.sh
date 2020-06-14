@@ -92,7 +92,7 @@ then
     yum install -y $AKRR_DIR/dist/akrr-*.noarch.rpm
 
     # copy akrr config
-    cp -r ~/src/ubccr/xdmod-appkernels/tests/artifacts/akrr ~/
+    cp -r $XDMOD_APPKERNEL_DIR/tests/artifacts/akrr ~/
     mkdir -p ~/akrr/log/akrrd ~/akrr/log/comptasks ~/akrr/log/data
 
     # start akrr
