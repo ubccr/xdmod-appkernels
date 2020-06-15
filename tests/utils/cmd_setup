@@ -33,9 +33,20 @@ setup_sshd(){
     mkdir /var/run/sshd
 
     # Generate new key
-    ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' && \
-    ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N '' && \
-    ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N '' && \
+    if [ ! -f "/etc/ssh/ssh_host_rsa_key" ]; then
+        ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
+    fi
+    if [ ! -f "/etc/ssh/ssh_host_ecdsa_key" ]; then
+        ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N ''
+    fi
+    if [ ! -f "/etc/ssh/ssh_host_ed25519_key" ]; then
+        ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N ''
+    fi
+
+    chown root:root /etc/ssh/ssh_host_*
+    chmod 600 /etc/ssh/ssh_host_*
+    chmod 644 /etc/ssh/ssh_host_*.pub
+
     echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
 }
 

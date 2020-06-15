@@ -39,6 +39,8 @@ echo XDMOD_TEST_MODE=$XDMOD_TEST_MODE
 # get xdmod
 if [ ! -d "$XDMOD_DIR" ]; then
     git clone --depth=1 --branch=$XDMOD_BRANCH https://github.com/ubccr/xdmod.git ../xdmod
+else
+    echo "XDMoD code is already here, will use it."
 fi
 
 # create link in XDMoD to xdmod-appkernels module
