@@ -2420,7 +2420,7 @@ class AppKernelDb
                     $comment
                 ];
                 $this->db->execute($sql, $params);
-                $this->db->execute($metric_data_update_sql);
+                $this->db->execute($metric_data_update_sql, $metric_data_update_params);
                 return array(
                     'success' => true,
                     'message' => "Control region time interval was created"
