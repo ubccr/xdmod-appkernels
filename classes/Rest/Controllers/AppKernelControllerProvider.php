@@ -661,7 +661,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
         if ($msg['success']) {
             $ak = $akList[$ak_def_id];
             $res = $resourceList[$resource_id];
-            $db->calculateControls(false, false, 20, 5, $res->nickname, $ak->basename);
+            $db->calculateControls(true, 20, 5, $res->nickname, $ak->basename);
         }
 
         // Return the message.
@@ -711,7 +711,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
         $ak = $akList[$ak_def_id];
         $res = $resourceList[$resource_id];
 
-        $db->calculateControls(false, false, 20, 5, $res->nickname, $ak->basename);
+        $db->calculateControls(false, 20, 5, $res->nickname, $ak->basename);
 
         return $app->json(array(
             'success' => true,
