@@ -5,9 +5,6 @@ namespace AppKernel;
 use CCR\Log;
 use AppKernel;
 
-//use AppKernel\AppKernelDb;
-//use AppKernel\IngestionLogEntry;
-//use AppKernel\InstanceData;
 use Exception;
 use PDOException;
 
@@ -265,8 +262,7 @@ class AppKernelIngestor
         $sinceLastLoadTime = null;
         if (array_key_exists('sinceLastLoadTime', $config)) {
             $sinceLastLoadTime = $config['sinceLastLoadTime'];
-            if ($sinceLastLoadTime !== null && !array_key_exists($sinceLastLoadTime,
-                    AppKernelIngestor::$validTimeframes)) {
+            if ($sinceLastLoadTime !== null && !array_key_exists($sinceLastLoadTime, AppKernelIngestor::$validTimeframes)) {
                 throw new Exception("sinceLastLoadTime should be [hour,day,week,month,load]");
             }
             unset($config['sinceLastLoadTime']);
@@ -405,8 +401,10 @@ class AppKernelIngestor
             $sqlAKDefcond .= " AND ak_def_id = :ak_def_id";
             $sqlAKDefcondParam[':ak_def_id'] = $this->dbAKList[$this->restrictToAppKernel]->id;
 
-            $response = $akdb->query("SELECT ak_id, num_units FROM mod_appkernel.app_kernel WHERE ak_def_id=?",
-                [$this->dbAKList[$this->restrictToAppKernel]->id]);
+            $response = $akdb->query(
+                "SELECT ak_id, num_units FROM mod_appkernel.app_kernel WHERE ak_def_id=?",
+                [$this->dbAKList[$this->restrictToAppKernel]->id]
+            );
 
             foreach ($response as $i => $v) {
                 $sqlAKcondParam[':ak_id_' . $i] = $v['ak_id'];
@@ -490,9 +488,8 @@ class AppKernelIngestor
         foreach ($instanceListGroupedByAK as $ak_basename => $instanceListGroupedByNumUnits) {
             $this->logger->debug("Current AK: $ak_basename");
 
-            if (!isset($dbAKList[$ak_basename])) {
+            if (!isset($this->dbAKList[$ak_basename])) {
                 $this->logger->warning("$ak_basename not in AK list");
-                #continue;
             }
 
             $ak_def_id = $this->dbAKList[$ak_basename]->id;
@@ -503,7 +500,6 @@ class AppKernelIngestor
             foreach ($instanceListGroupedByNumUnits as $num_units => $instanceList) {
                 if (!isset($this->dbAKIdMap[$ak_basename])) {
                     $this->logger->warning("$ak_basename not in AK id map");
-                    #continue;
                 }
 
                 $ak_id = $this->dbAKIdMap[$ak_basename][$num_units];
@@ -532,7 +528,7 @@ class AppKernelIngestor
                     try {
                         try {
                             // The parser should throw 4 types of exception: general, inca error, queued job, invalid xml
-                            $success = $this->parser->parse($akInstance, $parsedInstanceData);
+                            $this->parser->parse($akInstance, $parsedInstanceData);
 
                             // Set some data that will be needed for adding metrics and parameters
                             // TODO These should be preset during InstanceData &$ak query
@@ -648,8 +644,6 @@ class AppKernelIngestor
             }
         }
 
-        $appKernelReport[$resourceNickname] = $resourceReport;
-
         $this->logger->info("End resource: $resourceNickname");
 
         unset($parsedInstanceData);
@@ -663,7 +657,7 @@ class AppKernelIngestor
      *
      * @return string
      */
-    public function format_summary_report(array $reportData)
+    public function formatSummaryReport(array $reportData)
     {
         $reportString = "";
 
@@ -781,8 +775,13 @@ class AppKernelIngestor
         if (!$this->dryRunMode) {
             try {
                 $this->logger->info("Caculate running average and control values");
-                $this->db->calculateControls($this->recalculateControls, $this->controlIntervalSize, 5,
-                    $this->restrictToResource, $this->restrictToAppKernel);
+                $this->db->calculateControls(
+                    $this->recalculateControls,
+                    $this->controlIntervalSize,
+                    5,
+                    $this->restrictToResource,
+                    $this->restrictToAppKernel
+                );
             } catch (\PDOException $e) {
                 $msg = formatPdoExceptionMessage($e);
                 $this->logger->err(array(
@@ -810,7 +809,6 @@ class AppKernelIngestor
             . "error = {$this->appKernelSummaryReport['error']}, "
             . "duplicate = {$this->appKernelSummaryReport['duplicate']}, "
             . "exception = {$this->appKernelSummaryReport['exception']}\n";
-        //. $this->format_summary_report($this->appKernelReport);
 
         $this->logger->info($summaryReport);
 
@@ -839,8 +837,6 @@ class AppKernelIngestor
             $this->ingestionLog->setStatus(false, "SQL errors present");
         }
 
-        //$this->ingestionLog->reportObj = serialize($this->appKernelReport);
-
         // NOTE: "process_end_time" is needed for the log summary.
         $this->logger->notice(array(
             'message' => 'Ingestion End',
@@ -868,7 +864,7 @@ function formatPdoExceptionMessage(PDOException $e)
 
     if (3 == count($e->errorInfo)) {
         // MySQL error
-        list ($sqlstate, $driverCode, $driverMsg) = $e->errorInfo;
+        list (, $driverCode, $driverMsg) = $e->errorInfo;
 
         $msg = "Database Error ($driverCode): '$driverMsg'";
         $trace = $e->getTrace();
