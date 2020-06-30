@@ -235,8 +235,9 @@ class InstanceData
 
     public function environmentVersion()
     {
-
-        if (0 == count($this->ak_parameters)) return null;
+        if (0 == count($this->ak_parameters)) {
+            return null;
+        }
         $versionStr = "";
 
         // For the time being only use App:ExeBinSignature to calculate the
@@ -245,7 +246,9 @@ class InstanceData
 
         foreach ($this->ak_parameters as $parameter) {
             if (!(0 === strpos($parameter->tag, "App") &&
-                0 === strpos($parameter->name, "ExeBinSignature"))) continue;
+                0 === strpos($parameter->name, "ExeBinSignature"))) {
+                continue;
+            }
 
             // Sort the value of the parameter in case the order of the data returned
             // changes over time.
@@ -334,13 +337,17 @@ class InstanceData
         // made up of characters from the base64 alphabet will return true but
         // maynot acutally encoded.
 
-        if (false === ($decodedStr = base64_decode($str, true))) return false;
+        if (false === ($decodedStr = base64_decode($str, true))) {
+            return false;
+        }
 
         // Test to see if the string has a mime type of "application/x-gzip"
 
         $f = finfo_open(FILEINFO_MIME_TYPE);
         $mt = finfo_buffer($f, $decodedStr);
-        if ($mt != "application/x-gzip") return false;
+        if ($mt != "application/x-gzip") {
+            return false;
+        }
 
         // I had problems unzipping the decoded string directly but writing it to a
         // temporary file seems to work.  -smg 20110608
@@ -348,8 +355,9 @@ class InstanceData
         $tmpFile = tempnam(sys_get_temp_dir(), "akexplorer_");
         @file_put_contents($tmpFile, $decodedStr);
         $fp = gzopen($tmpFile, "r");
-        while (!gzeof($fp))
+        while (!gzeof($fp)) {
             $unzippedStr .= gzread($fp, 1024);
+        }
         gzclose($fp);
         unlink($tmpFile);
 
@@ -387,14 +395,14 @@ class InstanceMetric
 
     // --------------------------------------------------------------------------------
 
-    static function sort_cmp(InstanceMetric $a, InstanceMetric $b)
+    static public function sort_cmp(InstanceMetric $a, InstanceMetric $b)
     {
         return strcmp($a->name, $b->name);
     }
 
     // --------------------------------------------------------------------------------
 
-    public function __construct($name, $value, $unit = null, $id=null)
+    public function __construct($name, $value, $unit = null, $id = null)
     {
         if($id!==null) {
             $this->id = intval($id);
@@ -402,7 +410,7 @@ class InstanceMetric
         $this->name = $name;
         $this->value = $value;
         $this->unit = $unit;
-    }  // __construct()
+    }
 
     // --------------------------------------------------------------------------------
 
@@ -443,7 +451,7 @@ class InstanceParameter extends InstanceMetric
         if (null !== $tag) {
             $this->name = $name;
             $this->tag = $tag;
-        } else if (false !== strpos($name, ":")) {
+        } elseif (false !== strpos($name, ":")) {
             $parts = explode(":", $name);
             $this->tag = array_shift($parts);
             $this->name = implode(":", $parts);
@@ -454,7 +462,7 @@ class InstanceParameter extends InstanceMetric
         InstanceData::decode($value);
         $this->value = $value;
         $this->unit = $unit;
-    }  // __construct()
+    }
 
     // --------------------------------------------------------------------------------
     // Generate the metric guid to uniquely identify this metric.
@@ -466,8 +474,7 @@ class InstanceParameter extends InstanceMetric
     {
         return md5((null === $this->tag ? "" : $this->tag) . $this->name . $this->unit);
     }
-
-}  // class InstanceParameter
+}
 
 
 /**
@@ -521,17 +528,24 @@ class AppKernelDefinition
      */
     public $end_ts = null;
 
-    public function __construct($id = null, $name = null, $basename = null, $description = null,
-                                $processor_unit = null, $enabled = false, $visible = false,
-                                $start_ts = null, $end_ts = null)
-    {
+    public function __construct(
+        $id = null,
+        $name = null,
+        $basename = null,
+        $description = null,
+        $processor_unit = null,
+        $enabled = false,
+        $visible = false,
+        $start_ts = null,
+        $end_ts = null
+    ) {
         $this->id = intval($id);
         $this->name = $name;
         $this->basename = $basename;
         $this->description = $description;
         $this->processor_unit = $processor_unit;
-        $this->enabled = ( 1 == $enabled ? true : false );
-        $this->visible = ( 1 == $visible ? true : false );
+        $this->enabled = (1 == $enabled ? true : false);
+        $this->visible = (1 == $visible ? true : false);
         $this->start_ts = intval($start_ts);
         $this->end_ts = intval($end_ts);
     }
