@@ -395,7 +395,7 @@ class InstanceMetric
 
     // --------------------------------------------------------------------------------
 
-    static public function sort_cmp(InstanceMetric $a, InstanceMetric $b)
+    public static function sort_cmp(InstanceMetric $a, InstanceMetric $b)
     {
         return strcmp($a->name, $b->name);
     }
