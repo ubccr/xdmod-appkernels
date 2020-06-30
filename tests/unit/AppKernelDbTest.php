@@ -1,5 +1,6 @@
 <?php
 
+namespace AppKernelTest;
 
 use PHPUnit\Framework\TestCase;
 
@@ -15,7 +16,9 @@ function create_instance_data($ak_name, $deployment_num_proc_units, $deployment_
     $ak_db = new \AppKernel\AppKernelDb();
     $db = $ak_db->getDB();
 
-    $db_ak_id = $db->query("SELECT ak_id FROM mod_appkernel.app_kernel WHERE name=\"$ak_name\" AND num_units=$deployment_num_proc_units;")[0]['ak_id'];
+    $db_ak_id = $db->query(
+        "SELECT ak_id FROM mod_appkernel.app_kernel WHERE name=\"$ak_name\" AND num_units=$deployment_num_proc_units;"
+    )[0]['ak_id'];
     $ak = new InstanceData;
     $ak->db_ak_id = intval($db_ak_id);
     $ak->deployment_num_proc_units = intval($deployment_num_proc_units);
@@ -39,13 +42,13 @@ final class AppKernelDbTest extends TestCase
         $proc_unit_node_1to8 = array_slice($proc_unit_node_1to32, 0, 4);
         $proc_unit_node_1to4 = array_slice($proc_unit_node_1to32, 0, 3);
         $proc_unit_node_2to8 = array_slice($proc_unit_node_1to32, 1, 3);
-        $proc_unit_node_2to4 = array_slice($proc_unit_node_1to32, 1, 2);
-        $proc_unit_node_1to16 = array_slice($proc_unit_node_1to32, 0, 5);
-        $proc_unit_node_2to16 = array_slice($proc_unit_node_1to32, 1, 4);
 
         $ak_db = new \AppKernel\AppKernelDb();
-        $metrics_id = intval($ak_db->getDB()->query(
-            'SELECT metric_id FROM mod_appkernel.metric WHERE name="Wall Clock Time"')[0]['metric_id']);
+        $metrics_id = intval(
+            $ak_db->getDB()->query(
+                'SELECT metric_id FROM mod_appkernel.metric WHERE name="Wall Clock Time"'
+            )[0]['metric_id']
+        );
 
         return [
             [null, null, [], [], $proc_unit_node_1to8],
@@ -56,7 +59,13 @@ final class AppKernelDbTest extends TestCase
             ["2020-04-01", "2020-05-01", [28], ["ak_23_metric_$metrics_id"], $proc_unit_node_1to4],
             ["2020-04-01", "2020-05-01", [28], ["ak_7_metric_$metrics_id"], $proc_unit_node_2to8],
             ["2020-04-01", "2020-05-01", [28, 0], ["ak_23_metric_$metrics_id"], $proc_unit_node_1to4],
-            ["2020-04-01", "2020-05-01", [28], ["ak_7_metric_$metrics_id", "ak_7_metric_$metrics_id"], $proc_unit_node_2to8],
+            [
+                "2020-04-01",
+                "2020-05-01",
+                [28],
+                ["ak_7_metric_$metrics_id", "ak_7_metric_$metrics_id"],
+                $proc_unit_node_2to8
+            ],
 
         ];
     }
@@ -85,45 +94,144 @@ final class AppKernelDbTest extends TestCase
 
     public function getUniqueAppKernelsProvider()
     {
-        $akd_list = [
-            29 => new AppKernelDefinition(29, "Enzo", "enzo", null, "node", true, true, 1585713559, 1588331144),
-            22 => new AppKernelDefinition(22, "GAMESS", "gamess", null, "node", true, true, 1585704478, 1588329295),
-            28 => new AppKernelDefinition(28, "Graph500", "graph500", null, "node", true, true, 1585707582, 1588331351),
-            25 => new AppKernelDefinition(25, "HPCC", "hpcc", null, "node", true, true, 1585701706, 1588351754),
-            7 => new AppKernelDefinition(7, "IMB", "imb", null, "node", true, true, 1585706634, 1588351238),
-            23 => new AppKernelDefinition(23, "NAMD", "namd", null, "node", true, true, 1585868136, 1588334231),
-            24 => new AppKernelDefinition(24, "NWChem", "nwchem", null, "node", true, true, 1585704196, 1588329513),
-        ];
         return [
             [[], [], [], 7, null],
             [[28, 1], [], [], 7, null],
-            [[28], [], [], null, [
-                29 => new AppKernelDefinition(29, "Enzo", "enzo", null, "node", true, true, 1585713559, 1588331144),
-                22 => new AppKernelDefinition(22, "GAMESS", "gamess", null, "node", true, true, 1585704478, 1588329295),
-                28 => new AppKernelDefinition(28, "Graph500", "graph500", null, "node", true, true, 1585707582, 1588331351),
-                25 => new AppKernelDefinition(25, "HPCC", "hpcc", null, "node", true, true, 1585701706, 1588351754),
-                7 => new AppKernelDefinition(7, "IMB", "imb", null, "node", true, true, 1585706634, 1588351238),
-                23 => new AppKernelDefinition(23, "NAMD", "namd", null, "node", true, true, 1585868136, 1588334231),
-                24 => new AppKernelDefinition(24, "NWChem", "nwchem", null, "node", true, true, 1585704196, 1588329513),
+            [
+                [28],
+                [],
+                [],
+                null,
+                [
+                    29 => new AppKernelDefinition(29, "Enzo", "enzo", null, "node", true, true, 1585713559, 1588331144),
+                    22 => new AppKernelDefinition(
+                        22,
+                        "GAMESS",
+                        "gamess",
+                        null,
+                        "node",
+                        true,
+                        true,
+                        1585704478,
+                        1588329295
+                    ),
+                    28 => new AppKernelDefinition(
+                        28,
+                        "Graph500",
+                        "graph500",
+                        null,
+                        "node",
+                        true,
+                        true,
+                        1585707582,
+                        1588331351
+                    ),
+                    25 => new AppKernelDefinition(25, "HPCC", "hpcc", null, "node", true, true, 1585701706, 1588351754),
+                    7 => new AppKernelDefinition(7, "IMB", "imb", null, "node", true, true, 1585706634, 1588351238),
+                    23 => new AppKernelDefinition(23, "NAMD", "namd", null, "node", true, true, 1585868136, 1588334231),
+                    24 => new AppKernelDefinition(
+                        24,
+                        "NWChem",
+                        "nwchem",
+                        null,
+                        "node",
+                        true,
+                        true,
+                        1585704196,
+                        1588329513
+                    ),
 
-            ]],
-            [[28], [1], [], null, [
-                29 => new AppKernelDefinition(29, "Enzo", "enzo", null, "node", true, true, 1585714858, 1588330625),
-                22 => new AppKernelDefinition(22, "GAMESS", "gamess", null, "node", true, true, 1585704478, 1588329295),
-                28 => new AppKernelDefinition(28, "Graph500", "graph500", null, "node", true, true, 1585711421, 1588329038),
-                25 => new AppKernelDefinition(25, "HPCC", "hpcc", null, "node", true, true, 1585703946, 1588328720),
-                23 => new AppKernelDefinition(23, "NAMD", "namd", null, "node", true, true, 1585868136, 1588334231),
-                24 => new AppKernelDefinition(24, "NWChem", "nwchem", null, "node", true, true, 1585711919, 1588329513),
-            ]],
-            [[28], [1, 2], [], null, [
-                29 => new AppKernelDefinition(29, "Enzo", "enzo", null, "node", true, true, 1585713559, 1588330625),
-                22 => new AppKernelDefinition(22, "GAMESS", "gamess", null, "node", true, true, 1585704478, 1588329295),
-                28 => new AppKernelDefinition(28, "Graph500", "graph500", null, "node", true, true, 1585707582, 1588329038),
-                25 => new AppKernelDefinition(25, "HPCC", "hpcc", null, "node", true, true, 1585703391, 1588328720),
-                7 => new AppKernelDefinition(7, "IMB", "imb", null, "node", true, true, 1585711665, 1588329286),
-                23 => new AppKernelDefinition(23, "NAMD", "namd", null, "node", true, true, 1585868136, 1588334231),
-                24 => new AppKernelDefinition(24, "NWChem", "nwchem", null, "node", true, true, 1585704196, 1588329513),
-            ]]
+                ]
+            ],
+            [
+                [28],
+                [1],
+                [],
+                null,
+                [
+                    29 => new AppKernelDefinition(29, "Enzo", "enzo", null, "node", true, true, 1585714858, 1588330625),
+                    22 => new AppKernelDefinition(
+                        22,
+                        "GAMESS",
+                        "gamess",
+                        null,
+                        "node",
+                        true,
+                        true,
+                        1585704478,
+                        1588329295
+                    ),
+                    28 => new AppKernelDefinition(
+                        28,
+                        "Graph500",
+                        "graph500",
+                        null,
+                        "node",
+                        true,
+                        true,
+                        1585711421,
+                        1588329038
+                    ),
+                    25 => new AppKernelDefinition(25, "HPCC", "hpcc", null, "node", true, true, 1585703946, 1588328720),
+                    23 => new AppKernelDefinition(23, "NAMD", "namd", null, "node", true, true, 1585868136, 1588334231),
+                    24 => new AppKernelDefinition(
+                        24,
+                        "NWChem",
+                        "nwchem",
+                        null,
+                        "node",
+                        true,
+                        true,
+                        1585711919,
+                        1588329513
+                    ),
+                ]
+            ],
+            [
+                [28],
+                [1, 2],
+                [],
+                null,
+                [
+                    29 => new AppKernelDefinition(29, "Enzo", "enzo", null, "node", true, true, 1585713559, 1588330625),
+                    22 => new AppKernelDefinition(
+                        22,
+                        "GAMESS",
+                        "gamess",
+                        null,
+                        "node",
+                        true,
+                        true,
+                        1585704478,
+                        1588329295
+                    ),
+                    28 => new AppKernelDefinition(
+                        28,
+                        "Graph500",
+                        "graph500",
+                        null,
+                        "node",
+                        true,
+                        true,
+                        1585707582,
+                        1588329038
+                    ),
+                    25 => new AppKernelDefinition(25, "HPCC", "hpcc", null, "node", true, true, 1585703391, 1588328720),
+                    7 => new AppKernelDefinition(7, "IMB", "imb", null, "node", true, true, 1585711665, 1588329286),
+                    23 => new AppKernelDefinition(23, "NAMD", "namd", null, "node", true, true, 1585868136, 1588334231),
+                    24 => new AppKernelDefinition(
+                        24,
+                        "NWChem",
+                        "nwchem",
+                        null,
+                        "node",
+                        true,
+                        true,
+                        1585704196,
+                        1588329513
+                    ),
+                ]
+            ]
         ];
     }
 
@@ -140,8 +248,7 @@ final class AppKernelDbTest extends TestCase
         $ak_db = new \AppKernel\AppKernelDb();
         $actual = $ak_db->getUniqueAppKernels($resource_ids, $node_counts, $core_counts);
 
-        if ($expected === null && $n_expected === null)
-        {
+        if ($expected === null && $n_expected === null) {
             print(count($actual) . ", [\n");
             foreach (array_slice($actual, 0, min(10, count($actual))) as $val) {
                 print("$val->id => new AppKernelDefinition($val->id, \"$val->name\", \"$val->basename\"," .
@@ -180,21 +287,42 @@ final class AppKernelDbTest extends TestCase
         $ak_db = new \AppKernel\AppKernelDb();
         $db = $ak_db->getDB();
         # Get metric id
-        $ak_exec_exists_id = intval($db->query(
-            'SELECT metric_id FROM mod_appkernel.metric WHERE name="App kernel executable exists"')[0]['metric_id']);
-        $ak_input_exists_id = intval($db->query(
-            'SELECT metric_id FROM mod_appkernel.metric WHERE name="App kernel input exists"')[0]['metric_id']);
-        $ak_dgemm_flops_id = intval($db->query(
-            'SELECT metric_id FROM mod_appkernel.metric WHERE name="Average Double-Precision General Matrix Multiplication (DGEMM) Floating-Point Performance"')[0]['metric_id']);
-        $ak_stream_band_id = intval($db->query(
-            'SELECT metric_id FROM mod_appkernel.metric WHERE name="Average STREAM \'Add\' Memory Bandwidth"')[0]['metric_id']);
+        $ak_exec_exists_id = intval(
+            $db->query(
+                'SELECT metric_id FROM mod_appkernel.metric WHERE name="App kernel executable exists"'
+            )[0]['metric_id']
+        );
+        $ak_input_exists_id = intval(
+            $db->query(
+                'SELECT metric_id FROM mod_appkernel.metric WHERE name="App kernel input exists"'
+            )[0]['metric_id']
+        );
+        $ak_dgemm_flops_id = intval(
+            $db->query(
+                'SELECT metric_id FROM mod_appkernel.metric WHERE name="Average Double-Precision General Matrix Multiplication (DGEMM) Floating-Point Performance"'
+            )[0]['metric_id']
+        );
+        $ak_stream_band_id = intval(
+            $db->query(
+                'SELECT metric_id FROM mod_appkernel.metric WHERE name="Average STREAM \'Add\' Memory Bandwidth"'
+            )[0]['metric_id']
+        );
 
         $inst1 = [
             $ak_exec_exists_id => new InstanceMetric("App kernel executable exists", null, "", $ak_exec_exists_id),
             $ak_input_exists_id => new InstanceMetric("App kernel input exists", null, "", $ak_input_exists_id),
-            $ak_dgemm_flops_id => new InstanceMetric("Average Double-Precision General Matrix Multiplication (DGEMM) Floating-Point Performance",
-                null, "MFLOP per Second", $ak_dgemm_flops_id),
-            $ak_stream_band_id => new InstanceMetric("Average STREAM 'Add' Memory Bandwidth", null, "MByte per Second", $ak_stream_band_id),
+            $ak_dgemm_flops_id => new InstanceMetric(
+                "Average Double-Precision General Matrix Multiplication (DGEMM) Floating-Point Performance",
+                null,
+                "MFLOP per Second",
+                $ak_dgemm_flops_id
+            ),
+            $ak_stream_band_id => new InstanceMetric(
+                "Average STREAM 'Add' Memory Bandwidth",
+                null,
+                "MByte per Second",
+                $ak_stream_band_id
+            ),
         ];
         return [
             [25, null, null, [], [], 20, $inst1],
@@ -257,10 +385,6 @@ final class AppKernelDbTest extends TestCase
 
     public function loadAppKernelInstancesProvider()
     {
-        $ak_db = new \AppKernel\AppKernelDb();
-        $db = $ak_db->getDB();
-        $ak_exec_exists_id = intval($db->query(
-            'SELECT metric_id FROM mod_appkernel.metric WHERE name="App kernel executable exists"')[0]['metric_id']);
         return [
             [
                 null,
@@ -318,7 +442,8 @@ final class AppKernelDbTest extends TestCase
             print(count($actual) . ", [\n");
             foreach (array_slice($actual, 0, min(10, count($actual))) as $val) {
                 $ak_name = $db->query(
-                    "SELECT name FROM mod_appkernel.app_kernel WHERE ak_id=$val->db_ak_id;")[0]['name'];
+                    "SELECT name FROM mod_appkernel.app_kernel WHERE ak_id=$val->db_ak_id;"
+                )[0]['name'];
                 print("create_instance_data(\"$ak_name\", $val->deployment_num_proc_units, \"$val->deployment_time\", \"$val->status\"),\n");
             }
             print("]\n");
@@ -351,49 +476,33 @@ final class AppKernelDbTest extends TestCase
 
         // update initial control for 5 points
         $ak_db->newControlRegions(
-            $resource_id = 28,
-            $ak_def_id = 23,
-            $control_region_type = 'data_points',
-            $startDateTime = "2020-03-28",
-            $endDateTime = null,
-            $n_points = 5,
-            $comment = "short initial control region",
-            $update = true,
-            $control_region_def_id = null
+            28,
+            23,
+            'data_points',
+            "2020-03-28",
+            null,
+            5,
+            "short initial control region",
+            true,
+            null
         );
         $ak_db->calculateControls(false, 5, 5, "UBHPC_32core", "namd");
 
-        $control_regions = $ak_db->getControlRegions($resource_id = 28, $ak_def_id = 23);
+        $control_regions = $ak_db->getControlRegions(28, 23);
 
         $this->assertSame(1, count($control_regions));
-        $this->assertEquals([
-            'control_region_def_id' => $control_regions[0]['control_region_def_id'],
-            'resource_id' => "28",
-            'ak_def_id' => "23",
-            'control_region_type' => "data_points",
-            'control_region_starts' => "2020-03-28 00:00:00",
-            'control_region_ends' => null,
-            'control_region_points' => "5",
-            'comment' => "short initial control region"
-        ], $control_regions[0]);
-
-//        $actual = $ak_db->newControlRegions(
-//            $resource_id=28,
-//            $ak_def_id=23,
-//            $control_region_type='data_points',
-//            $startDateTime="2020-04-01",
-//            $endDateTime=null,
-//            $n_points=5,
-//            $comment="test",
-//            $update = true,
-//            $control_region_def_id = null
-//        );
-//        $ak_db->calculateControls(false, false, 20, 5, "UBHPC_32core", "namd");
-//
-//        var_dump($control_regions);
-
-        #print_r($actual);
+        $this->assertEquals(
+            [
+                'control_region_def_id' => $control_regions[0]['control_region_def_id'],
+                'resource_id' => "28",
+                'ak_def_id' => "23",
+                'control_region_type' => "data_points",
+                'control_region_starts' => "2020-03-28 00:00:00",
+                'control_region_ends' => null,
+                'control_region_points' => "5",
+                'comment' => "short initial control region"
+            ],
+            $control_regions[0]
+        );
     }
-
-
 }
