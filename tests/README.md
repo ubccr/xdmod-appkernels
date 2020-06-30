@@ -36,6 +36,7 @@ docker run -it --rm \
     -p 20080:8080 -p 23306:3306 -p 20022:22 \
     -e XDMOD_BRANCH=xdmod9.0 \
     -v `pwd`/../xdmod:/root/src/ubccr/xdmod \
+    -v `pwd`/../xdmod-qa:/root/src/ubccr/xdmod-qa \
     -v `pwd`:/root/src/ubccr/xdmod-appkernels \
     pseudo_repo/xdmod-appkernels-tests:latest
 ```

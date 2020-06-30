@@ -501,7 +501,7 @@ class AppKernelIngestor
             $ak_def_visible = $this->dbAKList[$ak_basename]->visible;
 
             foreach ($instanceListGroupedByNumUnits as $num_units => $instanceList) {
-                if (!isset($dbAKIdMap[$ak_basename])) {
+                if (!isset($this->dbAKIdMap[$ak_basename])) {
                     $this->logger->warning("$ak_basename not in AK id map");
                     #continue;
                 }
