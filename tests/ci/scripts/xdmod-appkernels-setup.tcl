@@ -17,12 +17,14 @@ source [file join [file dirname [info script]] helper-functions.tcl]
 set timeout 240
 spawn "xdmod-setup"
 
-selectMenuOption 8
+selectMenuOption 9
 
 # MySQL DB
 answerQuestion {DB Hostname or IP} {}
 answerQuestion {DB Port} {}
-answerQuestion {DB Username} {}
+answerQuestion {DB Username} akrruser
+providePassword {DB Password:} akrruser
+provideInput {Try again (yes, skip, abort)? \[yes\]} skip
 
 # AKRR REST API
 answerQuestion {AKRR REST API username} {}

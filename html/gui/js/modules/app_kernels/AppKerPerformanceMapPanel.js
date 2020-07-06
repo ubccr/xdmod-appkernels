@@ -1,4 +1,3 @@
-/* global Ext, XDMoD, CCR, document, window */
 /**
  * ARR active tasks grid.
  *

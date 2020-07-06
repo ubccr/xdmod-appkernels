@@ -143,7 +143,7 @@ class Report
             $this->report_params[$key]=$value;
         }
 
-        //clone some variables to avoid data curraption
+        //clone some variables to avoid data corruption
         if ($this->report_params['start_date']!==null) {
             $this->report_params['start_date']=clone  $this->report_params['start_date'];
         }
@@ -162,9 +162,13 @@ class Report
         //
         if (array_key_exists('user', $options) && $options['user']!==null) {
             $ak_db = new \AppKernel\AppKernelDb();
-            $allResources = $ak_db->getResources(date_format(date_sub(date_create(), date_interval_create_from_date_string("90 days")), 'Y-m-d'),
+            $allResources = $ak_db->getResources(
+                date_format(date_sub(date_create(), date_interval_create_from_date_string("90 days")), 'Y-m-d'),
                 date_format(date_create(), 'Y-m-d'),
-                array(), array(), $options['user']);
+                array(),
+                array(),
+                $options['user']
+            );
             $all_resource_names=array();
             foreach ($allResources as $r) {
                 $all_resource_names[]=$r->nickname;
@@ -202,7 +206,6 @@ class Report
             $this->report_params['performance_map_end_date']=clone $options['end_date'];
             $this->report_params['performance_map_start_date']=clone $options['start_date'];
         } else {
-            //$this->report_params['end_date']->sub(new DateInterval('P1D'));//periodic reports report for period ending at previous day
             $this->report_params['start_date']=clone $this->report_params['end_date'];
             $this->report_params['start_date']->sub(new DateInterval($this->report_params['report_date_interval']));
             $this->report_params['start_date']->add(new DateInterval('P1D'));
@@ -221,9 +224,6 @@ class Report
             $this->report_params['days'][]=$run_date->format('Y/m/d');
             $run_date->add($day_interval);
         }
-        //print_r($options);print_r($this->report_params);
-        //exit();
-        //throw new Exception('<pre>'.print_r($options,true).print_r($this->report_params,true).'</pre>');
     }
 
     /**
@@ -235,11 +235,11 @@ class Report
      * @throws Exception on failure
      *
      */
-    public function send_report_to_email($send_to, $internal_dashboard_user = false)
+    public function sendReportToEmail($send_to, $internal_dashboard_user = false)
     {
         //get report
         try {
-            $message=$this->make_report($internal_dashboard_user);
+            $message=$this->makeReport($internal_dashboard_user);
             if ($message===null) { //i.e. do not send report (e.g. user asked to send report only on errors)
                 return;
             }
@@ -280,7 +280,7 @@ class Report
      *
      * @return string html report
      */
-    public function make_report($internal_dashboard_user = false)
+    public function makeReport($internal_dashboard_user = false)
     {
         //header
         $message = '';
@@ -300,7 +300,7 @@ class Report
             'controlThreshold'=>$this->report_params['controlThreshold'],
             'controlThresholdCoeff'=>$this->report_params['controlThresholdCoeff']
         ));
-        $messagePerfMap=$perfMap->make_report($internal_dashboard_user);
+        $messagePerfMap=$perfMap->makeReport($internal_dashboard_user);
 
         //Error Patterns
         $pprecog=new PerfPatternRecognition(array(
@@ -318,7 +318,7 @@ class Report
 
         //get summary
 
-        $sum=$perfMap->get_summary_for_days($this->report_params['days']);
+        $sum=$perfMap->getSummaryForDays($this->report_params['days']);
         $message.=$sum['messageHeader'];
 
         $message.='<br/>';

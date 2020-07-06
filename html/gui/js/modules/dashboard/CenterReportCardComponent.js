@@ -1,4 +1,3 @@
-/* global Ext, XDMoD, CCR, window */
 Ext.namespace('XDMoD.Module.Dashboard');
 
 /**

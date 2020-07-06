@@ -1,0 +1,43 @@
+language: none
+env:
+    global:
+        - COMPOSER_ALLOW_SUPERUSER=1
+        - XDMOD_REALMS='jobs,storage'
+        - XDMOD_TEST_MODE=fresh_install
+        - XDMOD_BRANCH=xdmod9.0
+build:
+    cache: true
+    cache_dir_list:
+        - /root/.composer
+    pre_ci:
+        - docker build -t pseudo_repo/xdmod-open-appkernels:latest .
+    pre_ci_boot:
+        image_name: pseudo_repo/xdmod-open-appkernels
+        image_tag: latest
+        pull: false
+        options: "--user root -e HOME=/root --shm-size 2g"
+    ci:
+        - ./tests/runtests.sh
+    on_failure:
+        - cat /var/log/xdmod/*
+jobs:
+    - name: xdmod-appkernels_runCI
+      type: runCI
+      steps:
+        - IN: nightly-trigger
+      on_success:
+        - NOTIFY: email-team
+      on_failure:
+        - NOTIFY: email-team
+resources:
+  - name: nightly-trigger
+    type: time
+    versionTemplate:
+      interval: "0 3 * * *" # UTC
+  - name: email-team
+    type: notification
+    versionTemplate:
+      method: email
+      recipients:
+         - "nikolays@buffalo.edu"
+         - "ccr-xdmod-cron@buffalo.edu"

@@ -17,6 +17,7 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
     },
 
     constructor: function (config) {
+        // eslint-disable-next-line no-param-reassign
         config = config || {};
 
         Ext.applyIf(config, {
@@ -27,7 +28,7 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
 
         var expander = new Ext.ux.grid.RowExpander({
             tpl: new Ext.Template(
-                '<div class="status-info-details"><pre>{statusinfo}</pre></div>'
+                '<div class="status-info-details"><pre>{status_info}</pre></div>'
             )
         });
 
@@ -42,7 +43,7 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
 
             if (record.get('status').match(/ERROR/)) {
                 return rowClass + ' grid-row-error';
-            } else if (record.get('FatalErrorsCount') > 0 || record.get('FailsToSubmitToTheQueue') > 0) {
+            } else if (record.get('fatal_errors_count') > 0 || record.get('fails_to_submit_to_the_queue') > 0) {
                 return rowClass + ' grid-row-warning';
             }
 
@@ -73,15 +74,15 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
                     },
                     {
                         header: 'Status Info',
-                        dataIndex: 'statusinfo'
+                        dataIndex: 'status_info'
                     },
                     {
                         header: 'Time in Queue',
                         dataIndex: 'time_in_queue',
                         renderer: function (value) {
-                            var minute = 1000 * 60,
-                                hour = minute * 60,
-                                day = hour * 24;
+                            var minute = 1000 * 60;
+                            var hour = minute * 60;
+                            var day = hour * 24;
 
                             if (value === 0) {
                                 return '0';
@@ -91,9 +92,8 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
                                 return Math.floor(value / minute) + ' minutes';
                             } else if (value < day) {
                                 return Math.floor(value / hour) + ' hours';
-                            } else {
-                                return Math.floor(value / day) + ' days';
                             }
+                            return Math.floor(value / day) + ' days';
                         }
                     },
                     {
@@ -112,12 +112,12 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
                     },
                     {
                         header: 'Fatal Errors',
-                        dataIndex: 'FatalErrorsCount',
+                        dataIndex: 'fatal_errors_count',
                         align: 'right'
                     },
                     {
                         header: 'Fails to Submit',
-                        dataIndex: 'FailsToSubmitToTheQueue',
+                        dataIndex: 'fails_to_submit_to_the_queue',
                         align: 'right'
                     }
                 ]

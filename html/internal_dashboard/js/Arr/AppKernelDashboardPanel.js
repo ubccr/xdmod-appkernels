@@ -1,4 +1,3 @@
-/* global Ext, XDMoD, document */
 /**
  * ARR Status panel.
  *

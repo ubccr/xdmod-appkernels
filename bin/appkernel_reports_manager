@@ -8,7 +8,6 @@
  */
 require_once __DIR__ . '/../configuration/linker.php';
 
-
 use CCR\DB;
 use CCR\Log;
 use AppKernel\AppKernelDb;
@@ -171,8 +170,8 @@ $lastDayOfTheMonth = intval($end_date->format('t'));
 $dayOfTheMonth = intval($end_date->format('j'));
 if ($lastDayOfTheMonth == $dayOfTheMonth) {
     $monthlyDeliveries = $db->query(
-        'SELECT 
-            user_id, send_report_daily, send_report_weekly, 
+        'SELECT
+            user_id, send_report_daily, send_report_weekly,
             send_report_monthly, settings
 	    FROM report
 	    WHERE send_report_monthly >= :dayOfTheMonth',
@@ -180,7 +179,7 @@ if ($lastDayOfTheMonth == $dayOfTheMonth) {
     );
 } else {
     $monthlyDeliveries = $db->query(
-        'SELECT 
+        'SELECT
             user_id, send_report_daily, send_report_weekly,
             send_report_monthly, settings
 	    FROM report
@@ -258,7 +257,7 @@ foreach ($allGroupDeliveries as $groupDeliveries) {
                 'user'          => $user
             ));
 
-            $report->send_report_to_email($user_email);
+            $report->sendReportToEmail($user_email);
         } catch (Exception $e) {
             $logger->err(array(
                 'message'    =>
