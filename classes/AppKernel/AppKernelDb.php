@@ -896,11 +896,20 @@ class AppKernelDb
             }
         }
 
-        $sql = "SELECT resource_id, resource, nickname, description , enabled, visible FROM resource";
+        $sql = "SELECT resource_id, resource, nickname, description , enabled, visible, xdmod_resource_id FROM resource";
         if (0 != count($sqlCriteria)) {
             $sql .= " WHERE " . implode(" AND ", $sqlCriteria);
         }
 
+        // load xdmod resources from modw to ensure that xdmod_resource_id refer to existent resource
+        $result = $this->modwDB->query("SELECT id, name FROM modw.resourcefact");
+        $xdmod_resource = array();
+        while (false !== ($row = current($result))) {
+            $xdmod_resource[$row['id']] = $row['name'];
+            next($result);
+        }
+
+        // load resources
         $result = $this->db->query($sql, $sqlParams);
 
         while (false !== ($row = current($result))) {
@@ -911,6 +920,11 @@ class AppKernelDb
             $resource->description = $row['description'];
             $resource->enabled = $row['enabled'];
             $resource->visible = $row['visible'];
+            $resource->xdmod_resource_id = $row['xdmod_resource_id'];
+            if ( !is_null($resource->xdmod_resource_id) && !isset($xdmod_resource[$resource->xdmod_resource_id])) {
+                $resource->xdmod_resource_id = null;
+            }
+
             $this->resourceList[$row['nickname']] = $resource;
             next($result);
         }

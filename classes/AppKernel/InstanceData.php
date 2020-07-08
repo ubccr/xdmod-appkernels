@@ -563,6 +563,7 @@ class AKResource
     public $description = null;  // Resource description
     public $enabled = false;  // true if the resoure is enabled
     public $visible = false;  // true if visible outside of the application kernel tools
+    public $xdmod_resource_id = null;  // XDMoD resource id
 }
 
 class ProcessingUnit

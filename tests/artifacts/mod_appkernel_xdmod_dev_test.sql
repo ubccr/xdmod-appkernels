@@ -759,7 +759,7 @@ CREATE TABLE `resource` (
 
 LOCK TABLES `resource` WRITE;
 /*!40000 ALTER TABLE `resource` DISABLE KEYS */;
-INSERT INTO `resource` VALUES (1,'UBHPC_8core','UBHPC_8core','<ul>\r\n<li> 1024 total cores Gainestown @ 2.27GHz (8 cores, 24 GB per node)\r\n<li> 1024 total cores Gulftown @ 2.13GHz (8 cores, 24 GB per node)\r\n</ul>',1,1,13,NULL),(28,'UBHPC_32core','UBHPC_32core','UBHPC',1,1,1,NULL);
+INSERT INTO `resource` VALUES (1,'UBHPC_8core','UBHPC_8core','<ul>\r\n<li> 1024 total cores Gainestown @ 2.27GHz (8 cores, 24 GB per node)\r\n<li> 1024 total cores Gulftown @ 2.13GHz (8 cores, 24 GB per node)\r\n</ul>',1,1,1,NULL),(28,'UBHPC_32core','UBHPC_32core','UBHPC',1,1,1,NULL);
 /*!40000 ALTER TABLE `resource` ENABLE KEYS */;
 UNLOCK TABLES;
 

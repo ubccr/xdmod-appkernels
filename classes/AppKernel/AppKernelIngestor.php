@@ -450,6 +450,12 @@ class AppKernelIngestor
         $resource_name = $this->dbResourceList[$resourceNickname]->name;
         $resource_nickname = $this->dbResourceList[$resourceNickname]->nickname;
         $resource_visible = $this->dbResourceList[$resourceNickname]->visible;
+        $xdmod_resource_id = $this->dbResourceList[$resourceNickname]->xdmod_resource_id;
+
+        if (is_null($xdmod_resource_id)) {
+            $this->logger->warning("Appkernel resource $resourceNickname is not matched with any XDMoD resource." .
+                                   " This will make some tools inoperatable with that resource");
+        }
 
         $options = array('resource' => $resourceNickname);
 
@@ -500,7 +506,7 @@ class AppKernelIngestor
                 $processor_unit = null;
                 $ak_def_visible = null;
             }
-            
+
             foreach ($instanceListGroupedByNumUnits as $num_units => $instanceList) {
                 if (isset($this->dbAKIdMap[$ak_basename]) && isset($this->dbAKIdMap[$ak_basename][$num_units])) {
                 } else {
