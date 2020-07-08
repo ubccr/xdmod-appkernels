@@ -488,21 +488,27 @@ class AppKernelIngestor
         foreach ($instanceListGroupedByAK as $ak_basename => $instanceListGroupedByNumUnits) {
             $this->logger->debug("Current AK: $ak_basename");
 
-            if (!isset($this->dbAKList[$ak_basename])) {
-                $this->logger->warning("$ak_basename not in AK list");
+            if (isset($this->dbAKList[$ak_basename])) {
+                $ak_def_id = $this->dbAKList[$ak_basename]->id;
+                $ak_name = $this->dbAKList[$ak_basename]->name;
+                $processor_unit = $this->dbAKList[$ak_basename]->processor_unit;
+                $ak_def_visible = $this->dbAKList[$ak_basename]->visible;
+            } else {
+                $this->logger->warning("$ak_basename not in AK list (normal on first load)");
+                $ak_def_id = null;
+                $ak_name = null;
+                $processor_unit = null;
+                $ak_def_visible = null;
             }
-
-            $ak_def_id = $this->dbAKList[$ak_basename]->id;
-            $ak_name = $this->dbAKList[$ak_basename]->name;
-            $processor_unit = $this->dbAKList[$ak_basename]->processor_unit;
-            $ak_def_visible = $this->dbAKList[$ak_basename]->visible;
-
+            
             foreach ($instanceListGroupedByNumUnits as $num_units => $instanceList) {
-                if (!isset($this->dbAKIdMap[$ak_basename])) {
-                    $this->logger->warning("$ak_basename not in AK id map");
+                if (isset($this->dbAKIdMap[$ak_basename]) && isset($this->dbAKIdMap[$ak_basename][$num_units])) {
+                } else {
+                    $this->logger->warning("$ak_basename not in AK id map (normal on first load)");
+                    $ak_id = null;
                 }
 
-                $ak_id = $this->dbAKIdMap[$ak_basename][$num_units];
+
 
                 foreach ($instanceList as $instanceId => $akInstance) {
                     $this->logger->info("Processing $akInstance");
