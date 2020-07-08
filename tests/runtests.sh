@@ -82,8 +82,8 @@ if [ "$XDMOD_TEST_MODE" = "fresh_install" ];
 then
     $XDMOD_BOOTSTRAP
 
-    # Turn on novice user mod
-    sed -i 's@novice_user = "off"@novice_user = "on"@' /etc/xdmod/portal_settings.ini
+    # Turn on dashboard user mod
+    sed -i 's@user_dashboard = "off"@user_dashboard = "on"@' /etc/xdmod/portal_settings.ini
 
     # Load mod_akrr and mod_appkernel db (created by AKRR)
     mysql -u root < $XDMOD_APPKERNEL_DIR/tests/artifacts/create_akrr_db.sql
