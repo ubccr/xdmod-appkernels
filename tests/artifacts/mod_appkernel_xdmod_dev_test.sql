@@ -759,7 +759,7 @@ CREATE TABLE `resource` (
 
 LOCK TABLES `resource` WRITE;
 /*!40000 ALTER TABLE `resource` DISABLE KEYS */;
-INSERT INTO `resource` VALUES (1,'UBHPC_8core','UBHPC_8core','<ul>\r\n<li> 1024 total cores Gainestown @ 2.27GHz (8 cores, 24 GB per node)\r\n<li> 1024 total cores Gulftown @ 2.13GHz (8 cores, 24 GB per node)\r\n</ul>',1,1,13,NULL),(28,'UBHPC_32core','UBHPC_32core','UBHPC',1,1,13,NULL);
+INSERT INTO `resource` VALUES (1,'UBHPC_8core','UBHPC_8core','<ul>\r\n<li> 1024 total cores Gainestown @ 2.27GHz (8 cores, 24 GB per node)\r\n<li> 1024 total cores Gulftown @ 2.13GHz (8 cores, 24 GB per node)\r\n</ul>',1,1,13,NULL),(28,'UBHPC_32core','UBHPC_32core','UBHPC',1,1,1,NULL);
 /*!40000 ALTER TABLE `resource` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -802,7 +802,7 @@ DROP TABLE IF EXISTS `v_ak_metrics`;
 /*!50001 DROP VIEW IF EXISTS `v_ak_metrics`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_ak_metrics` AS SELECT 
+/*!50001 CREATE VIEW `v_ak_metrics` AS SELECT
  1 AS `name`,
  1 AS `enabled`,
  1 AS `num_units`,
@@ -819,7 +819,7 @@ DROP TABLE IF EXISTS `v_ak_parameters`;
 /*!50001 DROP VIEW IF EXISTS `v_ak_parameters`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_ak_parameters` AS SELECT 
+/*!50001 CREATE VIEW `v_ak_parameters` AS SELECT
  1 AS `name`,
  1 AS `enabled`,
  1 AS `num_units`,
@@ -836,7 +836,7 @@ DROP TABLE IF EXISTS `v_tree_debug`;
 /*!50001 DROP VIEW IF EXISTS `v_tree_debug`*/;
 SET @saved_cs_client     = @@character_set_client;
 SET character_set_client = utf8;
-/*!50001 CREATE VIEW `v_tree_debug` AS SELECT 
+/*!50001 CREATE VIEW `v_tree_debug` AS SELECT
  1 AS `ak_name`,
  1 AS `resource`,
  1 AS `processor_unit`,
