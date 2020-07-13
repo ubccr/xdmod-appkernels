@@ -1604,7 +1604,8 @@ or "Show Details of Successful Tasks" options to see details on tasks';
         // utilize this endpoint. Note, we do not utilize the `requirements` parameter of the above
         // `authorize` call because it utilizes `XDUser::hasAcls` which only checks if the user has
         // *all* of the supplied acls, not any of the supplied acls.
-        if ( ! ( $user->hasAcl(ROLE_ID_CENTER_DIRECTOR) ||  $user->hasAcl(ROLE_ID_CENTER_STAFF) ) ) {
+        if ( ! ( $user->hasAcl(ROLE_ID_CENTER_DIRECTOR) ||  $user->hasAcl(ROLE_ID_CENTER_STAFF) ||
+            $user->hasAcl(ROLE_ID_DEVELOPER)  ||  $user->hasAcl(ROLE_ID_PROGRAM_OFFICER) ) ) {
             throw  new UnauthorizedHttpException('xdmod', "Unable to complete action. User is not authorized.");
         }
 
@@ -1628,12 +1629,18 @@ or "Show Details of Successful Tasks" options to see details on tasks';
             $problemSizes = explode(self::DEFAULT_DELIM, $problemSizes);
         }
 
+        if ( $user->hasAcl(ROLE_ID_DEVELOPER)  ||  $user->hasAcl(ROLE_ID_PROGRAM_OFFICER)) {
+            $resource = null;
+        } else {
+            $resource = array('data' => $user->getResources());
+        }
+
         $data = array();
         try {
             $perfMap = new \AppKernel\PerformanceMap(array(
                 'start_date' => $startDate,
                 'end_date' => $endDate,
-                'resource' => array('data' => $user->getResources()),
+                'resource' => $resource,
                 'appKer' => $appKernels,
                 'problemSize' => $problemSizes
             ));
