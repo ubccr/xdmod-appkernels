@@ -109,11 +109,11 @@ class PerfPatternRecognition
     public function __construct($options)
     {
         //get AK short names
-        $pdo = DB::factory('database');
+        $pdo = DB::factory('appkernel');
         $ak_shortnames=array();
         $ak_fullnames=array();
         $sql = "SELECT ak_base_name,name
-                FROM mod_appkernel.app_kernel_def;";
+                FROM app_kernel_def;";
         $sqlres_tasdb=$pdo->query($sql);
         foreach($sqlres_tasdb as $row)
         {
@@ -136,7 +136,7 @@ class PerfPatternRecognition
                 $this->code_colors_by_error_code[$errorSubtype.$errorType]=$color;
             }
         }
-        
+
         //get list of resources with scheduled task
         $this->active_resources=array();
         $akrr_section = isset($config['config_akrr'])
@@ -184,7 +184,7 @@ class PerfPatternRecognition
         for($i=0;$i<count($this->recpatterns['resource']);$i++){
             $resource=$this->recpatterns['resource'][$i];
             $problems=$this->recpatterns['problems'][$i];
-			
+
             $message.='<tr>';
             $message.="<td colspan=4>Resource: <b>$resource</b></td>";
             $message.='</tr>';
@@ -241,10 +241,10 @@ class PerfPatternRecognition
             'problems'=>array());
 
         foreach ($this->runStatsResource as $resource=>$runStatsResource) {
-        	
+
         	if(!in_array($resource, $this->active_resources))continue;
-			
-			
+
+
             $problems[$resource]=array();
 
             //detect appkernel level problems
