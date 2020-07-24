@@ -509,12 +509,11 @@ class AppKernelIngestor
 
             foreach ($instanceListGroupedByNumUnits as $num_units => $instanceList) {
                 if (isset($this->dbAKIdMap[$ak_basename]) && isset($this->dbAKIdMap[$ak_basename][$num_units])) {
+                    $ak_id = $this->dbAKIdMap[$ak_basename][$num_units];
                 } else {
                     $this->logger->warning("$ak_basename not in AK id map (normal on first load)");
                     $ak_id = null;
                 }
-
-
 
                 foreach ($instanceList as $instanceId => $akInstance) {
                     $this->logger->info("Processing $akInstance");
