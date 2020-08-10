@@ -19,7 +19,7 @@ Control region for app kernels is set in appkernel tab of the admin dashboard [a
 
 ### AK Viewer
 
-The results of appkernels execution can be viewed with AK viewer and explorer [ak-viewer](ak-viewer.md). 
+The results of app kernel execution can be viewed with AK viewer and explorer [ak-viewer](ak-viewer.md). 
 
 ### AK Email Reports
 
