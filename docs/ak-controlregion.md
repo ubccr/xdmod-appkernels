@@ -6,7 +6,7 @@ Select control region panel from appkernel tab of XDMoD admin pannel.
 ![Control Region GUI](assets/images/control_region_gui_small.png)
 
 
-New control region can be added by clicking on the point of the plot and selecting 
+New control region can be added by clicking on the point of the plot and selecting
 "add new control region" from context menu or by clicking "New control region" from control regions pannel.
 
 ![Control Region: Add New region](assets/images/control_region_add_small.png)

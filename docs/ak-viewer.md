@@ -1,4 +1,4 @@
-The results of appkernels execution can be viewed with AK viewer 
+The results of appkernels execution can be viewed with AK viewer
 and explorer from appkernel tab of XDMoD.
 
 ![ak_viewer](assets/images/ak_viewer_small.png)
