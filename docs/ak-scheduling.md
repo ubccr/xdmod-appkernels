@@ -1,4 +1,4 @@
-Appkernels execution can be scheduled with [AKRR](https://akrr.xdmod.org) command line interface (CLI) 
+App kernel execution can be scheduled with [AKRR](https://akrr.xdmod.org) command line interface (CLI) 
 or with GUI using appkernel tab in the admin dashboard [ak-scheduling](ak-scheduling.md).
 
 At this point AKRR CLI provides more reach interface for group operation while GUI provides more fine control.
