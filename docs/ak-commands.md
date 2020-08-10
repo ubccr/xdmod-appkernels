@@ -15,7 +15,7 @@ or with GUI using App Kernels tab in the admin dashboard [ak-scheduling](ak-sche
 
 ### AK Control Region
 
-Control region for app kernels is set in appkernel tab of the admin dashboard [ak-controlregion](ak-controlregion.md). 
+Control region for app kernels is set in App Kernels tab of the admin dashboard [ak-controlregion](ak-controlregion.md). 
 
 ### AK Viewer
 
