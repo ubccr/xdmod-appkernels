@@ -10,7 +10,7 @@ The `xdmod-akrr-ingestor` command is used to ingest data from
 
 ### Task Scheduling
 
-Appkernels execution can be scheduled with [AKRR](https://akrr.xdmod.org) command line interface 
+App kernel execution can be scheduled with [AKRR](https://akrr.xdmod.org) command line interface 
 or with GUI using appkernel tab in the admin dashboard [ak-scheduling](ak-scheduling.md). 
 
 ### AK Control Region
@@ -24,4 +24,3 @@ The results of appkernels execution can be viewed with AK viewer and explorer [a
 ### AK Email Reports
 
 Control region for app kernels is set in appkernel tab of the admin dashboard [ak-reports](ak-reports.md). 
-
