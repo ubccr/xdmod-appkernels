@@ -1,7 +1,7 @@
 Control region specified the time period which will be used for creation a control region.
 That region will be used during performance monitoring for detecting for deviation from expected performance.
 
-Select control region panel from appkernel tab of XDMoD admin pannel.
+Select control region panel from App Kernels tab of Open XDMoD admin panel.
 
 ![Control Region GUI](assets/images/control_region_gui_small.png)
 
