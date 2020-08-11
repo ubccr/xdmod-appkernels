@@ -1,4 +1,4 @@
-Regular e-mail report can be set in Reports section of Appkernel tab of XDMoD
+Regular e-mail reports can be set in Reports section of App Kernels tab of Open XDMoD
 
 ![Reports Request](assets/images/report_request.png)
 
