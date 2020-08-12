@@ -7,8 +7,6 @@ toc:
     subfolderitems:
       - page: Open XDMoD module
         url: https://github.com/ubccr/xdmod-appkernels/releases/latest
-      - page: AKRR package
-        url: https://github.com/ubccr/akrr/releases/latest
   - title: Installing
     subfolderitems:
       - page: Installation Guide
@@ -24,10 +22,18 @@ toc:
         url: /ak-databases.html
   - title: Using
     subfolderitems:
-      - page: Command Reference
+      - page: AK Usage
         url: /ak-commands.html
       - page: Ingestor Guide
         url: /ak-ingestor.html
+      - page: Tasks Scheduling
+        url: /ak-scheduling.html
+      - page: AK Control Regions
+        url: /ak-controlregion.html
+      - page: AK Viewer
+        url: /ak-viewer.html
+      - page: AK e-mail Reports
+        url: /ak-reports.html
   - title: Developing
     subfolderitems:
       - page: Open XDMoD Module

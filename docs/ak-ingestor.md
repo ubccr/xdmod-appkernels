@@ -14,7 +14,7 @@ General Usage
 The application kernel ingestor has many options, but typically a
 command similar to this will be appropriate:
 
-    $ xdmod-akrr-ingestor -l load -r -c
+    $ xdmod-akrr-ingestor -l load -r
 
 This will ingest all application kernel data since the previous
 ingestion, replacing any duplicates and then calculate the control
@@ -60,15 +60,8 @@ These will accept UNIX timestamps as values.
 
     $ xdmod-akrr-ingestor -s 1420088400 -e 1422680400 ...
 
-Calculating Control Regions
+Recalculating Control Regions
 ---------------------------
-
-In addition to ingesting data it is also necessary to calculate control
-regions that will be used to determine if an application kernel is
-performing as expected.  This is specified using the
-`--calculate-controls`/`-c` option.
-
-    $ xdmod-akrr-ingestor -c ...
 
 For historical reasons there is also an option to re-calculate controls.
 This should not be necessary unless a bug was found in the control
