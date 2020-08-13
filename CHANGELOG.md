@@ -1,6 +1,16 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
+## 2020-08-13 v9.0.0
+
+- Bug Fixes
+    - General
+        - Fixed access to mod_appkernel using modw connector ([\#78](https://github.com/ubccr/xdmod-appkernels/pull/78))
+        - Fixed not setting ak_id for known appkernels during ingestion ([\#79](https://github.com/ubccr/xdmod-appkernels/pull/79))
+- Enhancements
+    - Documentation
+        - Added and updated documentation ([\#80](https://github.com/ubccr/xdmod-appkernels/pull/80))
+
 ## 2019-10-21 v8.5.0
 
 - Bug Fixes
