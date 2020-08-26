@@ -35,8 +35,8 @@ defaults:
       type: "pages"
     values:
       layout: "page"
-      version: "9.0"
-      sw_version: "9.0.0"
+      version: "9.5"
+      sw_version: "9.5.0"
       style: "effervescence"
       tocversion: "toc"
 
