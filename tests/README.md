@@ -10,7 +10,7 @@ Run Tests with specific XDMoD branch
 
 ```shell script
 docker run -it --rm -p 20080:8080 \
-    -e XDMOD_BRANCH=xdmod9.0 \
+    -e XDMOD_BRANCH=xdmod9.5 \
     pseudo_repo/xdmod-appkernels-tests:latest
 ```
 
@@ -24,7 +24,7 @@ Same without rebuilding image by attaching host directory
 ```shell script
 # in xdmod-appkernels directory
 docker run -it --rm -p 20080:8080 \
-    -e XDMOD_BRANCH=xdmod9.0 \
+    -e XDMOD_BRANCH=xdmod9.5 \
     -v `pwd`:/root/src/ubccr/xdmod-appkernels \
     pseudo_repo/xdmod-appkernels-tests:latest
 ```
@@ -34,7 +34,7 @@ Using local XDMoD and adding remote debugging capabilities with port forwarding 
 # in xdmod-appkernels directory
 docker run -it --rm \
     -p 20443:443 -p 23306:3306 -p 20022:22 \
-    -e XDMOD_BRANCH=xdmod9.0 \
+    -e XDMOD_BRANCH=xdmod9.5 \
     -v `pwd`/../xdmod:/root/src/ubccr/xdmod \
     -v `pwd`/../xdmod-qa:/root/src/ubccr/xdmod-qa \
     -v `pwd`:/root/src/ubccr/xdmod-appkernels \
