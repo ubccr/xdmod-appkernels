@@ -9,9 +9,9 @@
 require_once __DIR__ . '/../configuration/linker.php';
 
 use CCR\DB;
-use CCR\Log;
 use AppKernel\AppKernelDb;
 use AppKernel\Report;
+use Monolog\Logger;
 
 /**
  * Log level determined by "verbose" and "debug".
@@ -116,18 +116,18 @@ foreach ($args as $arg => $value) {
             break;
         case 'v':
         case 'verbose':
-            $logLevel = max($logLevel, Log::INFO);
+            $logLevel = max($logLevel, Logger::INFO);
             break;
         case 'd':
         case 'debug':
-            $logLevel = max($logLevel, Log::DEBUG);
+            $logLevel = max($logLevel, Logger::DEBUG);
             break;
         default:
             fwrite(STDERR, 'Invalid arguments: '.$arg.' => '.$value."\n");
             break;
     }
 }
-if($logLevel >= Log::DEBUG) {
+if($logLevel >= Logger::DEBUG) {
     print("Accepted arguments:\n");
     foreach ($args as $arg => $value) {
         print("\t" . $arg . ' => ' . $value . "\n");
@@ -135,13 +135,13 @@ if($logLevel >= Log::DEBUG) {
 }
 // ================================================================================
 // Logger configuration.
-$conf = array(
-    'file' => false,
-    'emailSubject' => 'App Kernel Report Scheduler',
-    'consoleLogLevel' => $logLevel
-);
-$conf['emailSubject'] .= (APPLICATION_ENV == 'dev') ? ' [Dev]' : '';
-$logger = Log::factory('ak-reports', $conf);
+$logger = \CCR\Logging::factory('ak-reports', array(
+    'console' => array('level' => $logLevel),
+    'email' => array(
+        'subject' => sprintf('App Kernel Report Scheduler %s', (APPLICATION_ENV === 'dev' ? '[Dev]' : ''))
+    ),
+    'mysql' => array()
+));
 
 // Database handle.
 $db = DB::factory('appkernel');

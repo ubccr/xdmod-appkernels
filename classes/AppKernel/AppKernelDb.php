@@ -2,7 +2,10 @@
 
 namespace AppKernel;
 
+use CCR\Logging;
+use Monolog\Logger;
 use PDO;
+use Psr\Log\LoggerInterface;
 use xd_utilities;
 use CCR\DB;
 use Exception;
@@ -55,7 +58,9 @@ class AppKernelDb
     // Handle to the database resource
     private $db = null;
 
-    // Optional PEAR::Log for logging
+    /**
+     * @var Logger|LoggerInterface
+     */
     private $logger = null;
 
     // List or application kernel definitions
@@ -90,12 +95,12 @@ class AppKernelDb
     private $control_criteria = 3.0;
 
     // --------------------------------------------------------------------------------
-    // @param $logger A Pear::Log object (http://pear.php.net/package/Log/
+    // @param $logger A Monolog Logger object
     // @param $configSection The configuration section to be used to obtain
     //   database connection parameters.
     // --------------------------------------------------------------------------------
 
-    public function __construct(\Log $logger = null, $configSection = null)
+    public function __construct(LoggerInterface $logger = null, $configSection = null)
     {
         // If the configuration section is not explicitly specified, use the
         // APPLICATION_ENV constant to select the correct section
@@ -107,7 +112,7 @@ class AppKernelDb
 
         $this->db = DB::factory($configSection);
         $this->modwDB = DB::factory('database');
-        $this->logger = $logger !== null ? $logger : \Log::singleton('null');
+        $this->logger = $logger !== null ? $logger : Logging::singleton('null');
     }
 
     // --------------------------------------------------------------------------------
@@ -1473,7 +1478,7 @@ class AppKernelDb
             $this->log(
                 "No matching app kernels found (ak_def_id = {$options['ak_def_id']}, " .
                 "collected = {$options['collected']}, resource_id = {$options['resource_id']})",
-                PEAR_LOG_WARNING
+                Logger::WARNING
             );
             return false;
         }
@@ -1701,7 +1706,7 @@ class AppKernelDb
         // Create an app kernel instance
 
         try {
-            $this->log("Store app kernel $ak", PEAR_LOG_DEBUG);
+            $this->log("Store app kernel $ak", Logger::DEBUG);
 
             $this->db->handle()->beginTransaction();
             if ($replace) {
@@ -1750,7 +1755,7 @@ class AppKernelDb
             }
             $this->db->handle()->commit();
         } catch (Exception $e) {
-            $this->log("Rolling back transaction", PEAR_LOG_DEBUG);
+            $this->log("Rolling back transaction", Logger::DEBUG);
             if ($replace) {
                 $this->db->execute('set foreign_key_checks=1;');
             }
@@ -1799,7 +1804,7 @@ class AppKernelDb
         if (!$dryRunMode) {
             $this->db->execute($sql, $params);
         }
-        $this->log("-> Created new app kernel instance: $ak", PEAR_LOG_DEBUG);
+        $this->log("-> Created new app kernel instance: $ak", Logger::DEBUG);
 
         // Set some data that will be needed for adding metrics and parameters
         // TODO These should be preset during InstanceData &$ak query
@@ -1842,7 +1847,7 @@ class AppKernelDb
         if (!$dryRunMode) {
             $this->db->execute($sql, $params);
         }
-        $this->log("-> Logged debug info for app kernel instance $ak", PEAR_LOG_DEBUG);
+        $this->log("-> Logged debug info for app kernel instance $ak", Logger::DEBUG);
 
         return true;
     }
@@ -1873,12 +1878,12 @@ class AppKernelDb
             if (!$dryRunMode) {
                 $this->db->execute($sql, $params);
             } else {
-                $this->log("$sql  " . print_r($params, 1), PEAR_LOG_DEBUG);
+                $this->log("$sql  " . print_r($params, 1), Logger::DEBUG);
             }
             $this->akMetrics[$ak->deployment_ak_base_name][$ak->deployment_num_proc_units][$guid] = $this->akMetricGuids[$guid];
             $this->log(
                 "-> Associated metric '{$metric->name}' (id = {$metric->id}) with app kernel '{$ak->deployment_ak_name}' (ak_id = {$ak->db_ak_id})",
-                PEAR_LOG_DEBUG
+                Logger::DEBUG
             );
         }
 
@@ -1901,7 +1906,7 @@ class AppKernelDb
                 if (count($rows) > 1) {
                     $this->log(
                         "a_tree has more then one entries for ak_def_id, resource_id, metric_id, num_units",
-                        PEAR_LOG_ERR
+                        Logger::ERROR
                     );
                 }
 
@@ -1992,7 +1997,7 @@ class AppKernelDb
                 if (count($rows) > 1) {
                     $this->log(
                         "a_tree2 has more then one entries for ak_def_id, resource_id, metric_id, num_units",
-                        PEAR_LOG_ERR
+                        Logger::ERROR
                     );
                 }
 
@@ -2076,7 +2081,7 @@ class AppKernelDb
                 }
             }
         }
-        $this->log("-> Stored metric '{$metric->name}' for app kernel $ak", PEAR_LOG_DEBUG);
+        $this->log("-> Stored metric '{$metric->name}' for app kernel $ak", Logger::DEBUG);
         return true;
     }
 
@@ -2100,12 +2105,12 @@ class AppKernelDb
             if (!$dryRunMode) {
                 $this->db->execute($sql, $params);
             } else {
-                $this->log("$sql  " . print_r($params, 1), PEAR_LOG_DEBUG);
+                $this->log("$sql  " . print_r($params, 1), Logger::DEBUG);
             }
             $this->akParameters[$ak->deployment_ak_base_name][$ak->deployment_num_proc_units][$guid] = $this->akParameterGuids[$guid];
             $this->log(
                 "-> Associated parameter '{$parameter->name}' (id = {$parameter->id}) with app kernel '{$ak->deployment_ak_name}' (ak_id = {$ak->db_ak_id})",
-                PEAR_LOG_DEBUG
+                Logger::DEBUG
             );
         }
 
@@ -2122,7 +2127,7 @@ class AppKernelDb
         if (!$dryRunMode) {
             $this->db->execute($sql, $params);
         }
-        $this->log("-> Stored parameter '{$parameter->name}' for app kernel $ak", PEAR_LOG_DEBUG);
+        $this->log("-> Stored parameter '{$parameter->name}' for app kernel $ak", Logger::DEBUG);
 
         return true;
     }
@@ -2152,7 +2157,7 @@ class AppKernelDb
         $this->db->execute($sql, $params);
         $id = $this->db->handle()->lastInsertId();
         $this->akIdMap[$ak->deployment_ak_base_name][$ak->deployment_num_proc_units] = $id;
-        $this->log("Added new app kernel {$ak->deployment_ak_name}", PEAR_LOG_DEBUG);
+        $this->log("Added new app kernel {$ak->deployment_ak_name}", Logger::DEBUG);
 
         return $id;
     }
@@ -2188,13 +2193,13 @@ class AppKernelDb
 
             $sql = "INSERT INTO ak_has_metric (ak_id, metric_id, num_units) VALUES (?,?,?)";
             $params = array($ak->db_ak_id, $metricId, $ak->deployment_num_proc_units);
-            $this->log("$sql  " . print_r($params, 1), PEAR_LOG_DEBUG);
+            $this->log("$sql  " . print_r($params, 1), Logger::DEBUG);
             $this->db->execute($sql, $params);
 
             $this->akMetricGuids[$metric->guid()] = $metricId;
             $this->log(
                 "Add metric to ak: name='{$metric->name}', unit='{$metric->unit}' ak='{$ak->deployment_ak_name}' (id = $metricId)",
-                PEAR_LOG_DEBUG
+                Logger::DEBUG
             );
 
             return $metricId;
@@ -2204,13 +2209,13 @@ class AppKernelDb
 
         $sql = "INSERT INTO metric (name, unit, guid) VALUES (?,?,?)";
         $params = array($metric->name, $metric->unit, $guid);
-        $this->log("$sql  " . print_r($params, 1), PEAR_LOG_DEBUG);
+        $this->log("$sql  " . print_r($params, 1), Logger::DEBUG);
         $this->db->execute($sql, $params);
         $metricId = $this->db->handle()->lastInsertId();
         $this->akMetricGuids[$metric->guid()] = $metricId;
         $this->log(
             "Created new metric: name='{$metric->name}', unit='{$metric->unit}' (id = $metricId)",
-            PEAR_LOG_DEBUG
+            Logger::DEBUG
         );
 
         return $metricId;
@@ -2242,13 +2247,13 @@ class AppKernelDb
 
         $sql = "INSERT INTO parameter (tag, name, unit, guid) VALUES (?,?,?,?)";
         $params = array($parameter->tag, $parameter->name, $parameter->unit, $guid);
-        $this->log("$sql  " . print_r($params, 1), PEAR_LOG_DEBUG);
+        $this->log("$sql  " . print_r($params, 1), Logger::DEBUG);
         $this->db->execute($sql, $params);
         $parameterId = $this->db->handle()->lastInsertId();
         $this->akParameterGuids[$guid] = $parameterId;
         $this->log(
             "Created new parameter: name='{$parameter->name}' unit='{$parameter->unit}' tag='{$parameter->tag}' (id = $parameterId)",
-            PEAR_LOG_DEBUG
+            Logger::DEBUG
         );
 
         return $parameterId;
@@ -2271,12 +2276,12 @@ class AppKernelDb
 
     // --------------------------------------------------------------------------------
 
-    private function log($message, $level = PEAR_LOG_INFO)
+    private function log($message, $level = Logger::INFO)
     {
         if (null === $this->logger) {
             return;
         }
-        $this->logger->log($message, $level);
+        $this->logger->log($level, $message);
     }
 
     // --------------------------------------------------------------------------------
@@ -2551,7 +2556,7 @@ class AppKernelDb
             );
         }
 
-        $this->log("recalculate control_region_def based on enviroment change\n", PEAR_LOG_INFO);
+        $this->log("recalculate control_region_def based on enviroment change\n", Logger::INFO);
         $this->db->execute("TRUNCATE TABLE control_region_def");
         if ($initial) {
             //Set initial region
@@ -2567,7 +2572,7 @@ class AppKernelDb
             foreach ($initial_regions_start as $first_run) {
                 $this->log(
                     "Adding initial control region for app kernel: {$first_run['ak_name']} on resource: {$resourceIdMap[$first_run['resource_id']]['name']}",
-                    PEAR_LOG_INFO
+                    Logger::INFO
                 );
                 $t = date_format(date_create($first_run['collected']), "Y-m-d") . " 00:00:00";
                 $t = date_format(
@@ -2607,7 +2612,7 @@ class AppKernelDb
                     $t = $collected;
                     $this->log(
                         "Adding control region due enviroment change, app kernel: {$newenv_regions_start[$i]['ak_name']} on resource: {$resourceIdMap[$newenv_regions_start[$i]['resource_id']]['name']}",
-                        PEAR_LOG_INFO
+                        Logger::INFO
                     );
 
                     $sql = "INSERT INTO control_region_def
@@ -2781,7 +2786,7 @@ class AppKernelDb
             $time_end = microtime(true);
             $this->log(
                 "Timing(update metric_data set control = null, running_average = null)=" . ($time_end - $time_start),
-                PEAR_LOG_DEBUG
+                Logger::DEBUG
             );
         }
 
@@ -2816,7 +2821,7 @@ class AppKernelDb
 
         $this->log(
             "Timing(Get a list of possible unique datasets (datasetsQuery))=" . ($time_end - $time_start),
-            PEAR_LOG_DEBUG
+            Logger::DEBUG
         );
 
         $time_start_bigcycle = microtime(true);
@@ -2842,7 +2847,7 @@ class AppKernelDb
             if ($progressVerbosity === 1) {
                 $message = "Calculating running average and control values. " .
                     number_format(100.0 * $di / $datasetsLength, 2) . "% " . json_encode($dataset);
-                $this->log($message, PEAR_LOG_DEBUG);
+                $this->log($message, Logger::DEBUG);
             }
             $control_criteria = $this->control_criteria;
             if ($akId2akDefIdMap[$dataset['ak_id']]['control_criteria'] !== null) {
@@ -2855,7 +2860,7 @@ class AppKernelDb
                 $this->log(
                     "Skipping metric {$dataset['metric_id']} {$metricsLookupById[$dataset['metric_id']]['name']} " .
                     "as there was no value in metric_attributes for its larger/smaller property",
-                    PEAR_LOG_WARNING
+                    Logger::WARNING
                 );
                 continue;
             }
@@ -2901,7 +2906,7 @@ class AppKernelDb
                         $this->log(
                             "Adding initial control region for app kernel: {$akId2akDefIdMap[$dataset['ak_id']]['name']} " .
                             "on resource: {$resourceIdMap[$dataset['resource_id']]['name']}",
-                            PEAR_LOG_INFO
+                            Logger::INFO
                         );
                         $t = date_format(date_create($data[0]['collected']), "Y-m-d") . " 00:00:00";
                         $t = date_format(
@@ -2926,7 +2931,7 @@ class AppKernelDb
                             "Updating initial control region for app kernel: " .
                             "{$akId2akDefIdMap[$dataset['ak_id']]['name']} on resource: " .
                             "{$resourceIdMap[$dataset['resource_id']]['name']}",
-                            PEAR_LOG_INFO
+                            Logger::INFO
                         );
                         $t = date_format(date_create($data[0]['collected']), "Y-m-d") . " 00:00:00";
                         $t = date_format(
@@ -3404,41 +3409,41 @@ class AppKernelDb
         $time_end_bigcycle = microtime(true);
         $t_bigcycle = $time_end_bigcycle - $time_start_bigcycle;
 
-        $this->log("Timing(Cycle for calculating running average and control values)=" . ($t_bigcycle), PEAR_LOG_DEBUG);
+        $this->log("Timing(Cycle for calculating running average and control values)=" . ($t_bigcycle), Logger::DEBUG);
         $this->log(
             "    Timing(data for control calc)=" . sprintf("%.4f", $timing['dataQuery']) . " (" . sprintf(
                 "%.2f",
                 100.0 * $timing['dataQuery'] / $t_bigcycle
             ) . "%)",
-            PEAR_LOG_DEBUG
+            Logger::DEBUG
         );
         $this->log(
             "    Timing(Control region calculation)=" . sprintf(
                 "%.4f",
                 $timing['contRegCalc']
             ) . " (" . sprintf("%.2f", 100.0 * $timing['contRegCalc'] / $t_bigcycle) . "%)",
-            PEAR_LOG_DEBUG
+            Logger::DEBUG
         );
         $this->log(
             "    Timing(data for control calc)=" . sprintf("%.4f", $timing['contCalc']) . " (" . sprintf(
                 "%.2f",
                 100.0 * $timing['contCalc'] / $t_bigcycle
             ) . "%)",
-            PEAR_LOG_DEBUG
+            Logger::DEBUG
         );
         $this->log(
             "        Timing(sql update)=" . sprintf("%.4f", $timing['sqlupdate1']) . " (" . sprintf(
                 "%.2f",
                 100.0 * $timing['sqlupdate1'] / $t_bigcycle
             ) . "%)",
-            PEAR_LOG_DEBUG
+            Logger::DEBUG
         );
         $this->log(
             "        Timing(sql update)=" . sprintf("%.4f", $timing['sqlupdate2']) . " (" . sprintf(
                 "%.2f",
                 100.0 * $timing['sqlupdate2'] / $t_bigcycle
             ) . "%)",
-            PEAR_LOG_DEBUG
+            Logger::DEBUG
         );
     }
 

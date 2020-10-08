@@ -6,6 +6,8 @@
 
 namespace AppKernel;
 
+use Psr\Log\LoggerInterface;
+
 require_once("AppKernelInstanceData.php");
 
 interface iAppKernelExplorer
@@ -20,7 +22,7 @@ interface iAppKernelExplorer
   // @returns An instance of the Explorer written for the specified source.
   // -------------------------------------------------------------------------
 
-  public static function factory(array $config, \Log $logger = NULL);
+  public static function factory(array $config, LoggerInterface $logger = NULL);
 
   // -------------------------------------------------------------------------
   // Set the time interval for the (start, end) times for any subsequent

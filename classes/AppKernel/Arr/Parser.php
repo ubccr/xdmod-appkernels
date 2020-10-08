@@ -2,6 +2,8 @@
 namespace AppKernel;
 use \Exception, \SimpleXmlElement;
 use libXMLError;
+use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 
 // ================================================================================
 // Parse data returned by the associated app kernel explorer (ArrExplorer)
@@ -14,10 +16,12 @@ use libXMLError;
 
 class ArrParser implements iAppKernelParser
 {
-  // PEAR::Log object
+    /**
+     * @var LoggerInterface
+     */
   private $logger = NULL;
 
-  public static function factory(array $config = NULL, \Log $logger = NULL)
+  public static function factory(array $config = NULL, LoggerInterface $logger = NULL)
   {
     return new ArrParser($config, $logger);
   }
@@ -26,7 +30,7 @@ class ArrParser implements iAppKernelParser
   // Private constructor so this class cannot be instantiated
   // -------------------------------------------------------------------------
 
-  private function __construct(array $config = NULL, \Log $logger)
+  private function __construct(array $config = NULL, LoggerInterface $logger)
   {
     $this->logger = $logger;
   }
@@ -112,7 +116,7 @@ class ArrParser implements iAppKernelParser
                        $reporter,
                        date("Y-m-d H:i:s", $parsedData->deployment_time),
                        $cause);
-        $this->logger->log($msg . "\nMessage: $errMsg", PEAR_LOG_DEBUG);
+        $this->logger->log(Logger::DEBUG,  $msg . "\nMessage: $errMsg");
 
         $parsedData->status = InstanceData::STATUS_ERROR;
         $parsedData->ak_error_cause = $cause;
@@ -127,7 +131,7 @@ class ArrParser implements iAppKernelParser
                        $reporter,
                        $waitTime,
                        date("Y-m-d H:i:s", $parsedData->deployment_time));
-        $this->logger->log($msg, PEAR_LOG_DEBUG);
+        $this->logger->log(Logger::DEBUG,  $msg);
 
         $parsedData->status = InstanceData::STATUS_QUEUED;
         $parsedData->ak_queue_time = $waitTime;
@@ -155,7 +159,7 @@ class ArrParser implements iAppKernelParser
         date("Y-m-d H:i:s", $parsedData->deployment_time);
       if ( InstanceData::STATUS_SUCCESS == $parsedData->status && isset($exitStatus->deployment_message) )
         $msg .= "  Message: '" . $exitStatus->deployment_message . "'";
-      $this->logger->log($msg, PEAR_LOG_WARNING);
+      $this->logger->log(Logger::WARNING,  $msg);
       throw new AppKernelException($msg, AppKernelException::UnknownType);
     }  // if ( NULL === $reporterType )
 

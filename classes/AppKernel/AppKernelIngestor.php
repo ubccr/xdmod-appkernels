@@ -5,8 +5,10 @@ namespace AppKernel;
 use CCR\Log;
 use AppKernel;
 
+use CCR\Logging;
 use Exception;
 use PDOException;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class AppKernelIngestor
@@ -22,9 +24,9 @@ class AppKernelIngestor
     private $db = null;
 
     /**
-     * Optional PEAR::Log for logging
+     * Optional PSR\Log\LoggerInterface for logging
      *
-     * @var Log|\Log|object|null
+     * @var LoggerInterface|object|null
      */
     private $logger = null;
 
@@ -171,7 +173,7 @@ class AppKernelIngestor
 
     /**
      * AppKernelIngestor constructor.
-     * @param \Log|null $logger A Pear::Log object (http://pear.php.net/package/Log/
+     * @param LoggerInterface|null $logger A Monolog Logger object.
      * @param array $config The configuration section for ingestion
      * @param bool $config ['dryRunMode']
      * @param int|null $config ['startTimestamp']
@@ -184,9 +186,9 @@ class AppKernelIngestor
      *
      * @throws Exception on incorrect config
      */
-    public function __construct(\Log $logger = null, $config = [])
+    public function __construct(LoggerInterface $logger = null, $config = [])
     {
-        $this->logger = $logger !== null ? $logger : \Log::singleton('null');
+        $this->logger = $logger !== null ? $logger : Logging::singleton('null');
 
         // set options
         if (array_key_exists('dryRunMode', $config)) {
@@ -325,10 +327,10 @@ class AppKernelIngestor
             $this->logger->debug("Loaded database resources: " . json_encode(array_keys($this->dbResourceList)));
         } catch (\PDOException $e) {
             $msg = "Error querying database for resoures: " . formatPdoExceptionMessage($e);
-            $this->logger->crit(array(
+            $this->logger->crit(json_encode(array(
                 'message' => $msg,
                 'stacktrace' => $e->getTraceAsString(),
-            ));
+            )));
             $this->ingestionLog->setStatus(false, $msg);
             return false;
         }
@@ -347,10 +349,10 @@ class AppKernelIngestor
             $this->logger->debug('DB AK ID Map: ' . json_encode($this->dbAKIdMap));
         } catch (\PDOException $e) {
             $msg = "Error querying database for appkernels: " . formatPdoExceptionMessage($e);
-            $this->logger->crit(array(
+            $this->logger->crit(json_encode(array(
                 'message' => $msg,
                 'stacktrace' => $e->getTraceAsString(),
-            ));
+            )));
             $this->ingestionLog->setStatus(false, $msg);
             return false;
         }
@@ -484,10 +486,10 @@ class AppKernelIngestor
             }
         } catch (Exception $e) {
             $msg = "Error retrieving app kernel instances: " . $e->getMessage();
-            $this->logger->crit(array(
+            $this->logger->crit(json_encode(array(
                 'message' => $msg,
                 'stacktrace' => $e->getTraceAsString(),
-            ));
+            )));
             return false;
         }
 
@@ -585,10 +587,10 @@ class AppKernelIngestor
                                     continue;
                                     break;
                                 default:
-                                    $this->logger->err(array(
+                                    $this->logger->err(json_encode(array(
                                         'message' => "AppKernelException: '$msg'",
                                         'stacktrace' => $e->getTraceAsString(),
-                                    ));
+                                    )));
                                     continue;
                                     break;
                             }
@@ -638,10 +640,10 @@ class AppKernelIngestor
                         }
                     } catch (\PDOException $e) {
                         $msg = formatPdoExceptionMessage($e);
-                        $this->logger->err(array(
+                        $this->logger->err(json_encode(array(
                             'message' => $msg,
                             'stacktrace' => $e->getTraceAsString(),
-                        ));
+                        )));
                         $resourceReport[$akInstance->akNickname]['sql_error']++;
                         $this->appKernelSummaryReport['sql_error']++;
                         continue;
@@ -696,10 +698,10 @@ class AppKernelIngestor
     public function run()
     {
         // NOTE: "process_start_time" is needed for the log summary.
-        $this->logger->notice(array(
+        $this->logger->notice(json_encode(array(
             'message' => 'Ingestion start',
             'process_start_time' => date('Y-m-d H:i:s'),
-        ));
+        )));
 
         if ($this->dryRunMode) {
             $this->logger->info("OPTION: Running in dryrun mode - discarding database updates");
@@ -713,11 +715,11 @@ class AppKernelIngestor
             $this->logger->info("OPTION: Load only app kernels starting with '$this->restrictToAppKernel'");
         }
 
-        $this->logger->notice(array(
+        $this->logger->notice(json_encode(array(
             'message' => 'Ingestion data time period',
             'data_start_time' => date("Y-m-d H:i:s", $this->startTimestamp),
             'data_end_time' => date("Y-m-d H:i:s", $this->endTimestamp),
-        ));
+        )));
 
         // Reset and initialize the ingestion logs
         $this->ingestionLog->reset();
@@ -738,10 +740,10 @@ class AppKernelIngestor
             $this->deploymentExplorer->setQueryInterval($this->startTimestamp, $this->endTimestamp);
         } catch (Exception $e) {
             $msg = "Error creating explorer ($this->explorerType): " . $e->getMessage();
-            $this->logger->crit(array(
+            $this->logger->crit(json_encode(array(
                 'message' => $msg,
                 'stacktrace' => $e->getTraceAsString(),
-            ));
+            )));
             $this->ingestionLog->setStatus(false, $msg);
             return false;
         }
@@ -751,10 +753,10 @@ class AppKernelIngestor
             $this->parser = AppKernel::parser($this->explorerType, null, $this->logger);
         } catch (Exception $e) {
             $msg = "Error creating parser ($this->explorerType): " . $e->getMessage();
-            $this->logger->crit(array(
+            $this->logger->crit(json_encode(array(
                 'message' => $msg,
                 'stacktrace' => $e->getTraceAsString(),
-            ));
+            )));
             $this->ingestionLog->setStatus(false, $msg);
             return false;
         }
@@ -795,15 +797,15 @@ class AppKernelIngestor
                 );
             } catch (\PDOException $e) {
                 $msg = formatPdoExceptionMessage($e);
-                $this->logger->err(array(
+                $this->logger->err(json_encode(array(
                     'message' => $msg,
                     'stacktrace' => $e->getTraceAsString(),
-                ));
+                )));
             } catch (Exception $e) {
-                $this->logger->err(array(
+                $this->logger->err(json_encode(array(
                     'message' => "Error: {$e->getMessage()} ({$e->getCode()})",
                     'stacktrace' => $e->getTraceAsString(),
-                ));
+                )));
             }
         }
 
@@ -824,7 +826,7 @@ class AppKernelIngestor
         $this->logger->info($summaryReport);
 
         // NOTE: This is needed for the log summary.
-        $this->logger->notice(array(
+        $this->logger->notice(json_encode(array(
             'message' => 'Summary data',
             'records_examined' => $this->appKernelSummaryReport['examined'],
             'records_loaded' => $this->appKernelSummaryReport['loaded'],
@@ -836,7 +838,7 @@ class AppKernelIngestor
             'records_error' => $this->appKernelSummaryReport['error'],
             'records_duplicate' => $this->appKernelSummaryReport['duplicate'],
             'records_exception' => $this->appKernelSummaryReport['exception']
-        ));
+        )));
 
         // Test sending errors and queued info
 
@@ -849,10 +851,10 @@ class AppKernelIngestor
         }
 
         // NOTE: "process_end_time" is needed for the log summary.
-        $this->logger->notice(array(
+        $this->logger->notice(json_encode(array(
             'message' => 'Ingestion End',
             'process_end_time' => date('Y-m-d H:i:s'),
-        ));
+        )));
 
         return true;
     }
