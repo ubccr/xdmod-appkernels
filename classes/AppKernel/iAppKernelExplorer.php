@@ -17,7 +17,7 @@ interface iAppKernelExplorer
   //
   // @param $config An associative array containing source-specific
   //   configuration information
-  // @param $log An optional PEAR::Log object for logging
+  // @param $log An optional Monolog Logger object for logging
   //
   // @returns An instance of the Explorer written for the specified source.
   // -------------------------------------------------------------------------

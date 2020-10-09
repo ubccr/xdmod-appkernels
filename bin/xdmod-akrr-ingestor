@@ -212,10 +212,10 @@ try {
     $appKernelIngestor = new AppKernelIngestor($logger, $config = $ingestingConfig);
     $success = $appKernelIngestor->run();
 } catch (Exception $e) {
-    $logger->crit(array(
+    $logger->crit(json_encode(array(
         'message' => "Error in Appkernel Ingestion: " . $e->getMessage(),
         'stacktrace' => $e->getTraceAsString(),
-    ));
+    )));
     cleanup_and_exit(1);
 }
 

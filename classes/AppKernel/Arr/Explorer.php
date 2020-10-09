@@ -15,7 +15,9 @@ require_once("AppKernelInstanceData_Arr.php");
 
 class ArrExplorer implements iAppKernelExplorer
 {
-  // Optional PEAR::Log for logging messages
+    /**
+     * @var LoggerInterface|null
+     */
   private $_logger = NULL;
 
   // Handle to the mod_appkernel database resource

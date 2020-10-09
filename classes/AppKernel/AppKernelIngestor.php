@@ -2,7 +2,6 @@
 
 namespace AppKernel;
 
-use CCR\Log;
 use AppKernel;
 
 use CCR\Logging;

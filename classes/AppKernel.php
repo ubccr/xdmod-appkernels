@@ -17,7 +17,7 @@ class AppKernel
   //
   // @param $source The source of the data to parse
   // @param $config An array containing source-specific configuration directives
-  // @param $logger An optional PEAR::Log class used for logging
+  // @param LoggerInterface$logger An optional Monolog Logger class used for logging
   //
   // @returns An instance of the appropriate application kernel explorer, which
   //   must implement the iAppKernelExplorer interface
@@ -45,7 +45,7 @@ class AppKernel
   //
   // @param $source The source of the data to parse
   // @param $config An array containing source-specific configuration directives
-  // @param $logger An optional PEAR::Log class used for logging
+  // @param LoggerInterface$logger An optional Monolog Logger class used for logging
   //
   // @returns An instance of the appropriate application kernel parser, which
   //   must implement the iAppKernelParser interface
@@ -56,7 +56,7 @@ class AppKernel
   // @see iAppKernelParser
   // --------------------------------------------------------------------------------
 
-  public static function parser($source, array $config = NULL, Log $logger)
+  public static function parser($source, array $config = NULL, \Psr\Log\LoggerInterface $logger)
   {
     $reporterType = NULL;
     if ( empty($source) )
@@ -76,7 +76,7 @@ class AppKernel
   // @param $sourceClassName The name of the class to instantiate
   // @param $sourceInterface The interface that the class must implement
   // @param $config An array containing source-specific configuration directives
-  // @param $logger An optional PEAR::Log class used for logging
+  // @param LoggerInterface $logger An optional Monolog Logger class used for logging
   //
   // @returns An instance of the appropriate object
   //
