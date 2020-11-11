@@ -28,7 +28,7 @@ class AppKernel
   // @see iAppKernelExplorer
   // -------------------------------------------------------------------------
 
-  public static function explorer($source, array $config = NULL, Log $logger = NULL)
+  public static function explorer($source, array $config = NULL, \Psr\Log\LoggerInterface $logger = NULL)
   {
     $reporterType = NULL;
     if ( empty($source) )
@@ -56,7 +56,7 @@ class AppKernel
   // @see iAppKernelParser
   // --------------------------------------------------------------------------------
 
-  public static function parser($source, array $config = NULL, Log $logger)
+  public static function parser($source, array $config = NULL, \Psr\Log\LoggerInterface $logger)
   {
     $reporterType = NULL;
     if ( empty($source) )
@@ -88,10 +88,10 @@ class AppKernel
                                       $sourceClassName,
                                       $sourceInterface,
                                       array $config = NULL,
-                                      Log $logger = NULL)
+                                      \Psr\Log\LoggerInterface $logger = NULL)
   {
     // Load the correct parser based on the data source
-    
+
     $obj = NULL;
     $dir = ucfirst($source);
     $className = self::MYNAMESPACE . "\\" . ucfirst($source) . $sourceClassName;
@@ -114,7 +114,7 @@ class AppKernel
     }
     */
 
-    $logger->log("Instantiating $classFile");
+    $logger->log(\CCR\Log::DEBUG, "Instantiating $classFile");
     return $className::factory($config, $logger);
 
   }  // instantiate()

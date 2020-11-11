@@ -14,6 +14,8 @@ cd $XDMOD_APPKERNEL_DIR
 
 export ORG_NAME=${ORG_NAME:-ubccr}
 export REPO_NAME=${REPO_NAME:-xdmod-appkernel}
+export XDMOD_ORG_NAME=${XDMOD_ORG_NAME:-ubccr}
+export XDMOD_REPO_FULL_NAME=${XDMOD_REPO_FULL_NAME:-$XDMOD_ORG_NAME/xdmod}
 export REPO_FULL_NAME=${REPO_FULL_NAME:-$ORG_NAME/$REPO_NAME}
 export SHIPPABLE_BUILD_DIR=${SHIPPABLE_BUILD_DIR:-$XDMOD_APPKERNEL_DIR}
 export XDMOD_TEST_MODE=${XDMOD_TEST_MODE:-fresh_install}
@@ -38,7 +40,7 @@ echo XDMOD_TEST_MODE=$XDMOD_TEST_MODE
 
 # get xdmod
 if [ ! -d "$XDMOD_DIR" ]; then
-    git clone --depth=1 --branch=$XDMOD_BRANCH https://github.com/ubccr/xdmod.git ../xdmod
+    git clone --depth=1 --branch=$XDMOD_BRANCH "https://github.com/${XDMOD_REPO_FULL_NAME}.git" ../xdmod
 else
     echo "XDMoD code is already here, will use it."
 fi
