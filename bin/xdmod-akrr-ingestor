@@ -14,8 +14,7 @@
  * @author Jeffrey T. Palmer <jtpalmer@buffalo.edu>
  */
 
-#require_once __DIR__ . '/../configuration/linker.php';
-require_once '/usr/share/xdmod/configuration/linker.php';
+require_once __DIR__ . '/../configuration/linker.php';
 
 use CCR\Log;
 use AppKernel\AppKernelIngestor;
