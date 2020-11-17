@@ -4,7 +4,7 @@ namespace AppKernelTest;
 
 use PHPUnit\Framework\TestCase;
 
-require_once "AppKernel/InstanceData.php";
+require_once __DIR__ . "/../../classes/AppKernel/AppKernelDb.php";
 
 use AppKernel\ProcessingUnit;
 use AppKernel\AppKernelDefinition;
