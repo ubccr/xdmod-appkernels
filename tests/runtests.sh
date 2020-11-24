@@ -109,7 +109,7 @@ then
     appkernel_reports_manager -m centerdirector -v -d -e 2019-02-28
 
     cd $SHIPPABLE_BUILD_DIR
-    git clone --depth=1 --branch=migrate_travis https://github.com/ryanrath/xdmod-qa.git .qa
+    git clone --depth=1 --branch=v1 https://github.com/ubccr/xdmod-qa.git .qa
 
     cd $XDMOD_APPKERNEL_DIR
     $SHIPPABLE_BUILD_DIR/.qa/scripts/install.sh ./
