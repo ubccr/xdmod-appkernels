@@ -23,9 +23,9 @@ class AppKernelIngestor
     private $db = null;
 
     /**
-     * Optional PEAR::Log for logging
+     * Optional PSR\LoggerInterface for logging
      *
-     * @var Log|\Log|object|null
+     * @var LoggerInterface|null
      */
     private $logger = null;
 
