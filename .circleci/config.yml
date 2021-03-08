@@ -19,6 +19,8 @@ jobs:
     environment:
       COMPOSER_ALLOW_SUPERUSER: 1
       XDMOD_REALMS: 'jobs,storage'
+      XDMOD_BRANCH: xdmod9.5
+      XDMOD_MODULE_NAME: appkernels
       XDMOD_IS_CORE: yes
       XDMOD_INSTALL_DIR: /xdmod
       XDMOD_TEST_MODE: << parameters.install-type >>
@@ -34,8 +36,15 @@ jobs:
           command: /usr/bin/openssl req -new -key /etc/pki/tls/private/localhost.key -x509 -sha256 -days 365 -set_serial $RANDOM -extensions v3_req -out /etc/pki/tls/certs/localhost.crt -subj "/C=XX/L=Default City/O=Default Company Ltd"
       - checkout
       - run:
+          name: Create Test Result Directory
+          command: mkdir -p ./shippable/testresults
+      - run:
           name: Setup & Run Tests
           command: ./tests/runtests.sh
+      - store_artifacts:
+          path: /tmp/screenshots
+      - store_artifacts:
+          path: /var/log/xdmod
       - store_test_results:
           path: ./shippable/testresults
 
@@ -46,7 +55,4 @@ workflows:
           matrix:
             parameters:
               os: [centos7, centos8]
-              install-type: ["fresh_install", "upgrade"]
-            exclude:
-              - os: centos8
-                install-type: "upgrade"
+              install-type: ["fresh_install"]
