@@ -36,6 +36,8 @@ jobs:
       - run:
           name: Setup & Run Tests
           command: ./tests/runtests.sh
+      - store_test_results:
+          path: ./shippable/testresults
 
 workflows:
   full-build:
