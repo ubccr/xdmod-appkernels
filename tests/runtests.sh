@@ -46,7 +46,7 @@ fi
 # create link in XDMoD to xdmod-appkernels module
 cd $XDMOD_DIR/open_xdmod/modules
 if [ ! -d "$XDMOD_DIR/open_xdmod/modules/appkernels" ]; then
-    ln -s ../../../xdmod-appkernels appkernels
+    ln -s $XDMOD_APPKERNEL_DIR appkernels
 fi
 cd $XDMOD_APPKERNEL_DIR
 
