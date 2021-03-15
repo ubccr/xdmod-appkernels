@@ -39,6 +39,10 @@ jobs:
           name: Create Test Result Directory
           command: mkdir -p ./shippable/testresults
       - run:
+          name: Setup Environment Variables
+          command: |
+            echo "export XDMOD_APPKERNELS_DIR=${CIRCLE_WORKING_DIR}" >> $BASH_ENV
+      - run:
           name: Setup & Run Tests
           command: ./tests/runtests.sh
       - store_artifacts:
