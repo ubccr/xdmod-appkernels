@@ -172,7 +172,7 @@ class AppKernelIngestor
 
     /**
      * AppKernelIngestor constructor.
-     * @param \Log|null $logger A Pear::Log object (http://pear.php.net/package/Log/
+     * @param LoggerInterface|null $logger optional, an implementation of PSR\Log\LoggerInterface to use during ingestion.
      * @param array $config The configuration section for ingestion
      * @param bool $config ['dryRunMode']
      * @param int|null $config ['startTimestamp']
