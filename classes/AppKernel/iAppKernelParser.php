@@ -12,10 +12,12 @@ namespace AppKernel;
 // Explorer/Parser combination.
 // --------------------------------------------------------------------------------
 
+use Psr\Log\LoggerInterface;
+
 interface iAppKernelParser
 {
   // Create an instance of the reporter parser
-  public static function factory(array $config = NULL, \Log $logger = NULL);
+  public static function factory(array $config = NULL, LoggerInterface $logger = NULL);
 
   // --------------------------------------------------------------------------------
   // Parse the application kernel data and return an AppKernelInstance object

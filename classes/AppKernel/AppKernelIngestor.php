@@ -7,6 +7,7 @@ use AppKernel;
 
 use Exception;
 use PDOException;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class AppKernelIngestor
@@ -22,9 +23,9 @@ class AppKernelIngestor
     private $db = null;
 
     /**
-     * Optional PEAR::Log for logging
+     * Optional PSR\LoggerInterface for logging
      *
-     * @var Log|\Log|object|null
+     * @var LoggerInterface|null
      */
     private $logger = null;
 
@@ -171,7 +172,7 @@ class AppKernelIngestor
 
     /**
      * AppKernelIngestor constructor.
-     * @param \Log|null $logger A Pear::Log object (http://pear.php.net/package/Log/
+     * @param LoggerInterface|null $logger optional, an implementation of PSR\Log\LoggerInterface to use during ingestion.
      * @param array $config The configuration section for ingestion
      * @param bool $config ['dryRunMode']
      * @param int|null $config ['startTimestamp']
@@ -184,9 +185,9 @@ class AppKernelIngestor
      *
      * @throws Exception on incorrect config
      */
-    public function __construct(\Log $logger = null, $config = [])
+    public function __construct(LoggerInterface $logger = null, $config = [])
     {
-        $this->logger = $logger !== null ? $logger : \Log::singleton('null');
+        $this->logger = $logger !== null ? $logger : \CCR\Log::singleton('null');
 
         // set options
         if (array_key_exists('dryRunMode', $config)) {
