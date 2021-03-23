@@ -327,7 +327,9 @@ function cleanup_and_exit($exitCode = 0)
         unset($appKernelIngestor);
     }
 
-    $logger->close();
+    if (isset($logger)) {
+       $logger->close();
+    }
 
     exit($exitCode);
 }
