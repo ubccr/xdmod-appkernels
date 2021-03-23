@@ -111,6 +111,10 @@ then
     appkernel_reports_manager -m centerdirector -v -d -e 2019-02-28
 
     cd $SHIPPABLE_BUILD_DIR
+
+    # Add an upstream branch so that the QA tests will run successfully
+    git remote add upstream https://github.com/ubccr/xdmod-appkernels.git
+
     git clone --depth=1 --branch=v1 https://github.com/ubccr/xdmod-qa.git .qa
 
     cd $XDMOD_APPKERNEL_DIR
