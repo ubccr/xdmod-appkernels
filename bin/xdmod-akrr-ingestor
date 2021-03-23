@@ -327,9 +327,7 @@ function cleanup_and_exit($exitCode = 0)
         unset($appKernelIngestor);
     }
 
-    if ($logger instanceof \Psr\Log\LoggerInterface) {
-        $logger->close();
-    }
+    $logger->close();
 
     exit($exitCode);
 }
