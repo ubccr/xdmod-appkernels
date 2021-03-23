@@ -6,6 +6,8 @@
 
 namespace AppKernel;
 
+use Psr\Log\LoggerInterface;
+
 require_once("AppKernelInstanceData.php");
 
 interface iAppKernelExplorer
@@ -20,7 +22,7 @@ interface iAppKernelExplorer
   // @returns An instance of the Explorer written for the specified source.
   // -------------------------------------------------------------------------
 
-  public static function factory(array $config, \Log $logger = NULL);
+  public static function factory(array $config, LoggerInterface $logger = NULL);
 
   // -------------------------------------------------------------------------
   // Set the time interval for the (start, end) times for any subsequent
@@ -42,7 +44,7 @@ interface iAppKernelExplorer
   //   resource should be returned, FALSE (default) if a list of distinct resource
   //   nicknames should be returned instead.
   //
-  // @returns An array containing resource nicknames (if $summary == FALSE) or 
+  // @returns An array containing resource nicknames (if $summary == FALSE) or
   //
   // array('edge', 'u2', 'alamo')
   // -------------------------------------------------------------------------
@@ -105,7 +107,7 @@ interface iAppKernelExplorer
   // -------------------------------------------------------------------------
 
   public function getAvailableInstances(array $options);
-  
+
   // -------------------------------------------------------------------------
   // Query the source for detailed data associated with the specified
   // application kernel execution instance.  The format of the data is specific

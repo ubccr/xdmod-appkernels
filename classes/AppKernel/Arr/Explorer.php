@@ -6,6 +6,8 @@ namespace AppKernel;
 
 use CCR\DB;
 use Exception;
+use Psr\Log\LoggerInterface;
+
 //use XDUser;
 
 require_once("AppKernelInstanceData_Arr.php");
@@ -13,6 +15,9 @@ require_once("AppKernelInstanceData_Arr.php");
 class ArrExplorer implements iAppKernelExplorer
 {
   // Optional PEAR::Log for logging messages
+    /**
+     * @var LoggerInterface
+     */
   private $_logger = NULL;
 
   // Handle to the mod_appkernel database resource
@@ -34,7 +39,7 @@ class ArrExplorer implements iAppKernelExplorer
   // @see iAppKernelExplorer::factory()
   // -------------------------------------------------------------------------
 
-  public static function factory(array $config, \Log $logger = NULL)
+  public static function factory(array $config, LoggerInterface $logger = NULL)
   {
     return new ArrExplorer($config, $logger);
   }  // factory()
@@ -45,7 +50,7 @@ class ArrExplorer implements iAppKernelExplorer
   // @throws Exception if there was an error establishing the database connection.
   // -------------------------------------------------------------------------
 
-  private function __construct(array $config, \Log $logger = NULL)
+  private function __construct(array $config, LoggerInterface $logger = NULL)
   {
     $this->add_supremm_metrix = ( isset($config['add_supremm_metrix'])
                  ? $config['add_supremm_metrix']
@@ -156,7 +161,7 @@ class ArrExplorer implements iAppKernelExplorer
     if ( $summary ) $sql .= " group by resource, reporternickname";
     $sql .= " order by resource" . ( $summary ? ", reporternickname" : "" );
 
-    $this->_logger->log(__FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
+    $this->_logger->log(\CCR\Log::DEBUG, __FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
                         " - " . date("Y-m-d H:i:s", $this->_end) . ")");
 
     $result = $this->_db_akrr->query($sql);
@@ -236,7 +241,7 @@ class ArrExplorer implements iAppKernelExplorer
 
     $sql .= " group by " . ( $baseNameOnly ? "reporter" : "reporternickname" );
 
-    $this->_logger->log(__FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
+    $this->_logger->log(\CCR\Log::DEBUG, __FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
                         " - " . date("Y-m-d H:i:s", $this->_end) . ")");
 
     $result = $this->_db_akrr->query($sql);
@@ -281,10 +286,10 @@ class ArrExplorer implements iAppKernelExplorer
     if ( 0 != count($criteriaList) ) $sql .= " where " . implode(" and ", $criteriaList);
     $sql .= " order by collected";
 
-    $this->_logger->log(__FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
+    $this->_logger->log(\CCR\Log::DEBUG, __FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
                         " - " . date("Y-m-d H:i:s", $this->_end) . "), options: " .
                         $this->optionsToString($options));
-    $this->_logger->log($sql, PEAR_LOG_DEBUG);
+    $this->_logger->log(\CCR\Log::DEBUG, $sql );
 
     $result = $this->_db_akrr->query($sql);
 
@@ -327,10 +332,10 @@ class ArrExplorer implements iAppKernelExplorer
     if ( 0 != count($criteriaList) ) $sql .= " where " . implode(" and ", $criteriaList);
     $sql .= " order by reporternickname, collected";
 
-    $this->_logger->log(__FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
+    $this->_logger->log(\CCR\Log::DEBUG, __FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
                         " - " . date("Y-m-d H:i:s", $this->_end) . "), options: " .
                         $this->optionsToString($options));
-    $this->_logger->log($sql, PEAR_LOG_DEBUG);
+    $this->_logger->log(\CCR\Log::DEBUG, $sql);
 
     $result = $this->_db_akrr->query($sql);
 
