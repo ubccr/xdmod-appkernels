@@ -41,7 +41,8 @@ jobs:
       - run:
           name: Setup Environment Variables
           command: |
-            echo "export XDMOD_APPKERNELS_DIR=${CIRCLE_WORKING_DIR}" >> $BASH_ENV
+            echo "export XDMOD_APPKERNELS_DIR=$HOME/project" >> $BASH_ENV
+            echo "export XDMOD_SOURCE_DIR=$HOME/xdmod" >> $BASH_ENV
       - run:
           name: Setup & Run Tests
           command: ./tests/runtests.sh
