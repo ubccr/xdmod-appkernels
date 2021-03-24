@@ -23,8 +23,6 @@ jobs:
       XDMOD_MODULE_NAME: appkernels
       XDMOD_IS_CORE: yes
       XDMOD_INSTALL_DIR: /xdmod
-      XDMOD_APPKERNELS_DIR: $HOME/project
-      XDMOD_SOURCE_DIR: $HOME/xdmod
       XDMOD_TEST_MODE: << parameters.install-type >>
     steps:
       - run:
@@ -40,6 +38,11 @@ jobs:
       - run:
           name: Create Test Result Directory
           command: mkdir -p ./shippable/testresults
+      - run:
+          name: Setup Environment Variables
+          command: |
+            echo "export XDMOD_APPKERNELS_DIR=$HOME/project" >> $BASH_ENV
+            echo "export XDMOD_SOURCE_DIR=$HOME/xdmod" >> $BASH_ENV
       - run:
           name: Setup & Run Tests
           command: ./tests/runtests.sh
