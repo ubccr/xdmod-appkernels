@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-XDMOD_APPKERNEL_DIR="$( dirname "${BASEDIR}" )"
+XDMOD_APPKERNEL_DIR=${XDMOD_APPKERNEL_DIR:-"$( dirname "${BASEDIR}" )"}
 XDMOD_WSP_DIR="$( dirname "${XDMOD_APPKERNEL_DIR}" )"
 # This script is executed in docker
 # either on shippable or in local docker run
@@ -48,7 +48,7 @@ fi
 # create link in XDMoD to xdmod-appkernels module
 cd $XDMOD_DIR/open_xdmod/modules
 if [ ! -d "$XDMOD_DIR/open_xdmod/modules/appkernels" ]; then
-    ln -s ../../../xdmod-appkernels appkernels
+    ln -s $XDMOD_APPKERNEL_DIR appkernels
 fi
 cd $XDMOD_APPKERNEL_DIR
 
@@ -111,6 +111,10 @@ then
     appkernel_reports_manager -m centerdirector -v -d -e 2019-02-28
 
     cd $SHIPPABLE_BUILD_DIR
+
+    # Add an upstream branch so that the QA tests will run successfully
+    git remote add upstream https://github.com/ubccr/xdmod-appkernels.git
+
     git clone --depth=1 --branch=v1 https://github.com/ubccr/xdmod-qa.git .qa
 
     cd $XDMOD_APPKERNEL_DIR
