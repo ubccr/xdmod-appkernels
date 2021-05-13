@@ -29,6 +29,22 @@ class AppKernelLevel
         $this->appKerShortname=$appKerShortname;
     }
 
+    private function implode_smart($a){
+        $s="";
+        for($i=0;$i<count($a);$i++) {
+            $s.=$a[$i];
+            if($i<count($a)-1){
+                if($i==count($a)-2){
+                    $s.=' and ';
+                }
+                else{
+                    $s.=', ';
+                }
+            }
+        }
+        return $s;
+    }
+
     public function detect(){
         $max_days=max(array_keys($this->runStatsAppKernel->NE));
         $all_problems=array();
@@ -106,8 +122,8 @@ class AppKernelLevel
             }
             if($count>0){
                 $days=$days/$count;
-                $msg.="{$this->appKerShortname} was $verb ".implode_smart($failedTimes)." times";
-                $msg.=" on ".implode_smart($problemSizes)." nodes";
+                $msg.="{$this->appKerShortname} was $verb ". $this->implode_smart($failedTimes)." times";
+                $msg.=" on ". $this->implode_smart($problemSizes)." nodes";
                 if($count>1)$msg.=" respectively";
                 $msg.=" during last ".number_format($days,0)." days";
 
@@ -187,8 +203,8 @@ class AppKernelLevel
             if($count>0){
                 $daysR=$daysR/$count;
 
-                $msg.="{$this->appKerShortname} was $verb ".implode_smart($failedPercentage)."%";
-                $msg.=" on ".implode_smart($problemSizes)." nodes";
+                $msg.="{$this->appKerShortname} was $verb ". $this->implode_smart($failedPercentage)."%";
+                $msg.=" on ". $this->implode_smart($problemSizes)." nodes";
                 $msg.=" during last ".number_format($daysR,0)." days";
                 if($count>1)$msg.=" respectively";
 
