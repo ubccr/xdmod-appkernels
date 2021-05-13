@@ -35,18 +35,23 @@ class AppKernelControllerProvider extends BaseControllerProvider
     const DEFAULT_DELIM=',';
 
     /**
-     * format NotificationSettings from client form submittion
+     * Format NotificationSettings from client form submittion
+     *
+     * @param array $s                  the input array.
+     * @param bool  $preserveCheckBoxes ?
+     *
+     * @return null
      */
-    public static function formatNotificationSettingsFromClient( &$s,$preserveCheckBoxes=false) {
-        $daysOfTheWeek=array('Sunday'=>1,'Monday'=>2,'Tuesday'=>3,'Wednesday'=>4, 'Thursday'=>5,'Friday'=>6,'Saturday'=>7);
+    public static function formatNotificationSettingsFromClient(&$s, $preserveCheckBoxes = false)
+    {
         //set report periodisity
         $groupCombine=array('daily_report','weekly_report','monthly_report');
 
         foreach ($groupCombine as $g) {
             $s[$g]=array();
             foreach ($s as $key => $value) {
-                if(strpos($key, $g.'_') === 0){
-                    $s[$g][str_replace($g.'_','',$key)]=$value;
+                if (strpos($key, $g.'_') === 0) {
+                    $s[$g][str_replace($g.'_', '', $key)]=$value;
                     unset($s[$key]);
                 }
             }
@@ -55,35 +60,48 @@ class AppKernelControllerProvider extends BaseControllerProvider
         $s['resource']=array();
         $s['appKer']=array();
         foreach ($s as $key => $value) {
-            if(strpos($key, 'resourcesList_') === 0){
-                $s['resource'][]=str_replace('resourcesList_','',$key);
-                if($preserveCheckBoxes) $s[$key]='';
-                else unset($s[$key]);
+            if (strpos($key, 'resourcesList_') === 0) {
+                $s['resource'][]=str_replace('resourcesList_', '', $key);
+                if ($preserveCheckBoxes) {
+                    $s[$key]='';
+                } else {
+                    unset($s[$key]);
+                }
             }
-            if(strpos($key, 'appkernelsList_') === 0){
-                $s['appKer'][]=str_replace('appkernelsList_','',$key);
-                if($preserveCheckBoxes) $s[$key]='';
-                else unset($s[$key]);
+            if (strpos($key, 'appkernelsList_') === 0) {
+                $s['appKer'][]=str_replace('appkernelsList_', '', $key);
+                if ($preserveCheckBoxes) {
+                    $s[$key]='';
+                } else {
+                    unset($s[$key]);
+                }
             }
         }
 
-        if(count($s['resource'])==1 && $s['resource'][0]=='all')
+        if (count($s['resource'])==1 && $s['resource'][0]=='all') {
             $s["resource"]=array();//None means all
-        if(count($s['appKer'])==1 && $s['appKer'][0]=='all')
+        }
+        if (count($s['appKer'])==1 && $s['appKer'][0]=='all') {
             $s["appKer"]=array();//None means all
+        }
     }
 
     /**
-     * format NotificationSettings for client
+     * Format NotificationSettings for client
+     *
+     * @param array $s the input array
+     *
+     * @return null
      */
-    public static function formatNotificationSettingsForClient( &$s) {
-        $daysOfTheWeek=array(1=>'Sunday',2=>'Monday',3=>'Tuesday',4=>'Wednesday', 5=>'Thursday',6=>'Friday',7=>'Saturday');
-
+    public static function formatNotificationSettingsForClient(&$s)
+    {
         //make list of resources and appkernels
-        if(count($s['resource'])==0)
+        if (count($s['resource'])==0) {
             $s["resource"]=array('all');//None means all
-        if(count($s['appKer'])==0)
+        }
+        if (count($s['appKer'])==0) {
             $s["appKer"]=array('all');//None means all
+        }
         foreach ($s['resource'] as $value) {
             $s['resourcesList_'.$value]='on';
         }
