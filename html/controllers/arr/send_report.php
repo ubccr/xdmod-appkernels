@@ -3,6 +3,7 @@
     require_once dirname(__FILE__).'/../../../configuration/linker.php';
 
     use CCR\DB;
+    use Rest\Controllers;
 
     @session_start();
 
@@ -49,7 +50,7 @@
                 $end_date = new DateTime($_REQUEST['end_date']);
 
                 $report_param=json_decode($_REQUEST['report_param'],true);
-                formatNotificationSettingsFromClient($report_param);
+                AppKernelControllerProvider::formatNotificationSettingsFromClient($report_param);
                 //print_r($report_param);
                 //throw new Exception(print_r($report_param,true));
 

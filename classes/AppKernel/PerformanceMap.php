@@ -665,7 +665,7 @@ SQL;
             $problemSize = end(explode('.', $row['reporternickname']));
             $collected = $row['collected'];
 
-            $resource_id = arrayValue($resource, $this->resource_ids);
+            $resource_id = array_key_exists($resource, $this->resource_ids) ? $this->resource_ids[$resource] : null;
             $ak_id = null;
             if (array_key_exists($appKer, $ak_ids) && array_key_exists($problemSize, $ak_ids[$appKer])) {
                 $ak_id = $ak_ids[$appKer][$problemSize];

@@ -35,6 +35,94 @@ class AppKernelControllerProvider extends BaseControllerProvider
     const DEFAULT_DELIM=',';
 
     /**
+     * Format NotificationSettings from client form submittion
+     *
+     * @param array $s                  the input array.
+     * @param bool  $preserveCheckBoxes ?
+     *
+     * @return null
+     */
+    public static function formatNotificationSettingsFromClient(&$s, $preserveCheckBoxes = false)
+    {
+        //set report periodisity
+        $groupCombine=array('daily_report','weekly_report','monthly_report');
+
+        foreach ($groupCombine as $g) {
+            $s[$g]=array();
+            foreach ($s as $key => $value) {
+                if (strpos($key, $g.'_') === 0) {
+                    $s[$g][str_replace($g.'_', '', $key)]=$value;
+                    unset($s[$key]);
+                }
+            }
+        }
+        //make list of resources and appkernels
+        $s['resource']=array();
+        $s['appKer']=array();
+        foreach ($s as $key => $value) {
+            if (strpos($key, 'resourcesList_') === 0) {
+                $s['resource'][]=str_replace('resourcesList_', '', $key);
+                if ($preserveCheckBoxes) {
+                    $s[$key]='';
+                } else {
+                    unset($s[$key]);
+                }
+            }
+            if (strpos($key, 'appkernelsList_') === 0) {
+                $s['appKer'][]=str_replace('appkernelsList_', '', $key);
+                if ($preserveCheckBoxes) {
+                    $s[$key]='';
+                } else {
+                    unset($s[$key]);
+                }
+            }
+        }
+
+        if (count($s['resource'])==1 && $s['resource'][0]=='all') {
+            $s["resource"]=array();//None means all
+        }
+        if (count($s['appKer'])==1 && $s['appKer'][0]=='all') {
+            $s["appKer"]=array();//None means all
+        }
+    }
+
+    /**
+     * Format NotificationSettings for client
+     *
+     * @param array $s the input array
+     *
+     * @return null
+     */
+    public static function formatNotificationSettingsForClient(&$s)
+    {
+        //make list of resources and appkernels
+        if (count($s['resource'])==0) {
+            $s["resource"]=array('all');//None means all
+        }
+        if (count($s['appKer'])==0) {
+            $s["appKer"]=array('all');//None means all
+        }
+        foreach ($s['resource'] as $value) {
+            $s['resourcesList_'.$value]='on';
+        }
+        foreach ($s['appKer'] as $value) {
+            $s['appkernelsList_'.$value]='on';
+        }
+
+        unset($s['resource']);
+        unset($s['appKer']);
+
+        $groupCombine=array('daily_report','weekly_report','monthly_report');
+
+        foreach ($groupCombine as $g) {
+            foreach ($s[$g] as $key => $value) {
+                $s[$g.'_'.$key]=$value;
+            }
+            unset($s[$g]);
+        }
+    }
+
+    /**
      * @see BaseControllerProvider::setupRoutes
      */
     public function setupRoutes(Application $app, \Silex\ControllerCollection $controller)
@@ -737,7 +825,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
             $user_id = $this->getUserFromRequest($request)->getUserID();
 
-            formatNotificationSettingsFromClient($curent_tmp_settings, true);
+            self::formatNotificationSettingsFromClient($curent_tmp_settings, true);
 
             $sqlres = $pdo->query(
                 'SELECT user_id,send_report_daily,send_report_weekly,send_report_monthly,settings
@@ -755,7 +843,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
             } else {
                 throw new Exception('settings is not set in db use default');
             }
-            formatNotificationSettingsForClient($curent_tmp_settings);
+            self::formatNotificationSettingsForClient($curent_tmp_settings);
             $response['data'] = $curent_tmp_settings;
             $response['success'] = true;
             return $app->json($response);
@@ -781,7 +869,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
             $user_id = $this->getUserFromRequest($request)->getUserID();
 
-            formatNotificationSettingsFromClient($curent_tmp_settings);
+            self::formatNotificationSettingsFromClient($curent_tmp_settings);
 
             $send_report_daily = ($curent_tmp_settings['daily_report']['send_on_event'] === 'sendNever') ? (0) : (1);
             $send_report_weekly = ($curent_tmp_settings['weekly_report']['send_on_event'] === 'sendNever') ? (-$curent_tmp_settings['weekly_report']['send_on']) : ($curent_tmp_settings['weekly_report']['send_on']);
@@ -846,13 +934,13 @@ class AppKernelControllerProvider extends BaseControllerProvider
             $curent_tmp_settings = $this->getStringParam($request, 'curent_tmp_settings', true);
             $curent_tmp_settings = json_decode($curent_tmp_settings, true);
 
-            formatNotificationSettingsFromClient($curent_tmp_settings, true);
+            self::formatNotificationSettingsFromClient($curent_tmp_settings, true);
 
             $curent_tmp_settings["controlThresholdCoeff"] = '1.0';
             $curent_tmp_settings["resource"] = array();//None means all
             $curent_tmp_settings["appKer"] = array();//None means all
 
-            formatNotificationSettingsForClient($curent_tmp_settings);
+            self::formatNotificationSettingsForClient($curent_tmp_settings);
 
             $response['data'] = $curent_tmp_settings;
             $response['success'] = true;
@@ -998,7 +1086,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
             $report_param = $this->getStringParam($request, 'report_param', true);
             $report_param = json_decode($report_param, true);
 
-            formatNotificationSettingsFromClient($report_param);
+            self::formatNotificationSettingsFromClient($report_param);
 
             $report = new Report(array(
                 'start_date' => $start_date,

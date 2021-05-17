@@ -3,6 +3,7 @@
     require_once dirname(__FILE__).'/../../../configuration/linker.php';
 
     use CCR\DB;
+    use Rest\Controllers;
 
     @session_start();
 
@@ -102,7 +103,7 @@
         case 'save_notification_settings' :
             try{
                 $curent_tmp_settings=json_decode($_REQUEST['curent_tmp_settings'],true);
-                formatNotificationSettingsFromClient($curent_tmp_settings);
+                AppKernelControllerProvider::formatNotificationSettingsFromClient($curent_tmp_settings);
 
                 $send_report_daily=($curent_tmp_settings['daily_report']['send_on_event']==='sendNever')?(0):(1);
                 $send_report_weekly=($curent_tmp_settings['weekly_report']['send_on_event']==='sendNever')?(-$curent_tmp_settings['weekly_report']['send_on']):($curent_tmp_settings['weekly_report']['send_on']);
@@ -154,7 +155,7 @@
                 else
                     throw new Exception('curent_tmp_settings is not set');
 
-                formatNotificationSettingsFromClient($curent_tmp_settings,true);
+                AppKernelControllerProvider::formatNotificationSettingsFromClient($curent_tmp_settings,true);
 
                 $sqlres=$pdo->query('SELECT user_id,send_report_daily,send_report_weekly,send_report_monthly,settings
                                         FROM mod_appkernel.report
@@ -171,7 +172,7 @@
                 else{
                     throw new Exception('settings is not set in db use default');
                 }
-                formatNotificationSettingsForClient($curent_tmp_settings);
+                AppKernelControllerProvider::formatNotificationSettingsForClient($curent_tmp_settings);
                 $response['data'] = $curent_tmp_settings;
                 $response['success'] = true;
                 echo json_encode($response);
@@ -187,12 +188,12 @@
                 else
                     throw new Exception('curent_tmp_settings is not set in templates');
 
-                formatNotificationSettingsFromClient($curent_tmp_settings,true);
+                AppKernelControllerProvider::formatNotificationSettingsFromClient($curent_tmp_settings,true);
 
                 $curent_tmp_settings["controlThresholdCoeff"]='1.0';
                 $curent_tmp_settings["resourcesList"]=array();//None means all
                 $curent_tmp_settings["appkernelsList"]=array();//None means all
-                formatNotificationSettingsForClient($curent_tmp_settings);
+                AppKernelControllerProvider::formatNotificationSettingsForClient($curent_tmp_settings);
                 $response['data'] = $curent_tmp_settings;
                 $response['success'] = true;
             }

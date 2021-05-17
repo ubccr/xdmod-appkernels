@@ -22,7 +22,6 @@
             "appkernel",
             "classes",
             "html",
-            "libraries",
             { "templates": "templates/appkernels" }
         ],
         "bin": [
