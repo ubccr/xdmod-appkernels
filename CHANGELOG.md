@@ -1,6 +1,11 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
+## 2021-05-21 v9.5.0
+
+- Miscellaneous
+    - Updated for compatibility with Open XDMoD 9.5.0
+
 ## 2020-08-13 v9.0.0
 
 - Bug Fixes
