@@ -1,3 +1,3 @@
 ---
-redirect_to: /9.0/ak-ingestor.html
+redirect_to: /9.5/ak-ingestor.html
 ---

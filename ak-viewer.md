@@ -1,3 +1,3 @@
 ---
-redirect_to: /9.0/ak-viewer.html
+redirect_to: /9.5/ak-viewer.html
 ---
