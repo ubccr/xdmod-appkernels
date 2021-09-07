@@ -201,6 +201,10 @@ if ($ingestingConfig['sinceLastLoadTime'] !== null) {
     }
 }
 
+if ($logLevel === -1) {
+    $logLevel = Log::NOTICE;
+}
+
 $conf = array(
     'file' => false,
     'mail' => false,

@@ -133,6 +133,9 @@ if($logLevel >= Log::DEBUG) {
         print("\t" . $arg . ' => ' . $value . "\n");
     }
 }
+if ($logLevel === -1) {
+    $logLevel = Log::NOTICE;
+}
 // ================================================================================
 // Logger configuration.
 $conf = array(
