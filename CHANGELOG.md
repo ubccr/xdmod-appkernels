@@ -1,7 +1,13 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
-## XXXX-XX-XX v10.0.0
+## 2022-03-10 v10.0.0
+
+- Bug Fixes
+    - General
+        - Set default log level used by command line scripts
+- Miscellaneous
+    - Updated for compatibility with Open XDMoD 10.0.0
 
 ## 2021-05-21 v9.5.0
 
