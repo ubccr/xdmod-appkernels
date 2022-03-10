@@ -1,7 +1,8 @@
 ---
 title: Application Kernels Overview
 redirect_from:
-    - "/9.5/"
+    - "/10.0/"
+    - ""
 ---
 
 
