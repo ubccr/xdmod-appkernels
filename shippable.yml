@@ -3,7 +3,7 @@ env:
     global:
         - COMPOSER_ALLOW_SUPERUSER=1
         - XDMOD_REALMS='jobs,storage'
-        - XDMOD_BRANCH=xdmod10.0
+        - XDMOD_BRANCH=xdmod10.5
         - XDMOD_SOURCE_DIR=$SHIPPABLE_BUILD_DIR/../xdmod
         - XDMOD_INSTALL_DIR=/xdmod
         - XDMOD_MODULE_DIR=$SHIPPABLE_BUILD_DIR

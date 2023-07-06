@@ -1,6 +1,8 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
+## XXXX-XX-XX v10.5.0
+
 ## 2022-03-10 v10.0.0
 
 - Bug Fixes
