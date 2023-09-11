@@ -57,8 +57,7 @@ if [ "$(realpath "$XDMOD_DIR/open_xdmod/modules/appkernels")" != "$(realpath "$X
     echo "$XDMOD_DIR/open_xdmod/modules/appkernels do not point to $XDMOD_APPKERNEL_DIR"
 fi
 
-
-composer install -d ../xdmod --no-progress
+COMPOSER=composer-el7.json composer install -d ../xdmod --no-progress
 
 # build xdmod rpms
 cd ../xdmod
