@@ -1,3 +1,3 @@
 ---
-redirect_to: /10.0/ak-scheduling.html
+redirect_to: /10.5/ak-scheduling.html
 ---
