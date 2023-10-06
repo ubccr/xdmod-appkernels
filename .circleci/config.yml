@@ -1,13 +1,9 @@
 version: 2.1
 
 executors:
-  centos7:
+  rocky8: &rocky8-executor
     docker:
-      - image: tools-ext-01.ccr.xdmod.org/xdmod-10.0.0:centos7.9-0.6
-  centos8: &centos8-executor
-    docker:
-      - image: tools-ext-01.ccr.xdmod.org/centos8-0.1:base
-
+      - image: tools-ext-01.ccr.xdmod.org/xdmod-10.5.0-x86_64:rockylinux8.5-0.3
 jobs:
   build:
     parameters:
@@ -19,7 +15,7 @@ jobs:
     environment:
       COMPOSER_ALLOW_SUPERUSER: 1
       XDMOD_REALMS: 'jobs,storage'
-      XDMOD_BRANCH: xdmod10.5
+      XDMOD_BRANCH: xdmod11.0
       XDMOD_MODULE_NAME: appkernels
       XDMOD_IS_CORE: yes
       XDMOD_INSTALL_DIR: /xdmod
@@ -59,5 +55,5 @@ workflows:
       - build:
           matrix:
             parameters:
-              os: [centos7]
-              install-type: ["fresh_install"]
+              os: [rocky8]
+              install-type: ["fresh_install", "upgrade"]
