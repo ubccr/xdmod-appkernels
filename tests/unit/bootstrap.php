@@ -2,7 +2,7 @@
 
 $dir = __DIR__;
 
-// Autoloader for main framework test classes.
+// Autoloader for test classes.
 spl_autoload_register(
     function ($className) use ($dir) {
         // Replace the UnitTests namespace prefix with the path to the unit
@@ -47,16 +47,14 @@ spl_autoload_register(
         $classPath = (
             "$dir/../../classes/"
             . str_replace('\\', '/', $className)
-            . '.php';
-
+            . '.php'
+        );
         if (is_readable($classPath)) {
             return require_once $classPath;
-        } else {
-            return false;
         }
+        return false;
     }
 );
 
 // Autoloader for XDMoD classes.
-// require_once __DIR__ . '/../../configuration/linker.php';
 require_once '/usr/share/xdmod/configuration/linker.php';
