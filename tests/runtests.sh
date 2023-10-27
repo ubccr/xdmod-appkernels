@@ -143,7 +143,7 @@ then
     expect $XDMOD_APPKERNEL_DIR/tests/ci/scripts/xdmod-appkernels-setup.tcl  | col -b
 
     cd $SHIPPABLE_BUILD_DIR
-    git clone --depth=1 --branch=v2 https://github.com/ryanrath/xdmod-qa.git .qa
+    git clone --depth=1 --branch=v2 https://github.com/ubccr/xdmod-qa.git .qa
 
     cd $XDMOD_APPKERNEL_DIR
     $SHIPPABLE_BUILD_DIR/.qa/scripts/install.sh ./
