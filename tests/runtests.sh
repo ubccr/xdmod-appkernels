@@ -146,6 +146,8 @@ then
     git clone --depth=1 --branch=v2 https://github.com/ubccr/xdmod-qa.git .qa
 
     cd $XDMOD_APPKERNEL_DIR
+    git remote add upstream https://github.com/ubccr/xdmod-appkernels.git
+
     $SHIPPABLE_BUILD_DIR/.qa/scripts/install.sh ./
     $SHIPPABLE_BUILD_DIR/.qa/scripts/build.sh
 fi
