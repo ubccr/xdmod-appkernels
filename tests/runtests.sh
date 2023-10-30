@@ -65,7 +65,7 @@ cd ../xdmod
 cd $XDMOD_APPKERNEL_DIR
 
 # get akrr
-git clone --depth=1 https://github.com/ubccr/akrr.git ../akrr
+git clone --depth=1 --branch=update-setup-rockylinux https://github.com/ryanrath/akrr.git ../akrr
 cd $AKRR_DIR
 ./make_rpm.sh
 cd $XDMOD_APPKERNEL_DIR
