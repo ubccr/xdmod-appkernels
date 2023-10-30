@@ -142,6 +142,12 @@ then
     # Configure xdmod appkernels
     expect $XDMOD_APPKERNEL_DIR/tests/ci/scripts/xdmod-appkernels-setup.tcl  | col -b
 
+    # Ingest AK runs
+    xdmod-akrr-ingestor -q -l load -c -r
+
+    # Test report
+    appkernel_reports_manager -m centerdirector -v -d -e 2019-02-28
+
     cd $SHIPPABLE_BUILD_DIR
     git clone --depth=1 --branch=v2 https://github.com/ubccr/xdmod-qa.git .qa
 
