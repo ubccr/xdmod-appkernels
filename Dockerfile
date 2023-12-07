@@ -1,4 +1,4 @@
-FROM tools-ext-01.ccr.xdmod.org/xdmod-10.0.0:centos7.9-0.6
+FROM tools-ext-01.ccr.xdmod.org/xdmod-10.5.0-x86_64:rockylinux8.5-0.3
 
 # install python3 for akrr build
-RUN yum -y install --setopt=tsflags=nodocs python3
+RUN dnf -y install --setopt=tsflags=nodocs python3
