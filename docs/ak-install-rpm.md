@@ -5,7 +5,7 @@ title: Application Kernels RPM Installation Guide
 Install RPM Package
 -------------------
 
-    # yum install xdmod-appkernels-{{ page.sw_version }}-1.0.el7.noarch.rpm
+    # dnf install xdmod-appkernels-{{ page.sw_version }}-1.0.el8.noarch.rpm
 
 Run Configuration Script
 ------------------------

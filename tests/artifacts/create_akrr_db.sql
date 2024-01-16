@@ -6,3 +6,4 @@ GRANT ALL ON mod_appkernel.* TO 'akrruser'@'localhost';
 GRANT SELECT ON modw.* TO 'akrruser'@'localhost';
 GRANT ALL ON mod_akrr.* TO 'xdmod'@'localhost';
 GRANT ALL ON mod_appkernel.* TO 'xdmod'@'localhost';
+FLUSH PRIVILEGES;

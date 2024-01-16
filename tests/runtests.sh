@@ -57,7 +57,7 @@ if [ "$(realpath "$XDMOD_DIR/open_xdmod/modules/appkernels")" != "$(realpath "$X
     echo "$XDMOD_DIR/open_xdmod/modules/appkernels do not point to $XDMOD_APPKERNEL_DIR"
 fi
 
-COMPOSER=composer-el7.json composer install -d ../xdmod --no-progress
+composer install -d ../xdmod --no-progress
 
 # build xdmod rpms
 cd ../xdmod
@@ -92,7 +92,7 @@ then
     mysql -u root mod_appkernel < $XDMOD_APPKERNEL_DIR/tests/artifacts/mod_appkernel_xdmod_dev_test.sql
 
     # install akrr
-    yum install -y $AKRR_DIR/dist/akrr-*.noarch.rpm
+    dnf install -y $AKRR_DIR/dist/akrr-*.noarch.rpm
 
     # copy akrr config
     cp -r $XDMOD_APPKERNEL_DIR/tests/artifacts/akrr ~/
@@ -114,7 +114,7 @@ then
     # Add an upstream branch so that the QA tests will run successfully
     git remote add upstream https://github.com/ubccr/xdmod-appkernels.git
 
-    git clone --depth=1 --branch=v1 https://github.com/ubccr/xdmod-qa.git .qa
+    git clone --depth=1 --branch=v2 https://github.com/ubccr/xdmod-qa.git .qa
 
     cd $XDMOD_APPKERNEL_DIR
     $SHIPPABLE_BUILD_DIR/.qa/scripts/install.sh ./
@@ -142,10 +142,18 @@ then
     # Configure xdmod appkernels
     expect $XDMOD_APPKERNEL_DIR/tests/ci/scripts/xdmod-appkernels-setup.tcl  | col -b
 
+    # Ingest AK runs
+    xdmod-akrr-ingestor -q -l load -c -r
+
+    # Test report
+    appkernel_reports_manager -m centerdirector -v -d -e 2019-02-28
+
     cd $SHIPPABLE_BUILD_DIR
-    git clone --depth=1 --branch=migrate_travis https://github.com/ryanrath/xdmod-qa.git .qa
+    git clone --depth=1 --branch=v2 https://github.com/ubccr/xdmod-qa.git .qa
 
     cd $XDMOD_APPKERNEL_DIR
+    git remote add upstream https://github.com/ubccr/xdmod-appkernels.git
+
     $SHIPPABLE_BUILD_DIR/.qa/scripts/install.sh ./
     $SHIPPABLE_BUILD_DIR/.qa/scripts/build.sh
 fi
