@@ -512,8 +512,8 @@ class AppKernelDb
             $m AS resource_end_date,
             DATE_FORMAT(rf.start_date, '%Y-%m-%d') AS resource_start_date,
             CASE
-            WHEN rs.processors IS NULL THEN 0
-            ELSE rs.processors
+            WHEN rs.cpu_processor_count IS NULL THEN 0
+            ELSE rs.cpu_processor_count
             END AS processors
         FROM
             modw.resourcefact AS rf,
@@ -531,7 +531,7 @@ class AppKernelDb
                 OR UNIX_TIMESTAMP(:end_date_gte) <= rs.end_date_ts
             )
         ORDER BY
-            rs.processors DESC,
+            rs.cpu_processor_count DESC,
             resource_end_date DESC,
             rf.code DESC";
 
