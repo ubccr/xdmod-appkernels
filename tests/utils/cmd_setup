@@ -12,7 +12,7 @@ setup_xdebug(){
     cd
     rpm -qa | grep php-pecl-xdebug > /dev/null 2>&1
     if [ $? != 0 ]; then
-        yum install php-pecl-xdebug -y
+        dnf install php-pecl-xdebug -y
     fi
 
     grep 'xdebug.remote_host' /etc/php.d/xdebug.ini > /dev/null 2>&1
@@ -28,7 +28,7 @@ EOT
 
 # Install SSHD, allow root to access
 setup_sshd(){
-    yum install -y openssh-server
+    dnf install -y openssh-server
 
     mkdir /var/run/sshd
 
@@ -129,7 +129,7 @@ END
     runuser -l $AKRRUSER -c "echo \"export PATH=/root/akrr/bin:\$PATH\" >> $AKRRUSER_HOME/.bashrc"
 
     # Install dependencies
-    yum install -y python MySQL-python openssl curl
+    dnf install -y python MySQL-python openssl curl
     # akrr.sh start
 }
 

@@ -2733,7 +2733,7 @@ class AppKernelDb
             $larger = true;
             $attr = explode(',', $metricAttribute);
 
-            if (isset($attr[2]) && count($attr[2]) > 0) {
+            if (isset($attr[2]) && strlen($attr[2]) > 0) {
                 $larger = substr($attr[2], 0, 1) != 'S';
             }
             if (isset($attr[1]) && $attr[1] !== '') {

@@ -1,12 +1,9 @@
 version: 2.1
 
 executors:
-  centos7:
+  rocky8: &rocky8-executor
     docker:
-      - image: tools-ext-01.ccr.xdmod.org/xdmod-10.0.0:centos7.9-0.6
-  centos8: &centos8-executor
-    docker:
-      - image: tools-ext-01.ccr.xdmod.org/centos8-0.1:base
+      - image: tools-ext-01.ccr.xdmod.org/xdmod-10.5.0-x86_64:rockylinux8.5-0.3
 
 jobs:
   build:
@@ -18,8 +15,8 @@ jobs:
     executor: << parameters.os >>
     environment:
       COMPOSER_ALLOW_SUPERUSER: 1
-      XDMOD_REALMS: 'jobs,storage'
-      XDMOD_BRANCH: xdmod10.5
+      XDMOD_REALMS: 'jobs,storage,cloud'
+      XDMOD_BRANCH: xdmod11.0
       XDMOD_MODULE_NAME: appkernels
       XDMOD_IS_CORE: yes
       XDMOD_INSTALL_DIR: /xdmod
@@ -27,7 +24,7 @@ jobs:
     steps:
       - run:
           name: Install Python3
-          command: yum -y install --setopt=tsflags=nodocs python3
+          command: dnf -y install --setopt=tsflags=nodocs python3
       - run:
           name: Generate OpenSSL Key
           command: openssl genrsa -rand /proc/cpuinfo:/proc/dma:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/uptime 2048 > /etc/pki/tls/private/localhost.key
@@ -41,15 +38,28 @@ jobs:
       - run:
           name: Setup Environment Variables
           command: |
-            echo "export XDMOD_APPKERNELS_DIR=$HOME/project" >> $BASH_ENV
+            echo "export XDMOD_APPKERNEL_DIR=$HOME/project" >> $BASH_ENV
             echo "export XDMOD_SOURCE_DIR=$HOME/xdmod" >> $BASH_ENV
       - run:
           name: Setup & Run Tests
           command: ./tests/runtests.sh
+      - run:
+          name: Ensure that no unexpected Apache errors were generated
+          command: test ! -e /var/log/php-fpm/www-error.log
+      - run:
+          name: Ensure that no PHP command-line errors were generated
+          command: >
+            if [ -e /var/log/php_errors.log ]; then
+                test `fgrep -v 'phpunit/phpunit' /var/log/php_errors.log | wc -l` = 0;
+            fi
       - store_artifacts:
           path: /tmp/screenshots
       - store_artifacts:
           path: /var/log/xdmod
+      - store_artifacts:
+          path: /var/log/php-fpm
+      - store_artifacts:
+          path: /var/log/php_errors.log
       - store_test_results:
           path: ./shippable/testresults
 
@@ -59,5 +69,5 @@ workflows:
       - build:
           matrix:
             parameters:
-              os: [centos7]
-              install-type: ["fresh_install"]
+              os: [rocky8]
+              install-type: ["fresh_install", "upgrade"]
