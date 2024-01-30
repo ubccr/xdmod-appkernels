@@ -662,7 +662,8 @@ SQL;
             $rec_date = date_format(date_create($row['collected']), 'Y/m/d');
             $resource = $row['resource'];
             $appKer = $row['reporter'];
-            $problemSize = end(explode('.', $row['reporternickname']));
+            $reporterNickName = explode('.', $row['reporternickname']);
+            $problemSize = end($reporterNickName);
             $collected = $row['collected'];
 
             $resource_id = array_key_exists($resource, $this->resource_ids) ? $this->resource_ids[$resource] : null;

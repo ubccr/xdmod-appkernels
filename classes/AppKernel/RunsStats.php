@@ -66,14 +66,14 @@ class RunsStats
             $this->E[$days]=0;
             $this->NE[$days]=0;
 
-            if($sum_map{$i}==' '){
+            if($sum_map[$i] ==' '){
                 $this->E[$days]++;
             }
             else{
                 $this->NE[$days]++;
-                if($sum_map{$i}=='F')$this->F[$days]++;
-                if($sum_map{$i}=='O')$this->O[$days]++;
-                if($sum_map{$i}=='U')$this->U[$days]++;
+                if($sum_map[$i] =='F')$this->F[$days]++;
+                if($sum_map[$i] =='O')$this->O[$days]++;
+                if($sum_map[$i] =='U')$this->U[$days]++;
             }
             $this->T[$days]++;
 
@@ -105,7 +105,7 @@ class RunsStats
         //Under-performance can be mixed with failure
         for($i=0;$i<strlen($sum_map);$i++){
             $days=strlen($sum_map)-$i;
-            if($sum_map{$i}==='U' && $this->NE[$days]===$this->F[$days]+$this->U[$days]){
+            if($sum_map[$i] ==='U' && $this->NE[$days]===$this->F[$days]+$this->U[$days]){
                 $this->UstreakRuns=$this->F[$days]+$this->U[$days];
                 $this->UstreakDays=$days;
                 break;
@@ -222,12 +222,12 @@ class RunsStats
             for($i=$Ndays-1;$i>=0;$i--){
                 $commondNonEmptyRun=NULL;
                 foreach($sum_map as $s) {
-                    if($s{$i}!=' '){
+                    if($s[$i] !=' '){
                         if($commondNonEmptyRun===NULL){
-                            $commondNonEmptyRun=$s{$i};
+                            $commondNonEmptyRun=$s[$i];
                         }
                         else{
-                            if($commondNonEmptyRun!==$s{$i}){
+                            if($commondNonEmptyRun!==$s[$i]){
                                 $commondNonEmptyRun='Z';
                             }
                         }

@@ -381,7 +381,7 @@ class ArrExplorer implements iAppKernelExplorer
     if ( empty($instance) )
       throw new Exception("Empty instance identifier");
     else if ( ! is_numeric($instance) )
-      throw new Exception("Malformed instance identifier '$instanceInfo'");
+      throw new Exception("Malformed instance identifier");
 
     $sql = "select * from akrr_xdmod_instanceinfo where instance_id = $instance";
     $result = $this->_db_akrr->query($sql);
