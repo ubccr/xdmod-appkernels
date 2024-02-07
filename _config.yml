@@ -28,13 +28,13 @@ github_username: ubccr
 github_url: https://github.com/ubccr/xdmod-appkernels
 xdmod_module_name: Application Kernels
 latest_version: "10.5"
+latest_sw_version: "10.5.0"
 version_list:
   - "10.5"
-  - "10.0"
 unsupported_version_list:
+  - "10.0"
   - "9.5"
   - "9.0"
-  - "8.5"
 
 defaults:
   -
@@ -67,6 +67,72 @@ defaults:
       sw_version: "9.5.0"
       style: "effervescence"
       tocversion: "v9_5toc"
+  -
+    scope:
+      path: "9.0"
+      type: "pages"
+    values:
+      layout: "page"
+      version: "9.0"
+      sw_version: "9.0.0"
+      style: "effervescence"
+      tocversion: "v9_0toc"
+  -
+    scope:
+      path: "8.5"
+      type: "pages"
+    values:
+      layout: "page"
+      version: "8.5"
+      sw_version: "8.5.0"
+      style: "effervescence"
+      tocversion: "v8_5toc"
+  -
+    scope:
+      path: "8.1"
+      type: "pages"
+    values:
+      layout: "page"
+      version: "8.1"
+      sw_version: "8.1.0"
+      style: "effervescence"
+      tocversion: "v8_1toc"
+  -
+    scope:
+      path: "8.0"
+      type: "pages"
+    values:
+      layout: "page"
+      version: "8.0"
+      style: "effervescence"
+      menu_markdown: "8.0/menu.md"
+  -
+    scope:
+      path: "7.5"
+      type: "pages"
+    values:
+      layout: "page"
+      version: "7.5"
+      style: "effervescence"
+      menu_markdown: "7.5/menu.md"
+  -
+    scope:
+      path: "7.0"
+      type: "pages"
+    values:
+      layout: "page"
+      version: "7.0"
+      style: "effervescence"
+      menu_markdown: "7.0/menu.md"
+  -
+    scope:
+      path: "6.6"
+      type: "pages"
+    values:
+      layout: "page"
+      version: "6.6"
+      style: "effervescence"
+      menu_markdown: "6.6/menu.md"
 
 # Build settings
 markdown: kramdown
