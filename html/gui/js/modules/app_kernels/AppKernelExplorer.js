@@ -877,6 +877,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 'tooltip',
                 'legend',
                 'series',
+                'layout',
+                'data',
                 'plotOptions',
                 'credits',
                 'dimensions',
@@ -903,7 +905,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 return;
             }
             // eslint-disable-next-line no-use-before-define
-            highChartPanel.un('resize', onResize, this);
+            plotlyPanel.un('resize', onResize, this);
 
             // eslint-disable-next-line no-use-before-define
             maximizeScale.call(this);
@@ -961,7 +963,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 reportGeneratorMeta.end_date,
                 reportGeneratorMeta.included_in_report);
             // eslint-disable-next-line no-use-before-define
-            highChartPanel.on('resize', onResize, this);
+            plotlyPanel.on('resize', onResize, this);
         }, this); // chartStore.on('load'
 
         var reloadChartFunc = function () {
@@ -985,12 +987,10 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
         }); // assistPanel
 
-        var highChartPanel = new CCR.xdmod.ui.HighChartPanel({
-
-            id: 'hc-panel' + this.id,
+        var plotlyPanel = new CCR.xdmod.ui.PlotlyPanel({
+            id: 'plotly-panel' + this.id,
             store: chartStore
-
-        }); // highChartPanel
+        }); // plotlyPanel
 
         var chartViewPanel = new Ext.Panel({
 
@@ -1003,7 +1003,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
             border: false,
 
             items: [
-                highChartPanel,
+                plotlyPanel,
                 assistPanel
             ]
 
@@ -1087,8 +1087,39 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
             chartHeight = chartViewPanel.getHeight() - (chartViewPanel.tbar ? chartViewPanel.tbar.getHeight() : 0);
         } // maximizeScale
 
-        function onResize(t) {
+        function onResize(t, adjWidth, adjHeight, rawWidth, rawHeight) {
             maximizeScale.call(this);
+            const chartDiv = document.getElementById(`plotly-panel${this.id}`);
+
+            if (chartDiv) {
+                Plotly.relayout(`plotly-panel${this.id}`, { width: adjWidth, height: adjHeight });
+                if (chartDiv._fullLayout.annotations.length !== 0) {
+                    const topCenter = topLegend(chartDiv._fullLayout);
+                    const subtitleLineCount = adjustTitles(chartDiv._fullLayout);
+                    const marginTop = Math.min(chartDiv._fullLayout.margin.t, chartDiv._fullLayout._size.t);
+                    const marginRight = chartDiv._fullLayout._size.r;
+                    const legendHeight = (topCenter && !(adjHeight <= 550)) ? chartDiv._fullLayout.legend._height : 0;
+                    const titleHeight = 31;
+                    const subtitleHeight = 15;
+                    const update = {
+                        'annotations[0].yshift': (marginTop + legendHeight) - titleHeight,
+                        'annotations[1].yshift': ((marginTop + legendHeight) - titleHeight) - (subtitleHeight * subtitleLineCount)
+                    };
+
+                    if (chartDiv._fullLayout.annotations.length >= 2) {
+                        const marginBottom = chartDiv._fullLayout._size.b;
+                        const plotAreaHeight = chartDiv._fullLayout._size.h;
+                        let pieChartXShift = 0;
+                        if (chartDiv._fullData.length !== 0 && chartDiv._fullData[0].type === 'pie') {
+                            pieChartXShift = subtitleLineCount > 0 ? 2 : 1;
+                        }
+                        update['annotations[2].yshift'] = (plotAreaHeight + marginBottom) * -1;
+                        update['annotations[2].xshift'] = marginRight - pieChartXShift;
+                    }
+
+                    Plotly.relayout(`plotly-panel${this.id}`, update);
+                }
+            }
         } // onResize
 
         Ext.apply(this, {

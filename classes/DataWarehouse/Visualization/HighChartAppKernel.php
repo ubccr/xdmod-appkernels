@@ -3,13 +3,13 @@
 namespace DataWarehouse\Visualization;
 
 /**
- * Base class for server generated highcharts chart for app kernel data.
+ * Base class for server generated chart for app kernel data.
  *
  * @author Amin Ghadersohi
  */
-class HighChartAppKernel extends HighChart2
+class HighChartAppKernel extends AggregateChart
 {
-    const IN_CONTROL_COLOR = '#aaffaa';
+    const IN_CONTROL_COLOR = 'rgba(170, 255, 170, 0.75)';
 
     const CONTROL_REGION_TIME_INTERVAL_COLOR = '#E0F8F7';
 
@@ -52,12 +52,7 @@ class HighChartAppKernel extends HighChart2
         $this->_datasetCount = 0;
         $this->_axisCount = 0;
 
-        $image = HTML_DIR . '/gui/images/exclamation_ak.png';
-
-        $this->_indicator_url = sprintf(
-            'url(data:image/png;base64,%s)',
-            base64_encode(file_get_contents($image))
-        );
+        $this->_indicator_url = '/gui/images/exclamation_ak.png';
     }
 
     public function configure(
@@ -76,55 +71,40 @@ class HighChartAppKernel extends HighChart2
         $showRunningAverages = false,
         $showControlInterval = false,
         $showMinMax = false,
-        $contextMenuOnClick = null
+        $contextMenuOnClick = null,
+        $resultCount = 0
     ) {
-        $this->_chart['title']['style'] = array(
-            'color'=> '#000000',
-            'fontSize' => (16 + $font_size).'px'
-        );
-        $this->_chart['subtitle']['style'] = array(
-            'color'=> '#5078a0',
-            'fontSize' => (12 + $font_size).'px'
-        );
-        $this->_chart['subtitle']['y'] = 30 + $font_size;
-        $this->_chart['legend']['itemStyle'] = array(
-            'color' => '#274b6d',
-            'fontWeight' => 'normal',
-            'fontSize' => (12  + $font_size).'px'
-        );
-        $tooltipConfig = array(
-            'xDateFormat' => '%Y/%m/%d %H:%M:%S',
-            'shared' => true,
-            'crosshairs' => true
-        );
-        $this->_chart['tooltip'] = $tooltipConfig;
+        $this->_chart['layout']['annotations'][0]['font']['color'] = '#000000';
+        $this->_chart['layout']['annotations'][0]['font']['size'] = (16 + $font_size);
 
-        $this->_chart['legend']['wordWrap'] = false;
+        $this->_chart['layout']['annotations'][1]['font']['color'] = '#5078a0';
+        $this->_chart['layout']['annotations'][1]['font']['size'] = (12 + $font_size);
 
-        $this->_chart['xAxis'] = array(
-            // min and max of datetime xAxis in milliseconds from 1970-01-01
-            'type' => 'datetime',
-            'min' => strtotime($this->_startDate)*1000,
-            // Don't specify a max xAxis value--highcharts is smart enough to plot the whole dataset.
-            'labels' => $this->_swapXY ? array(
-                'enabled' => true,
-                'step' => round(($font_size<0?0:$font_size+5 ) / 11),
-                'style' => array(
-                    'fontSize' => (11 + $font_size).'px',
-                    'marginTop' => $font_size * 2
-                )
-            )
-            : array(
-                'enabled' => true,
-                'step' => ceil(($font_size<0?0:$font_size+11  ) / 11),
-                'style' => array(
-                    'fontSize' => (11 + $font_size).'px',
-                    'marginTop' => $font_size * 2
-                )
+        if ($resultCount > 1) {
+            $this->_chart['layout']['hovermode'] = 'closest';
+        }
+
+        $this->_chart['layout']['xaxis'] = array(
+            'automargin' => true,
+            'layer' => 'below traces',
+            'type' => 'date',
+            'tickfont' => array(
+                'size' => (11 + $font_size),
+                'color' => '#606060',
             ),
-            'minTickInterval' =>  24 * 3600 * 1000,
-            'lineWidth' => 1 + $font_size/4,
-            'plotBands' => array()
+            'ticksuffix' => ' ',
+            'rangemode' => 'tozero',
+            'tickformat' => '%d. %b',
+            'tickmode' => 'date',
+            'tick0' => date('Y-m-d H:i:s', strtotime($this->_startDate)),
+            'hoverformat' => '%Y/%m/%d %H:%M:%S',
+            'spikedash' => 'solid',
+            'spikecolor' => '#c0c0c0',
+            'showgrid' => false,
+            'zeroline' => false,
+            //'dtick' => 14 * 24 * 60 * 60 * 1000, Need to look into if keep this off is better
+            'linewidth' => 1 + $font_size/4,
+            'linecolor' => '#c0d0e0',
         );
 
         $colors = \DataWarehouse\Visualization::getColors(33);
@@ -159,35 +139,65 @@ class HighChartAppKernel extends HighChart2
 
                 $yAxisColorValue = $colors[$this->_axisCount % 33];
                 $yAxisColor = '#'.str_pad(dechex($yAxisColorValue), 6, '0', STR_PAD_LEFT);
+                $yIndex = $this->_axisCount + 1;
+                $yAxisName = $this->_axisCount == 0 ? 'yaxis' : "yaxis{$yIndex}";
                 $yAxis = array(
+                    'automargin' => true,
+                    'layer' => 'below traces',
                     'title' => array(
-                         'text' => $dataset->metricUnit,
-                        'style' => array(
+                        'text' => '<b>' . $dataset->metricUnit . '</b>',
+                        'font' => array(
                             'color'=> $yAxisColor,
-                            'fontWeight' => 'bold',
-                            'fontSize' => (12 + $font_size).'px'
+                            'size' => (12 + $font_size)
                         )
                     ),
-                    'labels' => array(
-                        'style' => array(
-                            'fontSize' => (11 + $font_size).'px'
-                        ),
-                        'decimals' => 2
+                    'tickfont' => array(
+                        'size' => (11 + $font_size),
+                        'color' => '#606060'
                     ),
-                    'opposite' => $this->_axisCount % 2 == 1,
-                    'min' => false?null:$yMin,
-                                        'max' => false?null:$yMax,
-                    'type' => false? 'logarithmic' : 'linear',
-                    'showLastLabel' => true,
-                    'endOnTick' => true,
-                    'index' => $this->_axisCount,
-                    'lineWidth' => 1 + $font_size/4,
-                    'allowDecimals' => true,
-                    'tickInterval' => false ? 1  :null
+                    'tickformat' => ',.2f',
+                    'tickmode' => 'auto',
+                    'ticksuffix' => ' ',
+                    'tickprefix' => $this->_axisCount > 0 ? ' ' : null,
+                    'exponentformat' => 'SI',
+                    'type' => 'linear',
+                    'rangemode' => 'tozero',
+                    'range' => [$yMin, $yMax],
+                    'index' => $yIndex,
+                    'axisname' => $yAxisName,
+                    'separatethousands' => true,
+                    'overlaying' => $this->_axisCount == 0 ? null : 'y',
+                    'linewidth' => 1 + $font_size/4,
+                    'linecolor' => '#c0d0e0',
+                    'side' => 'left',
+                    'anchor' => 'x',
+                    'autoshift' => true,
+                    'gridwidth' => $this->_axisCount > 1 ? 0 : 1 + ($font_size/8),
+                    'zeroline' => false,
                 );
+
+                if ($this->_axisCount > 0){
+                    if ($this->_axisCount % 2 == 0) {
+                        $yAxis = array_merge($yAxis, array(
+                            'side' => 'left',
+                            'anchor' => 'free',
+                            'autoshift' => true,
+                        ));
+                    }
+                    else {
+                        $yAxis = array_merge($yAxis, array(
+                            'side' => 'right',
+                            'anchor' => $this->_axisCount > 1 ? 'free' : 'x',
+                            'autoshift' => true,
+                        ));
+                   }
+                }
+
+
                 $this->_axis[$dataset->metricUnit] = $yAxis;
-                                $this->_axis_index[$dataset->metricUnit]=count($this->_chart['yAxis']);
-                                $this->_chart['yAxis'][] = $yAxis;
+                $this->_axis_index[$dataset->metricUnit]= $yIndex - 1;
+                $this->_chart['layout']["{$yAxisName}"] = $yAxis;
+
                 $this->_axisCount++;
             } else{
                 $yMin=min($dataset->valueVector);
@@ -200,13 +210,15 @@ class HighChartAppKernel extends HighChart2
                     $yMin=0;
                 }
 
-                if($this->_axis[$dataset->metricUnit]['min']>$yMin) {
-                    $this->_axis[$dataset->metricUnit]['min']=$yMin;
-                    $this->_chart['yAxis'][$this->_axis_index[$dataset->metricUnit]]['min']=$yMin;
+                if($this->_axis[$dataset->metricUnit]['range'][0]>$yMin) {
+                    $this->_axis[$dataset->metricUnit]['range'][0]=$yMin;
+                    $index = $this->_axis_index[$dataset->metricUnit] == 0 ? 'yaxis' : "yaxis{$this->_axis_index[$dataset->metricUnit]}";
+                    $this->_chart['layout'][$index]['range'][0]=$yMin;
                 }
-                if($this->_axis[$dataset->metricUnit]['max']<$yMax) {
-                    $this->_axis[$dataset->metricUnit]['max']=$yMax;
-                    $this->_chart['yAxis'][$this->_axis_index[$dataset->metricUnit]]['max']=$yMax;
+                if($this->_axis[$dataset->metricUnit]['range'][1]<$yMax) {
+                    $this->_axis[$dataset->metricUnit]['range'][1]=$yMax;
+                    $index = $this->_axis_index[$dataset->metricUnit] == 0 ? 'yaxis' : "yaxis{$this->_axis_index[$dataset->metricUnit]}";
+                    $this->_chart['layout'][$index]['range'][1]=$yMax;
                 }
             }
         }
@@ -215,7 +227,7 @@ class HighChartAppKernel extends HighChart2
         {
             $dataCount = count($dataset->valueVector);
             $yAxis = $this->_axis[$dataset->metricUnit];
-            $yAxisColorValue = $colors[$yAxis['index'] % 33];
+            $yAxisColorValue = $colors[($yAxis['index']-1) % 33];
             $yAxisColor = '#'.str_pad(dechex($yAxisColorValue), 6, '0', STR_PAD_LEFT);
 
             $color_value =  $colorsPerCore?self::getAppKernelColor($dataset->rawNumProcUnits):  $colors[$this->_datasetCount % 33];
@@ -223,7 +235,7 @@ class HighChartAppKernel extends HighChart2
             $lineColor = '#'.str_pad(dechex(\DataWarehouse\Visualization::alterBrightness($color_value, -70)), 6, '0', STR_PAD_LEFT);
 
             if($longLegend) {
-                $datasetName = '['.$dataset->numProcUnits.': '.$dataset->resourceName.'] <br/>'.$dataset->akName.' '.
+                $datasetName = '['.$dataset->numProcUnits.': '.$dataset->resourceName.'] <br>'.$dataset->akName.' '.
                     $dataset->metric.$dataset->note.' [<span style="color:'.$yAxisColor.'">'.$dataset->metricUnit.'</span>]';
             } else {
                 if($dataset->note==="") {
@@ -233,148 +245,305 @@ class HighChartAppKernel extends HighChart2
                 }
             }
 
-            $enableMarkers = $dataCount < 11 || ($dataCount < 31 && $this->_width > \DataWarehouse\Visualization::$thumbnail_width);
-            $seriesValues = array();
+            if ($this->_datasetCount == 0) {
+                $this->_chart['layout']['hoverlabel']['bordercolor'] = $color;
+            }
+
+            $xValues = array();
+            $yValues = array();
             foreach($dataset->valueVector as $i => $v)
             {
                 $sv = array(
-                    'x' => $dataset->timeVector[$i]*1000.0,
-                    'y' => (double)$v
+                    'x' => date('Y-m-d H:i:s', $dataset->timeVector[$i]),
+                    'y' => (double)$v + (0.2 * $v)
                 );
                 if($v===null) {
                     $sv['y'] = null;
                 }
-                $sv['marker'] = array();
+
                 if($showChangeIndicator && $dataset->versionVector[$i] > 0) {
-                    $sv['marker']['symbol'] = $this->_indicator_url;
-                    $sv['marker']['enabled'] = true;
-                }else
-                {
-                    $sv['marker']['enabled'] = $enableMarkers;
+                    $this->_chart['layout']['images'][] = array(
+                        'source' => $this->_indicator_url,
+                        'name' => 'Change Indicator',
+                        'sizex' => 1.25*24*60*60*1000,
+                        'sizey' => 1.25*24*60*60*1000,
+                        'xref' => 'x',
+                        'yref' => 'y',
+                        'xanchor' => 'center',
+                        'yanchor' => 'middle',
+                        'x' => $this->_swapXY ? $sv['y'] : $sv['x'],
+                        'y' => $this->_swapXY ? $sv['x'] : $sv['y'],
+                    );
                 }
 
-                $seriesValues[] = $sv;
+                $xValues[] = $sv['x'];
+                $yValues[] = $sv['y'];
             }
-            $data_series_desc = array(
+            $trace = array(
                 'name' => $datasetName,
                 'zIndex' => 10,
-                'color'=>  $color,
-                'type' => 'line',
-                'shadow' => false,
-                'groupPadding' => 0.1,
-                'pointPadding' => 0,
-                'borderWidth' => 0,
-                'yAxis' => $yAxis['index'],
-                'lineWidth' => 2 + $font_size/4,
-                'showInLegend' => true,
-                'connectNulls' => true,
+                'cliponaxis' => false,
+                'yaxis' => "y{$yAxis['index']}",
+                'showlegend' => true,
+                'legendrank' => 1000,
                 'marker' => array(
-                    'lineWidth' => 1,
-                    'lineColor' => $lineColor,
-                    'radius' => $font_size/4 + 5,
+                    'color' => $color,
+                    'line' => array(
+                        'width' => 1,
+                        'color' => $lineColor,
+                    ),
+                    'size' => ($font_size/4 + 5) * 2,
                     'symbol' => self::getAppKernelSymbol($dataset->rawNumProcUnits)
                 ),
-                'data' => $seriesValues
+                'line' => array(
+                    'color' => $color,
+                    'width' => 2 + $font_size/4,
+                ),
+                'type' => 'scatter',
+                'mode' => 'lines+markers',
+                'hovertext' => $xValues,
+                'hovertemplate' => $datasetName . ': <b>%{y:,}</b> <extra></extra>',
+                'hoverlabel' => array(
+                    'align' => 'left',
+                    'bgcolor' => 'rgba(255, 255, 255, 0.8)',
+                    'bordercolor' => $yAxisColor,
+                    'font' => array(
+                        'size' => 12.8,
+                        'color' => '#000000',
+                        'family' => 'Lucida Grande, Lucida Sans Unicode, Arial, Helvetica, sans-serif',
+                    ),
+                    'namelength' => -1,
+                ), 
+                'x' => $this->_swapXY ? $yValues : $xValues,
+                'y' => $this->_swapXY ? $xValues : $yValues,
             );
 
             if($drillDown&&$contextMenuOnClick===null) {
-                $data_series_desc['cursor'] = 'pointer';
-                $data_series_desc['rawNumProcUnits'] = $dataset->rawNumProcUnits;
+                $trace['rawNumProcUnits'] = $dataset->rawNumProcUnits;
             }
 
-            $this->_chart['series'][] = $data_series_desc;
+            if ($resultCount > 1) {
+                $trace['hovertemplate'] = '%{hovertext} <br>' . "<span style=\"color:$color\";> ●</span> "
+                                          . $datasetName . ": <b>%{y:,}</b> <extra></extra>";
+            }
+
+            // Set null connectors
+            if (in_array(null, $yValues)) {
+                $null_trace = array(
+                    'name' => 'gap connector for ' . $datasetName,
+                    'zIndex' => 10,
+                    'x' => $this->_swapXY ? $yValues : $xValues,
+                    'y' => $this->_swapXY ? $xValues : $yValues,
+                    'showlegend' => false,
+                    'mode' => 'lines',
+                    'line' => array(
+                        'color' => $color,
+                        'dash' => 'dash'
+                    ),
+                    'connectgaps' => true,
+                    'hoverinfo' => 'skip',
+                    'type' => 'scatter',
+                    'yaxis' => "y{$yAxis['index']}",
+                );
+
+                if ($this->_swapXY) {
+                    $null_trace['xaxis'] = "x{$yAxis['index']}";
+                    unset($null_trace['yaxis']);
+                }
+
+                $this->_chart['data'][] = $null_trace;
+            } 
+
+            // Handle swap axis
+            $yAxisName = $yAxis['axisname'];
+            $xAxisName = substr_replace($yAxisName, 'xaxis', 0, 5);
+            $yIndex = $yAxis['index'];
+            $yAxisIndex = $yIndex - 1;
+            $yAxisCount = $this->_axisCount;
+            $xAxisStep = 0.115;
+            $xAxisBottomBoundStart = 0 + ($xAxisStep * ceil($yAxisCount/2));
+            $xAxisTopBoundStart = 1 - ($xAxisStep * floor($yAxisCount/2));
+            $topShift = floor($yAxisCount/2) - floor($yAxisIndex/2);
+            $bottomShift = ceil($yAxisCount/2) - ceil($yAxisIndex/2);
+
+            if ($this->_swapXY) {
+                $this->_chart['layout']['hovermode'] = 'y unified';
+                $trace['hovertemplate'] = $datasetName . ": <b>%{x:,}</b> <extra></extra>";
+                if ($resultCount > 1) {
+                    $this->_chart['layout']['hovermode'] = 'closest';
+                    $trace['hovertemplate'] = '%{hovertext} <br>' . "<span style=\"color:$color\";> ●</span> "
+                                              . $datasetName . ": <b>%{x:,}</b> <extra></extra>";
+                }
+
+                unset($trace['yaxis']);
+                $trace['xaxis'] = "x{$yIndex}";
+
+                $xtmp = $this->_chart['layout']["{$xAxisName}"];
+                $ytmp = $this->_chart['layout']["{$yAxisName}"];
+                $this->_chart['layout']['yaxis'] = $xtmp;
+                $this->_chart['layout']["{$xAxisName}"] = $ytmp;
+
+                $this->_chart['layout']["{$xAxisName}"]['side'] = ($yAxisIndex % 2 != 0) ? 'top' : 'bottom';
+                if ($this->_chart['layout']["{$xAxisName}"]['side'] == 'top') {
+                    $this->_chart['layout']["{$xAxisName}"]['title']['standoff'] = 0;
+                }
+                $this->_chart['layout']["{$xAxisName}"]['anchor'] = 'free';
+                if (isset($this->_chart['layout']["{$xAxisName}"]['overlaying'])) {
+                    $this->_chart['layout']["{$xAxisName}"]['overlaying'] = 'x';
+                }
+
+                $this->_chart['layout']["{$xAxisName}"]['position'] = $this->_chart['layout']["{$xAxisName}"]['side'] == 'top' ? min(1 - ($xAxisStep * $topShift), 1) :
+                    max(0 + ($xAxisStep * $bottomShift), 0);
+
+                $this->_chart['layout']["{$xAxisName}"]['domain'] = array(0,1);
+                $this->_chart['layout']["{$xAxisName}"]['title']['standoff'] = 0;
+                $this->_chart['layout']["{$xAxisName}"]['type'] = 'linear';
+                $this->_chart['layout']["{$xAxisName}"]['showgrid'] =$yAxisCount > 1 ? false : true;
+
+                $this->_chart['layout']['yaxis']['linewidth'] = 2 + $font_size / 4;
+                $this->_chart['layout']['yaxis']['linecolor'] = '#c0d0e0';
+                $this->_chart['layout']['yaxis']['domain'] = array($xAxisBottomBoundStart, $xAxisTopBoundStart);
+                $this->_chart['layout']['yaxis']['autorange'] = 'reversed';
+                $this->_chart['layout']['yaxis']['showgrid'] = false;
+                unset($this->_chart['layout']['yaxis']['position']);
+            }
+
+            $this->_chart['data'][] = $trace;
 
             $versionSum = array_sum($dataset->versionVector);
             if($showChangeIndicator && $versionSum > 0 && !isset($this->changeIndicatorInLegend) ) {
-                $versionValues = array();
+                $versionXValues = array();
+                $versionYValues = array();
                 foreach($dataset->versionVector as $i => $v)
                 {
-                    $versionValues[] = array('x' => $dataset->timeVector[$i]*1000.0, 'y' => null) ;
+                    $versionXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
+                    $versionYValues[] = null;
                 }
 
-                $version_series_desc = array(
+                $version_trace = array_merge($trace, array(
                     'name' => 'Change Indicator',
-                    'yAxis' => $yAxis['index'],
+                    'yaxis' => "y{$yAxis['index']}",
                     'zIndex' => 9,
+                    'mode' => 'markers',
                     'type' => 'scatter',
-                    'tooltip' => array(
-                        'enabled' => false
-                    ),
-                    'marker' => array(
-                        'enabled' => true,
-                        'symbol' => $this->_indicator_url,
-                    ),
-                    'showInLegend' => !isset($this->changeIndicatorInLegend),
-                    'legendIndex' => 100000,
-                    'data' => $versionValues
-                );
+                    'showlegend' => !isset($this->changeIndicatorInLegend),
+                    'legendrank' => 1004,
+                    'hoverinfo' => 'skip',
+                    'x' => $this->_swapXY ? $versionYValues : $versionXValues,
+                    'y' => $this->_swapXY ? $versionXValues : $versionYValues
+                ));
+
+                if ($this->_swapXY) {
+                    $version_trace['xaxis'] = "x{$yIndex}";
+                    unset($version_trace['yaxis']);
+                }
+
                 $this->changeIndicatorInLegend = true;
-                $this->_chart['series'][] = $version_series_desc;
+                $this->_chart['data'][] = $version_trace;
             }
 
             if($showRunningAverages) {
-                $averageValues = array();
+                $averageXValues = array();
+                $averageYValues = array();
                 foreach($dataset->runningAverageVector as $i => $v)
                 {
-                    $sv = array('x' =>  $dataset->timeVector[$i]*1000.0, 'y' => $v?(double)$v:null);
-                    $averageValues[] = $sv;
+                    $averageXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
+                    $averageYValues[] = $v ? (double)$v : null;
                 }
 
                 $aColor = '#'.str_pad(dechex(\DataWarehouse\Visualization::alterBrightness($color, -200)), 6, '0', STR_PAD_LEFT);
-                $data_series_desc = array(
+                $average_trace = array_merge($trace, array(
                     'name' => 'Running Average',
                     'zIndex' => 8,
-                    'color'=>  $aColor,
-                    'type' => 'line',
-                    'shadow' => false,
-                    'dashStyle' => 'Dash',
-                    'groupPadding' => 0.1,
-                    'pointPadding' => 0,
-                    'borderWidth' => 0,
-                    'yAxis' => $yAxis['index'],
-                    'lineWidth' => 1 + $font_size/4,
-                    'showInLegend' => true,
-                    'connectNulls' => false,
                     'marker' => array(
-                        'enabled' => false
+                        'color' => $aColor,
                     ),
-                    'data' => $averageValues
-                );
-                $this->_chart['series'][] = $data_series_desc;
+                    'line' => array(
+                        'width' => 1 + $font_size/4,
+                        'dash' => 'dash',
+                    ),
+                    'showInLegend' => true,
+                    'legendrank' => 1001,
+                    'hovertemplate' => 'Running Average: <b>%{y:,}</b> <extra></extra>',
+                    'x' => $this->_swapXY ? $averageYValues : $averageXValues,
+                    'y' => $this->_swapXY ? $averageXValues : $averageYValues,
+                ));
+
+                if ($this->_swapXY) {
+                    $average_trace['xaxis'] = "x{$yIndex}";
+                    $average_trace['hovertemplate'] = 'Running Average: <b>%{x:,}</b> <extra></extra>';
+                    unset($average_trace['yaxis']);
+                }
+
+
+                $this->_chart['data'][] = $average_trace;
             }
 
             if($showControls) {
                 if(!isset($this->_axis['control'])) {
                     $yAxisControl = array(
+                        'automargin' => true,
+                        'layer' => 'below traces',
                         'title' => array(
-                            'text' => 'Control',
-                            'style' => array(
-                                'fontWeight' => 'bold',
-                                'color'=> '#7cb5ec', // hardcoded to match data series. Where does this color come from?
-                                'fontSize' => (12 + $font_size).'px'
+                            'text' => '<b>Control</b>',
+                            'font' => array(
+                                'color'=> '#7cb5ec',
+                                'size' => (12 + $font_size)
                             )
                         ),
-                        'labels' => array(
-                            'style' => array(
-                                'fontSize' => (11 + $font_size).'px'
-                            ),
-                            'decimals' => 2
+                        'tickfont' => array(
+                            'size' => (11 + $font_size)
                         ),
-                        'opposite' => $this->_axisCount % 2 == 1,
+                        'tickformat' => ',.2f',
+                        'tickmode' => 'auto',
+                        'ticksuffix' => ' ',
+                        'tickprefix' => $this->_axisCount > 0 ? ' ' : null,
+                        'exponentformat' => 'SI',
                         'type' => 'linear',
-                        'showLastLabel' => $this->_chart['title']['text'] != '',
-                        'endOnTick' => true,
-                        'index' => $this->_axisCount,
-                        'lineWidth' => 2 + $font_size/4,
-                        'allowDecimals' => true,
-                        'tickInterval' => false ? 1 : null
+                        'range' => [null, null],
+                        'index' => $this->_axisCount + 1,
+                        'axisname' => $yAxisName,
+                        'separatethousands' => true,
+                        'overlaying' => $this->_axisCount == 0 ? null : 'y',
+                        'linewidth' => 1 + $font_size/4,
+                        'linecolor' => '#c0d0e0', 
+                        'side' => $this->_axisCount % 2 == 0 ? 'left' : 'right',
+                        'anchor' => 'free',
+                        'autoshift' => true,
+                        'gridwidth' => $this->_axisCount > 1 ? 0 : 1 + ($font_size/8),
+                        'zeroline' => false,
                     );
+                    $index = $this->_axisCount + 1;
+                    $yControlAxisName = "yaxis{$index}";
+                    $xControlAxisName = "xaxis{$index}";
+                    if ($this->_swapXY) {
+                        $yAxisControl['side'] = ($yAxisIndex % 2 != 0) ? 'top' : 'bottom';
+                        if ($yAxisControl['side'] == 'top') {
+                            $yAxisControl['title']['standoff'] = 0;
+                        }
+                        $yAxisControl['anchor'] = 'free';
+                        if (isset($yAxisControl['overlaying'])) {
+                            $yAxisControl['overlaying'] = 'x';
+                        }
+
+                        $yAxisControl['position'] = $this->_chart['layout']["{$xAxisName}"]['side'] == 'top' ? min(1 - ($xAxisStep * $topShift), 1) :
+                                                    max(0 + ($xAxisStep * $bottomShift), 0);
+
+                        $yAxisControl['domain'] = array(0,1);
+                        $yAxisControl['title']['standoff'] = 0;
+                        $yAxisControl['type'] = 'linear';
+                        $yAxisControl['showgrid'] =$yAxisCount > 1 ? false : true;
+                        $this->_chart['layout']["{$xControlAxisName}"] = $yAxisControl;
+                    }
+                    else {
+                        $this->_chart['layout']["{$yControlAxisName}"] = $yAxisControl;
+                    }
                     $this->_axis['control'] = $yAxisControl;
-                    $this->_chart['yAxis'][] = $yAxisControl;
                     $this->_axisCount++;
                 }
 
-                $controlVector = array();
+                $controlVectorXValues = array();
+                $controlVectorYValues = array();
                 foreach($dataset->controlVector as $i => $control)
                 {
                     if($discreteControls) {
@@ -386,83 +555,177 @@ class HighChartAppKernel extends HighChart2
                             $control = 0;
                         }
                     }
-                    $sv = array('x' =>  $dataset->timeVector[$i]*1000.0, 'y' => (double)$control);
-                    $controlVector[] = $sv;
+                    $controlVectorXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
+                    $controlVectorYValues[] = (double)$control;
                 }
 
-                $data_series_desc = array(
+                $control_vector_trace = array_merge($trace, array(
                     'name' => 'Control',
                     'zIndex' => 7,
-                    'type' => 'line',
-                    'shadow' => false,
-                    'dashStyle' => 'ShortDot',
-                    'groupPadding' => 0.1,
-                    'pointPadding' => 0,
-                    'borderWidth' => 0,
-                    'yAxis' => $this->_axis['control']['index'],
-                    'lineWidth' => 1 + $font_size/4,
-                    'showInLegend' => true,
-                    'connectNulls' => false,
                     'marker' => array(
-                        'enabled' => false
+                        'color' => '#7cb5ec'
                     ),
-                    'data' => $controlVector
-                );
-                $this->_chart['series'][] = $data_series_desc;
-            }
-            if($showMinMax && count($dataset->valueLowVector)>0 && count($dataset->valueHighVector)>0) {
-                $rangeValues = array();
-                foreach($dataset->valueLowVector as $i => $v)
-                {
-                    $v2 = $dataset->valueHighVector[$i];
-                    $sv = array($dataset->timeVector[$i]*1000.0, $v2?(double)$v2:null, $v?(double)$v:null);
+                    'line' => array(
+                        'color' => '#7cb5ec',
+                        'width' => 1 + $font_size/4,
+                        'dash' => 'dot',
+                    ),
+                    'yaxis' => "y{$this->_axis['control']['index']}",
+                    'legendrank' => 1002,
+                    'hovertemplate' => 'Control : <b>%{y:,}</b> <extra></extra>',
+                    'x' => $this->_swapXY ? $controlVectorYValues : $controlVectorXValues,
+                    'y' => $this->_swapXY ? $controlVectorXValues : $controlVectorYValues
+                ));
 
-                    $rangeValues[] = $sv;
+                if ($this->_swapXY) {
+                    $controlIndex = $this->_axis['control']['index'];
+                    $control_vector_trace['xaxis'] = "x{$controlIndex}";
+                    $control_vector_trace['hovertemplate'] = 'Control : <b>%{x:,}</b> <extra></extra>'; 
+                    unset($control_vector_trace['yaxis']);
                 }
 
-                $data_series_desc = array(
-                    'name' => 'MinMax Values',
+                $this->_chart['data'][] = $control_vector_trace;
+            }
+            if($showMinMax && count($dataset->valueLowVector)>0 && count($dataset->valueHighVector)>0) {
+                $min = array();
+                $max = array();
+                $minMaxXValues = array();
+                foreach($dataset->valueLowVector as $i => $v)
+                {
+                    $v2 = $dataset->controlEndVector[$i];
+                    $min[] = $v?(double)$v:null;
+                    if (!is_null($v) && !is_null($v2)) {
+                        $max[] = $v2 - $v1;
+                    }
+                    else {
+                        $max[] = null;
+                    }
+                }
+                $min_max_start = array_merge($trace, array(
+                    'name' => 'MinMax Start',
                     'zIndex' => 6,
-                    'color'=>  self::MINMAX_COLOR,
-                    'type' => 'areasplinerange',
-                    'shadow' => false,
-                    'yAxis' => $yAxis['index'],
-                    'lineWidth' => 0,
-                    'showInLegend' => true,
-                    'connectNulls' => false,
-                    'marker' => array(
-                        'enabled' => false
+                    'fill' => 'tozeroy',
+                    'fillcolor'=> '#ffffff',
+                    'line' => array(
+                        'color' => '#ffffff'
                     ),
-                    'data' => $rangeValues
-                );
-                $this->_chart['series'][] = $data_series_desc;
+                    'marker' => array(
+                        'color' => '#ffffff'
+                    ),
+                    'type' => 'area',
+                    'yaxis' => "y{$yAxis['index']}",
+                    'mode' => 'none',
+                    'hoverinfo' => 'skip',
+                    'hovertemplate' => '',
+                    'stackgroup' => '1',
+                    'x' => $this->_swapXY ? $min : $minMaxXValues,
+                    'y' => $this->_swapXY ? $minMaxXValues : $min
+                ));
+
+                $this->_chart['data'][] = $min_max_start;
+
+                if ($this->_swapXY) {
+                    $min_max_start['xaxis'] = "x{$yIndex}";
+                    $min_max_start['fill'] = 'tozerox';
+                    unset($min_max_start['yaxis']);
+                }
+
+                $min_max_end = array_merge($trace, array(
+                    'name' => 'MinMax',
+                    'zIndex' => 6,
+                    'fill' => 'tonexty',
+                    'fillcolor' => self::MINMAX_COLOR,
+                    'type' => 'area',
+                    'hovertext' => $minMaxXValues,
+                    'customdata' => $min,
+                    'yaxis' => "y{$yAxis['index']}",
+                    'mode' => 'none',
+                    'legendrank' => 1003,
+                    'hovertemplate' => 'MinMax: <b>%{y:,} - %{customdata}</b> <extra></extra>',
+                    'stackgroup' => '1',
+                    'x' => $this->_swapXY ? $max : $minMaxXValues,
+                    'y' => $this->_swapXY ? $minMaxXValues : $max
+                ));
+
+                if ($this->_swapXY) {
+                    $min_max_end['xaxis'] = "x{$yIndex}";
+                    $min_max_end['fill'] = 'tonextx';
+                    $min_max_end['hovertemplate'] = 'MinMax: <b>%{x:,} - %{customdata}</b> <extra></extra>';
+                    unset($min_max_end['yaxis']);
+                }
+
+                $this->_chart['data'][] = $min_max_end;
             }
             if($showControlInterval) {
-                $rangeValues = array();
+                $startValues = array();
+                $endValues = array();
+                $controlIntervalXValues = array();
                 foreach($dataset->controlStartVector as $i => $v)
                 {
                     $v2 = $dataset->controlEndVector[$i];
-                    $sv = array($dataset->timeVector[$i]*1000.0, $v2?(double)$v2:null, $v?(double)$v:null);
-
-                    $rangeValues[] = $sv;
+                    $controlIntervalXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
+                    $startValues[] = $v?(double)$v:null;
+                    if (!is_null($v) && !is_null($v2)) {
+                        $endValues[] = $v2 - $v1;
+                    }
+                    else {
+                        $endValues[] = null;
+                    }
                 }
 
-                $data_series_desc = array(
+                $control_interval_start = array_merge($trace, array(
+                    'name' => 'Control Band Start',
+                    'zIndex' => 0,
+                    'fill' => 'toself',
+                    'fillcolor'=> '#ffffff',
+                    'line' => array(
+                        'color' => '#ffffff'
+                    ),
+                    'marker' => array(
+                        'color' => '#ffffff'
+                    ),
+                    'type' => 'area',
+                    'yaxis' => "y{$yAxis['index']}",
+                    'mode' => 'none',
+                    'hoverinfo' => 'skip',
+                    'hovertemplate' => '',
+                    'showlegend' => false,
+                    'x' => $this->_swapXY ? $startValues : $controlIntervalXValues,
+                    'y' => $this->_swapXY ? $controlIntervalXValues : $startValues
+                ));
+
+                $this->_chart['data'][] = $control_interval_start;
+
+                if ($this->_swapXY) {
+                    $control_interval_start['xaxis'] = "x{$yIndex}";
+                    $control_interval_start['fill'] = 'tozerox';
+                    unset($control_interval_start['yaxis']);
+                }
+                $controlColor = self::IN_CONTROL_COLOR; 
+                $control_interval_end = array_merge($trace, array(
                     'name' => 'Control Band',
                     'zIndex' => 0,
-                    'color'=>  self::IN_CONTROL_COLOR,
-                    'type' => 'areasplinerange',
-                    'shadow' => false,
-                    'yAxis' => $yAxis['index'],
-                    'lineWidth' => 0,
-                    'showInLegend' => true,
-                    'connectNulls' => false,
-                    'marker' => array(
-                        'enabled' => false
-                    ),
-                    'data' => $rangeValues
-                );
-                $this->_chart['series'][] = $data_series_desc;
+                    'fill' => 'tonexty',
+                    'fillcolor' => self::IN_CONTROL_COLOR,
+                    'type' => 'area',
+                    'hovertext' => $controlIntervalXValues,
+                    'customdata' => $startValues,
+                    'yaxis' => "y{$yAxis['index']}",
+                    'mode' => 'none',
+                    'legendrank' => 1004,
+                    'hovertemplate' => 'Control Band: <b>%{y} - %{customdata}</b> <extra></extra>', 
+                    'x' => $this->_swapXY ? $endValues : $controlIntervalXValues,
+                    'y' => $this->_swapXY ? $controlIntervalXValues : $endValues
+                ));
+
+                if ($this->_swapXY) {
+                    $control_interval_end['xaxis'] = "x{$yIndex}";
+                    $control_interval_end['fill'] = 'tonextx';
+                    $control_interval_end['hovertemplate'] = 'Control Band: <b>%{x} - %{customdata}</b> <extra></extra>';
+                    unset($control_interval_end['yaxis']);
+                }
+
+                $this->_chart['data'][] = $control_interval_end;
             }
 
             if($showControlZones) {
@@ -496,11 +759,23 @@ class HighChartAppKernel extends HighChart2
                         }
 
                         if($i0!=$i1) {
-                            $this->_chart['xAxis']['plotBands'][] = array(
-                                'from' => $t0*1000,
-                                'to' => $t1*1000,
-                                'color' =>self::UNDERPERFORMING_COLOR
-                            );
+                            $this->_chart['layout']['shapes'][] = array(
+                                'name' => 'Out of Control',
+                                'fillcolor' => self::UNDERPERFORMING_COLOR,
+                                'layer' => 'below',
+                                'line' => array(
+                                    'width' => 0
+                                ),
+                                'type' => 'rect',
+                                'showlegend' => !isset($this->outOfControlInLegend) ? true : false,
+                                'legendrank' => 1005,
+                                'xref' => $this->_swapXY ? 'paper' : 'x',
+                                'yref' => $this->_swapXY ? 'y' : 'paper',
+                                'x0' => $this->_swapXY ? 0 : date('Y-m-d H:i:s', $t0),
+                                'x1' => $this->_swapXY ? 1 : date('Y-m-d H:i:s', $t1),
+                                'y0' => $this->_swapXY ? date('Y-m-d H:i:s', $t0) : 0,
+                                'y1' => $this->_swapXY ? date('Y-m-d H:i:s', $t1) : 1,
+                           );
                         }
                     }
                     if($i>=count($controlStatus)) {
@@ -531,10 +806,22 @@ class HighChartAppKernel extends HighChart2
                         }
 
                         if($i0!=$i1) {
-                            $this->_chart['xAxis']['plotBands'][] = array(
-                                'from' => $t0*1000,
-                                'to' => $t1*1000,
-                                'color' =>self::OVERPERFORMING_COLOR
+                            $this->_chart['layout']['shapes'][] = array(
+                                'name' => 'Better than Control',
+                                'fillcolor' => self::OVERPERFORMING_COLOR,
+                                'layer' => 'below',
+                                'line' => array(
+                                    'width' => 0
+                                ),
+                                'showlegend' => !isset($this->betterThanControlInLegend) ? true : false,
+                                'legendrank' => 1006,
+                                'type' => 'rect',
+                                'xref' => $this->_swapXY ? 'paper' : 'x',
+                                'yref' => $this->_swapXY ? 'y' : 'paper',
+                                'x0' => $this->_swapXY ? 0 : date('Y-m-d H:i:s', $t0),
+                                'x1' => $this->_swapXY ? 1 : date('Y-m-d H:i:s', $t1),
+                                'y0' => $this->_swapXY ? date('Y-m-d H:i:s', $t0) : 0,
+                                'y1' => $this->_swapXY ? date('Y-m-d H:i:s', $t1) : 1,
                             );
                         }
                     }
@@ -565,10 +852,22 @@ class HighChartAppKernel extends HighChart2
                         }
 
                         if($i0!=$i1) {
-                            $this->_chart['xAxis']['plotBands'][] = array(
-                                'from' => $t0*1000,
-                                'to' => $t1*1000,
-                                'color' =>self::CONTROL_REGION_TIME_INTERVAL_COLOR
+                            $this->_chart['layout']['shapes'][] = array(
+                                'name' => 'Control Region Time Interval',
+                                'fillcolor' => self::CONTROL_REGION_TIME_INTERVAL_COLOR,
+                                'layer' => 'below',
+                                'line' => array(
+                                    'width' => 0
+                                ),
+                                'showlegend' => !isset($this->controlRegionTimeIntervalInLegend) ? true : false,
+                                'legendrank' => 1007,
+                                'type' => 'rect',
+                                'xref' => $this->_swapXY ? 'paper' : 'x',
+                                'yref' => $this->_swapXY ? 'y' : 'paper',
+                                'x0' => $this->_swapXY ? 0 : date('Y-m-d H:i:s', $t0),
+                                'x1' => $this->_swapXY ? 1 : date('Y-m-d H:i:s', $t1),
+                                'y0' => $this->_swapXY ? date('Y-m-d H:i:s', $t0) : 0,
+                                'y1' => $this->_swapXY ? date('Y-m-d H:i:s', $t1) : 1,
                             );
                         }
                     }
@@ -576,78 +875,8 @@ class HighChartAppKernel extends HighChart2
                         break;
                     }
                 }
-
-                if(!isset($this->outOfControlInLegend) ) {
-                        $versionValues = array();
-                    foreach($dataset->versionVector as $i => $v)
-                        {
-                                    $versionValues[] = array('x' => $dataset->timeVector[$i]*1000.0, 'y' => null) ;
-                    }
-
-                        $ooc_series_desc = array(
-                                'name' => 'Out of Control',
-                                'yAxis' => $yAxis['index'],
-                                'type' => 'area',
-                                'color' => self::UNDERPERFORMING_COLOR,
-                                'showInLegend' => !isset($this->outOfControlInLegend),
-                                'legendIndex' => 100000,
-                                'data' => $versionValues
-                                            );
-                                            $this->outOfControlInLegend = true;
-                                            $this->_chart['series'][] = $ooc_series_desc;
-                }
-                if(!isset($this->betterThanControlInLegend) ) {
-                        $versionValues = array();
-                    foreach($dataset->versionVector as $i => $v)
-                        {
-                                    $versionValues[] = array(
-                                            'x' => $dataset->timeVector[$i]*1000.0,
-                                            'y' => null
-                                    ) ;
-                    }
-
-                        $inc_series_desc = array(
-                                'name' => 'Better than Control',
-                                'yAxis' => $yAxis['index'],
-                                'type' => 'area',
-                                'color' => self::OVERPERFORMING_COLOR,
-                                'showInLegend' => !isset($this->betterThanControlInLegend),
-                                'legendIndex' => 100001,
-                                'data' => $versionValues
-                                            );
-                                            $this->betterThanControlInLegend = true;
-                                            $this->_chart['series'][] = $inc_series_desc;
-                }
-                if(!isset($this->controlRegionTimeIntervalInLegend) ) {
-                        $versionValues = array();
-                    foreach($dataset->versionVector as $i => $v)
-                        {
-                                        $versionValues[] = array(
-                                                'x' => $dataset->timeVector[$i]*1000.0,
-                                                'y' => null
-                                        ) ;
-                    }
-
-                        $inc_series_desc = array(
-                                'name' => 'Control Region Time Interval',
-                                'yAxis' => $yAxis['index'],
-                                'type' => 'area',
-                                'color' => self::CONTROL_REGION_TIME_INTERVAL_COLOR,
-                                'showInLegend' => !isset($this->controlRegionTimeIntervalInLegend),
-                                'legendIndex' => 100001,
-                                'data' => $versionValues
-                                            );
-                                            $this->controlRegionTimeIntervalInLegend = true;
-                                            $this->_chart['series'][] = $inc_series_desc;
-                }
-
             }
-            if($contextMenuOnClick!==null) {
-                for($i=0; $i<count($this->_chart['series']); $i++) {
-                    $this->_chart['series'][$i]['cursor'] = 'pointer';
-                }
-            }
-                    $this->_datasetCount++;
+            $this->_datasetCount++;
         }
         $this->setDataSource(array('XDMoD App Kernels'));
     }
@@ -680,7 +909,7 @@ class HighChartAppKernel extends HighChart2
             1 => 'circle',
             2 => 'square',
             4 => 'diamond',
-            8 => 'triangle',
+            8 => 'triangle-up',
             16 => 'triangle-down',
             32 => 'circle',
             64 => 'square',
@@ -701,9 +930,9 @@ class HighChartAppKernel extends HighChart2
         $returnData = $this->exportJsonStore();
 
         if($format == 'img_tag') {
-            return '<img class="xd-img" alt="'.$this->getTitle().'" width="'.$this->_width*$this->_scale.'" height="'.$this->_height*$this->_scale.'"  class="chart_thumb-img" src="data:image/png;base64,'.base64_encode(\xd_charting\exportHighchart($returnData['data'][0], $this->_width, $this->_height, $this->_scale, 'png')).'" />';
+            return '<img class="xd-img" alt="'.$this->getTitle().'" width="'.$this->_width*$this->_scale.'" height="'.$this->_height*$this->_scale.'"  class="chart_thumb-img" src="data:image/png;base64,'.base64_encode(\xd_charting\exportChart($returnData['data'][0], $this->_width, $this->_height, $this->_scale, 'png')).'" />';
         }
 
-        return \xd_charting\exportHighchart($returnData['data'][0], $this->_width, $this->_height, $this->_scale, $format);
+        return \xd_charting\exportChart($returnData['data'][0], $this->_width, $this->_height, $this->_scale, $format);
     }
 }
