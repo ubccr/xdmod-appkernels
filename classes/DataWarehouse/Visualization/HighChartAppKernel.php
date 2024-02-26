@@ -210,15 +210,15 @@ class HighChartAppKernel extends AggregateChart
                     $yMin=0;
                 }
 
+                $axisIndex = $this->_axis_index[$dataset->metricUnit] + 1;
+                $axis = $axisIndex == 1 ? 'yaxis' : "yaxis{$axisIndex}";
                 if($this->_axis[$dataset->metricUnit]['range'][0]>$yMin) {
                     $this->_axis[$dataset->metricUnit]['range'][0]=$yMin;
-                    $index = $this->_axis_index[$dataset->metricUnit] == 0 ? 'yaxis' : "yaxis{$this->_axis_index[$dataset->metricUnit]}";
-                    $this->_chart['layout'][$index]['range'][0]=$yMin;
+                    $this->_chart['layout'][$axis]['range'][0]=$yMin;
                 }
                 if($this->_axis[$dataset->metricUnit]['range'][1]<$yMax) {
                     $this->_axis[$dataset->metricUnit]['range'][1]=$yMax;
-                    $index = $this->_axis_index[$dataset->metricUnit] == 0 ? 'yaxis' : "yaxis{$this->_axis_index[$dataset->metricUnit]}";
-                    $this->_chart['layout'][$index]['range'][1]=$yMax;
+                    $this->_chart['layout'][$axis]['range'][1]=$yMax;
                 }
             }
         }
@@ -251,22 +251,29 @@ class HighChartAppKernel extends AggregateChart
 
             $xValues = array();
             $yValues = array();
+            $seriesData = array();
             foreach($dataset->valueVector as $i => $v)
             {
                 $sv = array(
                     'x' => date('Y-m-d H:i:s', $dataset->timeVector[$i]),
-                    'y' => (double)$v + (0.2 * $v)
+                    'y' => (double)$v
                 );
+
                 if($v===null) {
                     $sv['y'] = null;
                 }
+
+                $seriesData[] = array(
+                    'x' => $dataset->timeVector[$i],
+                    'y' => $sv['y']
+                );
 
                 if($showChangeIndicator && $dataset->versionVector[$i] > 0) {
                     $this->_chart['layout']['images'][] = array(
                         'source' => $this->_indicator_url,
                         'name' => 'Change Indicator',
-                        'sizex' => 1.25*24*60*60*1000,
-                        'sizey' => 1.25*24*60*60*1000,
+                        'sizex' => 2*24*60*60*1000,
+                        'sizey' => 20,
                         'xref' => 'x',
                         'yref' => 'y',
                         'xanchor' => 'center',
@@ -316,6 +323,7 @@ class HighChartAppKernel extends AggregateChart
                 ), 
                 'x' => $this->_swapXY ? $yValues : $xValues,
                 'y' => $this->_swapXY ? $xValues : $yValues,
+                'seriesData' => $seriesData,
             );
 
             if($drillDown&&$contextMenuOnClick===null) {
@@ -414,10 +422,15 @@ class HighChartAppKernel extends AggregateChart
             if($showChangeIndicator && $versionSum > 0 && !isset($this->changeIndicatorInLegend) ) {
                 $versionXValues = array();
                 $versionYValues = array();
+                $versionSeries = array();
                 foreach($dataset->versionVector as $i => $v)
                 {
                     $versionXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
                     $versionYValues[] = null;
+                    $versionSeries[] = array(
+                        'x' => $dataset->timeVector[$i],
+                        'y' => null;
+                    );
                 }
 
                 $version_trace = array_merge($trace, array(
@@ -425,12 +438,16 @@ class HighChartAppKernel extends AggregateChart
                     'yaxis' => "y{$yAxis['index']}",
                     'zIndex' => 9,
                     'mode' => 'markers',
+                    'marker' => array(
+                        'symbol' => 'hourglass'
+                    ),
                     'type' => 'scatter',
                     'showlegend' => !isset($this->changeIndicatorInLegend),
                     'legendrank' => 1004,
                     'hoverinfo' => 'skip',
                     'x' => $this->_swapXY ? $versionYValues : $versionXValues,
-                    'y' => $this->_swapXY ? $versionXValues : $versionYValues
+                    'y' => $this->_swapXY ? $versionXValues : $versionYValues,
+                    'seriesData' => $versionSeries,
                 ));
 
                 if ($this->_swapXY) {
@@ -445,10 +462,15 @@ class HighChartAppKernel extends AggregateChart
             if($showRunningAverages) {
                 $averageXValues = array();
                 $averageYValues = array();
+                $averageSeries = array();
                 foreach($dataset->runningAverageVector as $i => $v)
                 {
                     $averageXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
                     $averageYValues[] = $v ? (double)$v : null;
+                    $averageSeries[] = array(
+                        'x' => $dataset->timeVector[$i],
+                        'y' => $v ? (double)$v : null
+                    );
                 }
 
                 $aColor = '#'.str_pad(dechex(\DataWarehouse\Visualization::alterBrightness($color, -200)), 6, '0', STR_PAD_LEFT);
@@ -467,6 +489,7 @@ class HighChartAppKernel extends AggregateChart
                     'hovertemplate' => 'Running Average: <b>%{y:,}</b> <extra></extra>',
                     'x' => $this->_swapXY ? $averageYValues : $averageXValues,
                     'y' => $this->_swapXY ? $averageXValues : $averageYValues,
+                    'seriesData' => $averageSeries,
                 ));
 
                 if ($this->_swapXY) {
@@ -544,6 +567,7 @@ class HighChartAppKernel extends AggregateChart
 
                 $controlVectorXValues = array();
                 $controlVectorYValues = array();
+                $controlVectorSeries = array();
                 foreach($dataset->controlVector as $i => $control)
                 {
                     if($discreteControls) {
@@ -557,13 +581,18 @@ class HighChartAppKernel extends AggregateChart
                     }
                     $controlVectorXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
                     $controlVectorYValues[] = (double)$control;
+                    $controlVectorSeries[] = array(
+                        'x' => $dataset->timeVector[$i],
+                        'y' => (double)$control
+                    );
                 }
 
                 $control_vector_trace = array_merge($trace, array(
                     'name' => 'Control',
                     'zIndex' => 7,
                     'marker' => array(
-                        'color' => '#7cb5ec'
+                        'color' => '#7cb5ec',
+                        'symbol' => 'diamond'
                     ),
                     'line' => array(
                         'color' => '#7cb5ec',
@@ -574,7 +603,8 @@ class HighChartAppKernel extends AggregateChart
                     'legendrank' => 1002,
                     'hovertemplate' => 'Control : <b>%{y:,}</b> <extra></extra>',
                     'x' => $this->_swapXY ? $controlVectorYValues : $controlVectorXValues,
-                    'y' => $this->_swapXY ? $controlVectorXValues : $controlVectorYValues
+                    'y' => $this->_swapXY ? $controlVectorXValues : $controlVectorYValues,
+                    'seriesData' => $controlVectorSeries
                 ));
 
                 if ($this->_swapXY) {
@@ -590,9 +620,11 @@ class HighChartAppKernel extends AggregateChart
                 $min = array();
                 $max = array();
                 $minMaxXValues = array();
+                $minMaxSeries = array();
                 foreach($dataset->valueLowVector as $i => $v)
                 {
                     $v2 = $dataset->controlEndVector[$i];
+                    $minMaxXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
                     $min[] = $v?(double)$v:null;
                     if (!is_null($v) && !is_null($v2)) {
                         $max[] = $v2 - $v1;
@@ -600,6 +632,10 @@ class HighChartAppKernel extends AggregateChart
                     else {
                         $max[] = null;
                     }
+                    $minMaxSeries[] = array(
+                        'x' => $dataset->timeVector[$i],
+                        'y' => $v2 - $v1
+                    );
                 }
                 $min_max_start = array_merge($trace, array(
                     'name' => 'MinMax Start',
@@ -644,7 +680,8 @@ class HighChartAppKernel extends AggregateChart
                     'hovertemplate' => 'MinMax: <b>%{y:,} - %{customdata}</b> <extra></extra>',
                     'stackgroup' => '1',
                     'x' => $this->_swapXY ? $max : $minMaxXValues,
-                    'y' => $this->_swapXY ? $minMaxXValues : $max
+                    'y' => $this->_swapXY ? $minMaxXValues : $max,
+                    'seriesData' => $minMaxSeries
                 ));
 
                 if ($this->_swapXY) {
@@ -660,6 +697,7 @@ class HighChartAppKernel extends AggregateChart
                 $startValues = array();
                 $endValues = array();
                 $controlIntervalXValues = array();
+                $controlIntervalSeries = array();
                 foreach($dataset->controlStartVector as $i => $v)
                 {
                     $v2 = $dataset->controlEndVector[$i];
@@ -671,6 +709,10 @@ class HighChartAppKernel extends AggregateChart
                     else {
                         $endValues[] = null;
                     }
+                    $controlIntervalSeries[] = array(
+                        'x' => $dataset->timeVector[$i],
+                        'y' => $v2 - $v1
+                    );
                 }
 
                 $control_interval_start = array_merge($trace, array(
@@ -715,7 +757,8 @@ class HighChartAppKernel extends AggregateChart
                     'legendrank' => 1004,
                     'hovertemplate' => 'Control Band: <b>%{y} - %{customdata}</b> <extra></extra>', 
                     'x' => $this->_swapXY ? $endValues : $controlIntervalXValues,
-                    'y' => $this->_swapXY ? $controlIntervalXValues : $endValues
+                    'y' => $this->_swapXY ? $controlIntervalXValues : $endValues,
+                    'seriesData' => $controlInvervalSeries
                 ));
 
                 if ($this->_swapXY) {

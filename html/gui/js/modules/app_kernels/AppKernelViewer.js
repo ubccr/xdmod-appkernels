@@ -570,7 +570,11 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                             l: 5,
                             r: 5,
                             b: 35
-                        }; 
+                        };
+                        for (let i = 0; i < chartOptions.layout.images.length; i++) {
+                            chartOptions.layout.images[i].sizex *= 2;
+                            chartOptions.layout.images[i].sizey = 40;
+                        }
                         this.charts.push(XDMoD.utils.createChart(chartOptions));
                     } else {
                         this.chart = XDMoD.utils.createChart(chartOptions);
@@ -1230,7 +1234,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
         this.maximizeScale();
 
         if (this.chart) {
-           const chartDiv = document.getElementById(this.chart.id);
+            const chartDiv = document.getElementById(this.chart.id);
             if (chartDiv) {
                 Plotly.relayout(this.chart.id, { width: adjWidth, height: adjHeight });
                 if (chartDiv._fullLayout.annotations.length !== 0) {
