@@ -273,7 +273,7 @@ class HighChartAppKernel extends AggregateChart
                         'source' => $this->_indicator_url,
                         'name' => 'Change Indicator',
                         'sizex' => 2*24*60*60*1000,
-                        'sizey' => 20,
+                        'sizey' => 40, // Need to find the right sizing here
                         'xref' => 'x',
                         'yref' => 'y',
                         'xanchor' => 'center',
@@ -331,7 +331,7 @@ class HighChartAppKernel extends AggregateChart
             }
 
             if ($resultCount > 1) {
-                $trace['hovertemplate'] = '%{hovertext} <br>' . "<span style=\"color:$color\";> ●</span> "
+                $trace['hovertemplate'] = '%{hovertext|%Y/%m/%d %H:%M:%S} <br>' . "<span style=\"color:$color\";> ●</span> "
                                           . $datasetName . ": <b>%{y:,}</b> <extra></extra>";
             }
 
@@ -429,7 +429,7 @@ class HighChartAppKernel extends AggregateChart
                     $versionYValues[] = null;
                     $versionSeries[] = array(
                         'x' => $dataset->timeVector[$i],
-                        'y' => null;
+                        'y' => null
                     );
                 }
 
