@@ -218,7 +218,7 @@ Ext.extend(XDMoD.Arr.AppKerSuccessRatePlotPanel, Ext.Panel, {
         if ( ! this.durationToolbar.validate() ) return;
 
         this.mask('Loading...');
-        plotlyPanel.un('resize', onResize, this); 
+        plotlyPanel.un('resize', onResize, this);
 
         chartStore.baseParams = {};
         Ext.apply(this.chartStore.baseParams, getBaseParams.call(this));

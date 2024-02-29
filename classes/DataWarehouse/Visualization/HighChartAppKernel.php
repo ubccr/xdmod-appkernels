@@ -940,13 +940,13 @@ class HighChartAppKernel extends AggregateChart
                         $ooc_trace['xaxis'] = "x{$yIndex}";
                         unset($ooc_trace['yaxis']);
                     }
-  
+
                     $this->outOfControlInLegend = true;
                     $this->_chart['data'][] = $ooc_trace;
                 }
                 if(!isset($this->betterThanControlInLegend) ) {
                     $betterThanControlXValues = array();
-                    $betterThanControlYValues = array(); 
+                    $betterThanControlYValues = array();
                     foreach($dataset->versionVector as $i => $v)
                     {
                         $betterThanControlXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
@@ -978,7 +978,7 @@ class HighChartAppKernel extends AggregateChart
                 }
                 if(!isset($this->controlRegionTimeIntervalInLegend) ) {
                     $controlRegionTimeIntervalXValues = array();
-                    $controlRegionTimeIntervalYValues = array(); 
+                    $controlRegionTimeIntervalYValues = array();
                     foreach($dataset->versionVector as $i => $v)
                     {
                         $controlRegionTimeIntervalXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
