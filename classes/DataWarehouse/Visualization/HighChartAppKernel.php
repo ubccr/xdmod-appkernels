@@ -320,7 +320,7 @@ class HighChartAppKernel extends AggregateChart
                         'family' => 'Lucida Grande, Lucida Sans Unicode, Arial, Helvetica, sans-serif',
                     ),
                     'namelength' => -1,
-                ), 
+                ),
                 'x' => $this->_swapXY ? $yValues : $xValues,
                 'y' => $this->_swapXY ? $xValues : $yValues,
                 'seriesData' => $seriesData,
@@ -360,7 +360,7 @@ class HighChartAppKernel extends AggregateChart
                 }
 
                 $this->_chart['data'][] = $null_trace;
-            } 
+            }
 
             // Handle swap axis
             $yAxisName = $yAxis['axisname'];
@@ -529,7 +529,7 @@ class HighChartAppKernel extends AggregateChart
                         'separatethousands' => true,
                         'overlaying' => $this->_axisCount == 0 ? null : 'y',
                         'linewidth' => 1 + $font_size/4,
-                        'linecolor' => '#c0d0e0', 
+                        'linecolor' => '#c0d0e0',
                         'side' => $this->_axisCount % 2 == 0 ? 'left' : 'right',
                         'anchor' => 'free',
                         'autoshift' => true,
@@ -610,7 +610,7 @@ class HighChartAppKernel extends AggregateChart
                 if ($this->_swapXY) {
                     $controlIndex = $this->_axis['control']['index'];
                     $control_vector_trace['xaxis'] = "x{$controlIndex}";
-                    $control_vector_trace['hovertemplate'] = 'Control : <b>%{x:,}</b> <extra></extra>'; 
+                    $control_vector_trace['hovertemplate'] = 'Control : <b>%{x:,}</b> <extra></extra>';
                     unset($control_vector_trace['yaxis']);
                 }
 
@@ -743,7 +743,7 @@ class HighChartAppKernel extends AggregateChart
                     $control_interval_start['fill'] = 'tozerox';
                     unset($control_interval_start['yaxis']);
                 }
-                $controlColor = self::IN_CONTROL_COLOR; 
+                $controlColor = self::IN_CONTROL_COLOR;
                 $control_interval_end = array_merge($trace, array(
                     'name' => 'Control Band',
                     'zIndex' => 0,
@@ -755,7 +755,7 @@ class HighChartAppKernel extends AggregateChart
                     'yaxis' => "y{$yAxis['index']}",
                     'mode' => 'none',
                     'legendrank' => 1004,
-                    'hovertemplate' => 'Control Band: <b>%{y} - %{customdata}</b> <extra></extra>', 
+                    'hovertemplate' => 'Control Band: <b>%{y} - %{customdata}</b> <extra></extra>',
                     'x' => $this->_swapXY ? $endValues : $controlIntervalXValues,
                     'y' => $this->_swapXY ? $controlIntervalXValues : $endValues,
                     'seriesData' => $controlInvervalSeries
@@ -914,7 +914,7 @@ class HighChartAppKernel extends AggregateChart
                 }
                 if(!isset($this->outOfControlInLegend) ) {
                     $outOfControlXValues = array();
-                    $outOfControlYValues = array(); 
+                    $outOfControlYValues = array();
                     foreach($dataset->versionVector as $i => $v)
                     {
                         $outOfControlXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
