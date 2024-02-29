@@ -11,7 +11,7 @@
     "ga": false,
     "_gaq": false,
     "jsPlumb": false,
-    "Highcharts": false,
+    "Plotly": false,
     "truncateText": false,
     "token": false,
     "XDMoD": false
