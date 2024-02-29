@@ -923,7 +923,7 @@ class HighChartAppKernel extends AggregateChart
 
                     $ooc_trace = array(
                             'name' => 'Out of Control',
-                            'yaxis' => $yAxis['index'],
+                            'yaxis' => "y{$yAxis['index']}",
                             'type' => 'bar',
                             'line' => array(
                                 'width' => 0
@@ -933,11 +933,16 @@ class HighChartAppKernel extends AggregateChart
                             ),
                             'showlegend' => !isset($this->outOfControlInLegend),
                             'legendrank' => 1005,
-                            'x' => $outOfControlXValues,
-                            'y' => $outOfControlYValues,
-                     );
-                     $this->outOfControlInLegend = true;
-                     $this->_chart['data'][] = $ooc_trace;
+                            'x' => $this->_swapXY ? $outOfControlYValues : $outOfControlXValues,
+                            'y' => $this->_swapXY ? $outOfControlXValues : $outOfControlYValues,
+                    );
+                    if ($this->_swapXY) {
+                        $ooc_trace['xaxis'] = "x{$yIndex}";
+                        unset($ooc_trace['yaxis']);
+                    }
+  
+                    $this->outOfControlInLegend = true;
+                    $this->_chart['data'][] = $ooc_trace;
                 }
                 if(!isset($this->betterThanControlInLegend) ) {
                     $betterThanControlXValues = array();
@@ -950,7 +955,7 @@ class HighChartAppKernel extends AggregateChart
 
                     $btc_trace = array(
                             'name' => 'Better Than Control',
-                            'yaxis' => $yAxis['index'],
+                            'yaxis' => "y{$yAxis['index']}",
                             'type' => 'bar',
                             'line' => array(
                                 'width' => 0
@@ -960,11 +965,16 @@ class HighChartAppKernel extends AggregateChart
                             ),
                             'showlegend' => !isset($this->betterThanControlInLegend),
                             'legendrank' => 1006,
-                            'x' => $betterThanControlXValues,
-                            'y' => $betterThanControlYValues,
-                     );
-                     $this->betterThanControlInLegend = true;
-                     $this->_chart['data'][] = $btc_trace;
+                            'x' => $this->_swapXY ? $betterThanControlYValues : $betterThanControlXValues,
+                            'y' => $this->_swapXY ? $betterThanControlXValues : $betterThanControlYValues,
+                        );
+                    if ($this->_swapXY) {
+                        $btc_trace['xaxis'] = "x{$yIndex}";
+                        unset($btc_trace['yaxis']);
+                    }
+
+                    $this->betterThanControlInLegend = true;
+                    $this->_chart['data'][] = $btc_trace;
                 }
                 if(!isset($this->controlRegionTimeIntervalInLegend) ) {
                     $controlRegionTimeIntervalXValues = array();
@@ -977,7 +987,7 @@ class HighChartAppKernel extends AggregateChart
 
                     $crti_trace = array(
                             'name' => 'Control Region Time Interval',
-                            'yaxis' => $yAxis['index'],
+                            'yaxis' => "y{$yAxis['index']}",
                             'type' => 'bar',
                             'line' => array(
                                 'width' => 0
@@ -987,11 +997,16 @@ class HighChartAppKernel extends AggregateChart
                             ),
                             'showlegend' => !isset($this->controlRegionTimeIntervalInLegend),
                             'legendrank' => 1007,
-                            'x' => $controlRegionTimeIntervalXValues,
-                            'y' => $controlRegionTimeIntervalYValues,
-                     );
-                     $this->controlRegionTimeIntervalInLegend = true;
-                     $this->_chart['data'][] = $crti_trace;
+                            'x' => $this->_swapXY ? $controlRegionTimeIntervalYValues : $controlRegionTimeIntervalXValues,
+                            'y' => $this->_swapXY ? $controlRegionTimeIntervalXValues : $controlRegionTimeIntervalYValues,
+                        );
+                    if ($this->_swapXY) {
+                        $crti_trace['xaxis'] = "x{$yIndex}";
+                        unset($crti_trace['yaxis']);
+                    }
+
+                    $this->controlRegionTimeIntervalInLegend = true;
+                    $this->_chart['data'][] = $crti_trace;
                 }
             }
             $this->_datasetCount++;
