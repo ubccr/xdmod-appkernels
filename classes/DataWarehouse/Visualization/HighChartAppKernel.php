@@ -810,8 +810,6 @@ class HighChartAppKernel extends AggregateChart
                                     'width' => 0
                                 ),
                                 'type' => 'rect',
-                                'showlegend' => !isset($this->outOfControlInLegend) ? true : false,
-                                'legendrank' => 1005,
                                 'xref' => $this->_swapXY ? 'paper' : 'x',
                                 'yref' => $this->_swapXY ? 'y' : 'paper',
                                 'x0' => $this->_swapXY ? 0 : date('Y-m-d H:i:s', $t0),
@@ -856,8 +854,6 @@ class HighChartAppKernel extends AggregateChart
                                 'line' => array(
                                     'width' => 0
                                 ),
-                                'showlegend' => !isset($this->betterThanControlInLegend) ? true : false,
-                                'legendrank' => 1006,
                                 'type' => 'rect',
                                 'xref' => $this->_swapXY ? 'paper' : 'x',
                                 'yref' => $this->_swapXY ? 'y' : 'paper',
@@ -902,8 +898,6 @@ class HighChartAppKernel extends AggregateChart
                                 'line' => array(
                                     'width' => 0
                                 ),
-                                'showlegend' => !isset($this->controlRegionTimeIntervalInLegend) ? true : false,
-                                'legendrank' => 1007,
                                 'type' => 'rect',
                                 'xref' => $this->_swapXY ? 'paper' : 'x',
                                 'yref' => $this->_swapXY ? 'y' : 'paper',
@@ -917,6 +911,87 @@ class HighChartAppKernel extends AggregateChart
                     if($i>=count($controlStatus)) {
                         break;
                     }
+                }
+                if(!isset($this->outOfControlInLegend) ) {
+                    $outOfControlXValues = array();
+                    $outOfControlYValues = array(); 
+                    foreach($dataset->versionVector as $i => $v)
+                    {
+                        $outOfControlXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
+                        $outOfControlYValues[] = null;
+                    }
+
+                    $ooc_trace = array(
+                            'name' => 'Out of Control',
+                            'yaxis' => $yAxis['index'],
+                            'type' => 'bar',
+                            'line' => array(
+                                'width' => 0
+                            ),
+                            'marker' => array(
+                                'color' => self::UNDERPERFORMING_COLOR
+                            ),
+                            'showlegend' => !isset($this->outOfControlInLegend),
+                            'legendrank' => 1005,
+                            'x' => $outOfControlXValues,
+                            'y' => $outOfControlYValues,
+                     );
+                     $this->outOfControlInLegend = true;
+                     $this->_chart['data'][] = $ooc_trace;
+                }
+                if(!isset($this->betterThanControlInLegend) ) {
+                    $betterThanControlXValues = array();
+                    $betterThanControlYValues = array(); 
+                    foreach($dataset->versionVector as $i => $v)
+                    {
+                        $betterThanControlXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
+                        $betterThanControlYValues[] = null;
+                    }
+
+                    $btc_trace = array(
+                            'name' => 'Better Than Control',
+                            'yaxis' => $yAxis['index'],
+                            'type' => 'bar',
+                            'line' => array(
+                                'width' => 0
+                            ),
+                            'marker' => array(
+                                'color' => self::OVERPERFORMING_COLOR
+                            ),
+                            'showlegend' => !isset($this->betterThanControlInLegend),
+                            'legendrank' => 1006,
+                            'x' => $betterThanControlXValues,
+                            'y' => $betterThanControlYValues,
+                     );
+                     $this->betterThanControlInLegend = true;
+                     $this->_chart['data'][] = $btc_trace;
+                }
+                if(!isset($this->controlRegionTimeIntervalInLegend) ) {
+                    $controlRegionTimeIntervalXValues = array();
+                    $controlRegionTimeIntervalYValues = array(); 
+                    foreach($dataset->versionVector as $i => $v)
+                    {
+                        $controlRegionTimeIntervalXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
+                        $controlRegionTimeIntervalYValues[] = null;
+                    }
+
+                    $crti_trace = array(
+                            'name' => 'Control Region Time Interval',
+                            'yaxis' => $yAxis['index'],
+                            'type' => 'bar',
+                            'line' => array(
+                                'width' => 0
+                            ),
+                            'marker' => array(
+                                'color' => self::CONTROL_REGION_TIME_INTERVAL_COLOR
+                            ),
+                            'showlegend' => !isset($this->controlRegionTimeIntervalInLegend),
+                            'legendrank' => 1007,
+                            'x' => $controlRegionTimeIntervalXValues,
+                            'y' => $controlRegionTimeIntervalYValues,
+                     );
+                     $this->controlRegionTimeIntervalInLegend = true;
+                     $this->_chart['data'][] = $crti_trace;
                 }
             }
             $this->_datasetCount++;
