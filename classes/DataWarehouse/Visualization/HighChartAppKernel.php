@@ -190,7 +190,7 @@ class HighChartAppKernel extends AggregateChart
                             'anchor' => $this->_axisCount > 1 ? 'free' : 'x',
                             'autoshift' => true,
                         ));
-                   }
+                    }
                 }
 
 
@@ -225,7 +225,6 @@ class HighChartAppKernel extends AggregateChart
         $controlPivot = -0.5;
         foreach($datasets as $index => $dataset)
         {
-            $dataCount = count($dataset->valueVector);
             $yAxis = $this->_axis[$dataset->metricUnit];
             $yAxisColorValue = $colors[($yAxis['index']-1) % 33];
             $yAxisColor = '#'.str_pad(dechex($yAxisColorValue), 6, '0', STR_PAD_LEFT);
@@ -627,14 +626,14 @@ class HighChartAppKernel extends AggregateChart
                     $minMaxXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
                     $min[] = $v?(double)$v:null;
                     if (!is_null($v) && !is_null($v2)) {
-                        $max[] = $v2 - $v1;
+                        $max[] = $v2 - $v;
                     }
                     else {
                         $max[] = null;
                     }
                     $minMaxSeries[] = array(
                         'x' => $dataset->timeVector[$i],
-                        'y' => $v2 - $v1
+                        'y' => $v2 - $v
                     );
                 }
                 $min_max_start = array_merge($trace, array(
@@ -704,14 +703,14 @@ class HighChartAppKernel extends AggregateChart
                     $controlIntervalXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
                     $startValues[] = $v?(double)$v:null;
                     if (!is_null($v) && !is_null($v2)) {
-                        $endValues[] = $v2 - $v1;
+                        $endValues[] = $v2 - $v;
                     }
                     else {
                         $endValues[] = null;
                     }
                     $controlIntervalSeries[] = array(
                         'x' => $dataset->timeVector[$i],
-                        'y' => $v2 - $v1
+                        'y' => $v2 - $v
                     );
                 }
 
@@ -743,7 +742,6 @@ class HighChartAppKernel extends AggregateChart
                     $control_interval_start['fill'] = 'tozerox';
                     unset($control_interval_start['yaxis']);
                 }
-                $controlColor = self::IN_CONTROL_COLOR;
                 $control_interval_end = array_merge($trace, array(
                     'name' => 'Control Band',
                     'zIndex' => 0,
@@ -758,7 +756,7 @@ class HighChartAppKernel extends AggregateChart
                     'hovertemplate' => 'Control Band: <b>%{y} - %{customdata}</b> <extra></extra>',
                     'x' => $this->_swapXY ? $endValues : $controlIntervalXValues,
                     'y' => $this->_swapXY ? $controlIntervalXValues : $endValues,
-                    'seriesData' => $controlInvervalSeries
+                    'seriesData' => $controlIntervalSeries
                 ));
 
                 if ($this->_swapXY) {

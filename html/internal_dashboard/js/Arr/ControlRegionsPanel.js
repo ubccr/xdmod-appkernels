@@ -732,7 +732,7 @@ XDMoD.Arr.ControlRegionsPanel=Ext.extend(XDMoD.PortalModule,
                         renderTo: id,
                         layout: {
                             width: isMenu ? CCR.xdmod.ui.thumbWidth * this.chartThumbScale : this.chartWidth * this.chartScale,
-                            height: isMenu ? CCR.xdmod.ui.thumbHeight * this.chartThumbScale : this.chartHeight * this.chartScale,
+                            height: isMenu ? CCR.xdmod.ui.thumbHeight * this.chartThumbScale : this.chartHeight * this.chartScale
                         },
                         data: [],
                         credits: {
@@ -763,7 +763,7 @@ XDMoD.Arr.ControlRegionsPanel=Ext.extend(XDMoD.PortalModule,
 
                     const chartDiv = document.getElementById(id);
                     chartDiv.on('plotly_click', (evt) => {
-                        if (evt.points && evt.points.length != 0) {
+                        if (evt.points && evt.points.length !== 0) {
                             // Drilldowns exist when hovermode = 'closest' so theres only one point
                             let xValue;
                             const needle = evt.points[0].y;
@@ -773,14 +773,11 @@ XDMoD.Arr.ControlRegionsPanel=Ext.extend(XDMoD.PortalModule,
                                     xValue = haystack[i].x;
                                 }
                             }
-                            if (drilldown) {
+                            if (xValue) {
                                 self.contextMenuOnClick({ x: xValue | 0 });
                             }
                         }
                     });
-
-
-
 
                 }, this); //task
 

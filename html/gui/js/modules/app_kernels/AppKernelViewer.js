@@ -552,7 +552,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                         renderTo: id,
                         layout: {
                             width: width,
-                            height: height,
+                            height: height
                         },
                         data: [],
                         credits: {
@@ -579,18 +579,19 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                     } else {
                         this.chart = XDMoD.utils.createChart(chartOptions);
                         this.chart.id = id;
-                    }
 
-                    const chartDiv = document.getElementById(id);
-                    chartDiv.on('plotly_click', (evt) => {
-                        if (evt.points && evt.points.length != 0) {
-                            // Drilldowns exist when hovermode = 'closest' so theres only one point
-                            const drilldown = evt.points[0].data.rawNumProcUnits;
-                            if (drilldown) {
-                                XDMoD.Module.AppKernels.AppKernelViewer.selectChildUnitsChart(drilldown);
+                        const chartDiv = document.getElementById(id);
+                        chartDiv.on('plotly_click', (evt) => {
+                            if (evt.points && evt.points.length !== 0) {
+                                // Drilldowns exist when hovermode = 'closest' so theres only one point
+                                const drilldown = evt.points[0].data.rawNumProcUnits;
+                                if (drilldown) {
+                                    XDMoD.Module.AppKernels.AppKernelViewer.selectChildUnitsChart(drilldown);
+                                }
                             }
-                        }
-                    });
+                        });
+
+                    }
                 }, this);
 
                 task.delay(0);
