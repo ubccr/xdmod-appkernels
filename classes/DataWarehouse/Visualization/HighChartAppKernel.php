@@ -814,7 +814,7 @@ class HighChartAppKernel extends AggregateChart
                                 'x1' => $this->_swapXY ? 1 : date('Y-m-d H:i:s', $t1),
                                 'y0' => $this->_swapXY ? date('Y-m-d H:i:s', $t0) : 0,
                                 'y1' => $this->_swapXY ? date('Y-m-d H:i:s', $t1) : 1,
-                           );
+                            );
                         }
                     }
                     if($i>=count($controlStatus)) {

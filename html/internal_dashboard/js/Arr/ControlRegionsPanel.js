@@ -767,14 +767,14 @@ XDMoD.Arr.ControlRegionsPanel=Ext.extend(XDMoD.PortalModule,
                             // Drilldowns exist when hovermode = 'closest' so theres only one point
                             let xValue;
                             const needle = evt.points[0].y;
-                            const haystack = evt.points[0].data.seriesData
+                            const haystack = evt.points[0].data.seriesData;
                             for (let i = 0; i < haystack.length; i++) {
                                 if (haystack[i].y === needle) {
                                     xValue = haystack[i].x;
                                 }
                             }
                             if (xValue) {
-                                self.contextMenuOnClick({ x: xValue | 0 });
+                                self.contextMenuOnClick({ x: xValue });
                             }
                         }
                     });

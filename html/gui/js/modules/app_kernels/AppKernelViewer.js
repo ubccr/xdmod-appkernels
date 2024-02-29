@@ -590,7 +590,6 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                                 }
                             }
                         });
-
                     }
                 }, this);
 
