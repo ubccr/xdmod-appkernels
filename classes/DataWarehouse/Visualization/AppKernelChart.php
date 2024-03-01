@@ -7,7 +7,7 @@ namespace DataWarehouse\Visualization;
  *
  * @author Amin Ghadersohi
  */
-class HighChartAppKernel extends AggregateChart
+class AppKernelChart extends AggregateChart
 {
     const IN_CONTROL_COLOR = 'rgba(170, 255, 170, 0.75)';
 

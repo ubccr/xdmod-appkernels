@@ -495,7 +495,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
         }
 
         $lastResult = new \AppKernel\Dataset('Empty App Kernel Dataset', -1, "", -1, "", -1, "", "", "", "");
-        $chart = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
+        $chart = new \DataWarehouse\Visualization\AppKernelChart($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
         $chart->setTitle($show_title ? 'Empty App Kernel Dataset' : null, $font_size);
         $chart->setLegend($legend_location, $font_size);
 
@@ -570,7 +570,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
                 }
                 if ($format != 'params') {
-                    $chart = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
+                    $chart = new \DataWarehouse\Visualization\AppKernelChart($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
                     $chart->setTitle($show_title ? $result->metric : null, $font_size);
                     $chart->setSubtitle($show_title ? $result->resourceName : null, $font_size);
                 }

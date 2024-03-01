@@ -119,7 +119,7 @@ class DataExplorer extends Common
         $filename = substr($filename,0,100);
         if($format === 'hc_jsonstore' || $format === 'png' || $format === 'svg' || $format === 'pdf' || $format === 'png_inline' || $format === 'svg_inline')
         {
-            $chart = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
+            $chart = new \DataWarehouse\Visualization\AppKernelChart($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
 			$title=$title?$title:implode(', ',$filename_resources).'; '.implode(', ',$filename_kernels).'; '.implode(', ',$filename_metrics);
             $chart->setTitle($show_title?($title):NULL, $font_size);
             $chart->setLegend($legend_location, $font_size);//called before and after
