@@ -266,13 +266,14 @@ class AppKernelChart extends AggregateChart
                     'x' => $dataset->timeVector[$i],
                     'y' => $sv['y']
                 );
-
+                
                 if($showChangeIndicator && $dataset->versionVector[$i] > 0) {
+                    // sizex and sizey are based of the data they reference so 
+                    // we need to scale the image to the data
                     $this->_chart['layout']['images'][] = array(
                         'source' => $this->_indicator_url,
                         'name' => 'Change Indicator',
                         'sizex' => 24*60*60*1000,
-                        'sizey' => 1, // Need to find the right sizing here
                         'xref' => 'x',
                         'yref' => 'y',
                         'xanchor' => 'center',
@@ -438,7 +439,7 @@ class AppKernelChart extends AggregateChart
                     'zIndex' => 9,
                     'mode' => 'markers',
                     'marker' => array(
-                        'symbol' => 'hourglass'
+                        'size' => 0
                     ),
                     'type' => 'scatter',
                     'showlegend' => !isset($this->changeIndicatorInLegend),
@@ -1008,6 +1009,11 @@ class AppKernelChart extends AggregateChart
                 }
             }
             $this->_datasetCount++;
+        }
+        // Fix change indicator y sizing based on max range on plot
+        for ($i = 0; $i < count($this->_chart['layout']['images']); $i++) {
+            $scale = $this->_swapXY ? $this->_chart['layout']['xaxis']['range'][1] : $this->_chart['layout']['yaxis']['range'][1];
+            $this->_chart['layout']['images'][$i]['sizey'] = max($scale * 0.025, 1);
         }
         $this->setDataSource(array('XDMoD App Kernels'));
     }

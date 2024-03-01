@@ -989,6 +989,9 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
         var plotlyPanel = new CCR.xdmod.ui.PlotlyPanel({
             id: 'plotly-panel' + this.id,
+            layout : {
+                appkernels: true
+            },
             store: chartStore
         }); // plotlyPanel
 

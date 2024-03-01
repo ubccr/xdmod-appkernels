@@ -552,7 +552,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                         renderTo: id,
                         layout: {
                             width: width,
-                            height: height
+                            height: height,
+                            appkernels: true
                         },
                         data: [],
                         credits: {
