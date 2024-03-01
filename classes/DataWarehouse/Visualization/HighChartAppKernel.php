@@ -271,8 +271,8 @@ class HighChartAppKernel extends AggregateChart
                     $this->_chart['layout']['images'][] = array(
                         'source' => $this->_indicator_url,
                         'name' => 'Change Indicator',
-                        'sizex' => 2*24*60*60*1000,
-                        'sizey' => 40, // Need to find the right sizing here
+                        'sizex' => 24*60*60*1000,
+                        'sizey' => 1, // Need to find the right sizing here
                         'xref' => 'x',
                         'yref' => 'y',
                         'xanchor' => 'center',
@@ -703,7 +703,7 @@ class HighChartAppKernel extends AggregateChart
                     $controlIntervalXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
                     $startValues[] = $v?(double)$v:null;
                     if (!is_null($v) && !is_null($v2)) {
-                        $endValues[] = $v2 - $v;
+                        $endValues[] = $v2;
                     }
                     else {
                         $endValues[] = null;
