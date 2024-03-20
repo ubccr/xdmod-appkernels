@@ -745,7 +745,7 @@ XDMoD.Arr.ControlRegionsPanel=Ext.extend(XDMoD.PortalModule,
 
                     chartOptions.layout.hovermode = chartOptions.swapXY ? 'y unified' : 'x unified';
                     if (chartOptions.data && chartOptions.data.length !== 0) {
-                        chartOptions.data[0].hovertemplate = chartOptions.data[0].name + ': <b>%{y:,}</b> <extra></extra>';
+                        chartOptions.data[0].hovertemplate = `${chartOptions.data[0].name}: <b>%{y:,}</b> <extra></extra>`;
                     }
                     if (isMenu) {
                         chartOptions.layout.thumbnail = true;
@@ -755,9 +755,9 @@ XDMoD.Arr.ControlRegionsPanel=Ext.extend(XDMoD.PortalModule,
                             r: 5,
                             b: 35
                         };
-                        for (let i = 0; i < chartOptions.layout.images.length; i++) {
-                            chartOptions.layout.images[i].sizex *= 2;
-                            chartOptions.layout.images[i].sizey = 40;
+                        for (let j = 0; j < chartOptions.layout.images.length; j++) {
+                            chartOptions.layout.images[j].sizex *= 2;
+                            chartOptions.layout.images[j].sizey = 40;
                         }
                         this.charts.push(XDMoD.utils.createChart(chartOptions));
                     } else {

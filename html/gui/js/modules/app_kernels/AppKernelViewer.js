@@ -572,9 +572,9 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                             r: 5,
                             b: 35
                         };
-                        for (let i = 0; i < chartOptions.layout.images.length; i++) {
-                            chartOptions.layout.images[i].sizex *= 2;
-                            chartOptions.layout.images[i].sizey = 40;
+                        for (let j = 0; j < chartOptions.layout.images.length; j++) {
+                            chartOptions.layout.images[j].sizex *= 2;
+                            chartOptions.layout.images[j].sizey = 40;
                         }
                         this.charts.push(XDMoD.utils.createChart(chartOptions));
                     } else {

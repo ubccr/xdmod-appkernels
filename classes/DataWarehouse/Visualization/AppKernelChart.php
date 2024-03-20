@@ -266,9 +266,9 @@ class AppKernelChart extends AggregateChart
                     'x' => $dataset->timeVector[$i],
                     'y' => $sv['y']
                 );
-                
+
                 if($showChangeIndicator && $dataset->versionVector[$i] > 0) {
-                    // sizex and sizey are based of the data they reference so 
+                    // sizex and sizey are based of the data they reference so
                     // we need to scale the image to the data
                     $this->_chart['layout']['images'][] = array(
                         'source' => $this->_indicator_url,
