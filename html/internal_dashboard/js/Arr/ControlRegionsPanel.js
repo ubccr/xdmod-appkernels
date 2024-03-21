@@ -772,9 +772,9 @@ XDMoD.Arr.ControlRegionsPanel=Ext.extend(XDMoD.PortalModule,
                             let xValue;
                             const needle = evt.points[0].y;
                             const haystack = evt.points[0].data.seriesData;
-                            for (let i = 0; i < haystack.length; i++) {
-                                if (haystack[i].y === needle) {
-                                    xValue = haystack[i].x;
+                            for (let j = 0; j < haystack.length; j++) {
+                                if (haystack[j].y === needle) {
+                                    xValue = haystack[j].x;
                                 }
                             }
                             if (xValue) {

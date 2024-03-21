@@ -139,7 +139,8 @@ Ext.extend(XDMoD.Arr.AppKerSuccessRatePlotPanel, Ext.Panel, {
       var chartScale = 1;
       var chartWidth = 757;
       var chartHeight = 400;
-      
+      let plotlyPanel;
+
       // Interrogate various components for parameters to send to the chart controller
 
       var getBaseParams = function ()
@@ -562,7 +563,7 @@ Ext.extend(XDMoD.Arr.AppKerSuccessRatePlotPanel, Ext.Panel, {
      
   // Plotly panel to render from the chart store
 
-     var plotlyPanel = new CCR.xdmod.ui.PlotlyPanel({
+     plotlyPanel = new CCR.xdmod.ui.PlotlyPanel({
        id: `plotly-panel${this.id}`,
        store: chartStore
      });
