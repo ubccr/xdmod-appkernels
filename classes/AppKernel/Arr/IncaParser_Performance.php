@@ -34,7 +34,7 @@ class IncaParser_Performance
                         InstanceData &$parsedData)
   {
     $this->_results = $parsedData;
-    
+
     // Is the data in long or short format?  If the ID tag exists as a child of
     // the performance tag then it is in long format, if there is an ID
     // attribute in the performance then it is short format.
@@ -174,11 +174,11 @@ class IncaParser_Performance
       }
       return current($this->_benchmarkInfo);
     }  // if ( NULL === $benchmarkName && NULL === $measurement )
-
+      $msg = "Benchmark does not exist: '$benchmarkName'.  Valid values are ('" .
+          implode("', '", $this->benchmarkNames()) . "')";
     if ( ! array_key_exists($benchmarkName, $this->_benchmarkInfo) )
     {
-      $msg = "Benchmark does not exist: '$benchmarkName'.  Valid values are ('" .
-        implode("', '", $this->benchmarkNames()) . "')";
+
       throw new AppKernelException($msg, AppKernelException::ParseError);
     }
 
