@@ -21,6 +21,7 @@
     "getMultiAxisObjects": false,
     "getClickedPoint": false,
     "topLegend": false,
-    "adjustTitles": false
+    "adjustTitles": false,
+    "relayoutChart": false
   }
 }
