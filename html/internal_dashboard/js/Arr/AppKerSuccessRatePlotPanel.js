@@ -697,30 +697,8 @@ Ext.extend(XDMoD.Arr.AppKerSuccessRatePlotPanel, Ext.Panel, {
         const chartDiv = document.getElementById(`plotly-panel${this.id}`);
         if (chartDiv) {
             Plotly.relayout(`plotly-panel${this.id}`, { width: adjWidth, height: adjHeight });
-            if (chartDiv._fullLayout.annotations.length !== 0) {
-                const topCenter = topLegend(chartDiv._fullLayout);
-                const subtitleLineCount = adjustTitles(chartDiv._fullLayout);
-                const marginTop = Math.min(chartDiv._fullLayout.margin.t, chartDiv._fullLayout._size.t);
-                const marginRight = chartDiv._fullLayout._size.r;
-                const legendHeight = (topCenter && !(adjHeight <= 550)) ? chartDiv._fullLayout.legend._height : 0;
-                const titleHeight = 31;
-                const subtitleHeight = 15;
-                const update = {
-                    'annotations[0].yshift': (marginTop + legendHeight) - titleHeight,
-                    'annotations[1].yshift': ((marginTop + legendHeight) - titleHeight) - (subtitleHeight * subtitleLineCount)
-                };
-
-                if (chartDiv._fullLayout.annotations.length >= 2) {
-                    const marginBottom = chartDiv._fullLayout._size.b;
-                    const plotAreaHeight = chartDiv._fullLayout._size.h;
-                    let pieChartXShift = 0;
-                    if (chartDiv._fullData.length !== 0 && chartDiv._fullData[0].type === 'pie') {
-                        pieChartXShift = subtitleLineCount > 0 ? 2 : 1;
-                    }
-                    update['annotations[2].yshift'] = (plotAreaHeight + marginBottom) * -1;
-                    update['annotations[2].xshift'] = marginRight - pieChartXShift;
-                }
-
+            if (chartDiv._fullLayout.annotations.length > 0) {
+                const update = relayoutChart(chartDiv, adjHeight, false);
                 Plotly.relayout(`plotly-panel${this.id}`, update);
             }
         }
