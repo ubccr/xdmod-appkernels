@@ -525,7 +525,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
         $paramBag->add($request->query->all());
         $paramBag->add($request->request->all());
         $params = $paramBag->all();
-        $show_unified_hover_label = count($results) > 1;
+        $show_closest_hover_label = count($results) > 1;
 
         foreach ($results as $result) {
             $result = $result->autoAggregate();
@@ -589,7 +589,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
                     true,
                     false,
                     $show_change_indicator,
-                    $show_unified_hover_label,
+                    $show_closest_hover_label,
                     $single_metric && $show_control_plot,
                     $single_metric && $discrete_controls,
                     $single_metric && $show_control_zones,
