@@ -510,6 +510,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
             true,
             false,
             $show_change_indicator,
+            false,
             $single_metric && $show_control_plot,
             $single_metric && $discrete_controls,
             $single_metric && $show_control_zones,
@@ -524,7 +525,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
         $paramBag->add($request->query->all());
         $paramBag->add($request->request->all());
         $params = $paramBag->all();
-        $resultCount = count($results);
+        $show_unified_hover_label = count($results) > 1;
 
         foreach ($results as $result) {
             $result = $result->autoAggregate();
@@ -588,14 +589,14 @@ class AppKernelControllerProvider extends BaseControllerProvider
                     true,
                     false,
                     $show_change_indicator,
+                    $show_unified_hover_label,
                     $single_metric && $show_control_plot,
                     $single_metric && $discrete_controls,
                     $single_metric && $show_control_zones,
                     $single_metric && $show_running_averages,
                     $single_metric && $show_control_interval,
                     true,
-                    $contextMenuOnClick,
-                    $resultCount
+                    $contextMenuOnClick
                 );
                 $chart->setLegend($legend_location, $font_size);
             }

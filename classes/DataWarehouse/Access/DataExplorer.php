@@ -123,6 +123,7 @@ class DataExplorer extends Common
 			$title=$title?$title:implode(', ',$filename_resources).'; '.implode(', ',$filename_kernels).'; '.implode(', ',$filename_metrics);
             $chart->setTitle($show_title?($title):NULL, $font_size);
             $chart->setLegend($legend_location, $font_size);//called before and after
+            $show_unified_hover_label = count($datasets) > 1;
             $chart->configure($datasets,
                 $font_size,
                 $limit,
@@ -132,14 +133,7 @@ class DataExplorer extends Common
                 false,
                 true,
                 $showChangeIndicator,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                count($datasets)
+                $show_unified_hover_label
             );
             $chart->setLegend($legend_location, $font_size);
             $message = NULL;

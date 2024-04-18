@@ -65,14 +65,14 @@ class AppKernelChart extends AggregateChart
         $colorsPerCore = false,
         $longLegend = false,
         $showChangeIndicator = true,
+        $showUnifiedHoverLabel = false,
         $showControls = false,
         $discreteControls = false,
         $showControlZones = false,
         $showRunningAverages = false,
         $showControlInterval = false,
         $showMinMax = false,
-        $contextMenuOnClick = null,
-        $resultCount = 0
+        $contextMenuOnClick = null
     ) {
         $this->_chart['layout']['annotations'][0]['font']['color'] = '#000000';
         $this->_chart['layout']['annotations'][0]['font']['size'] = (16 + $font_size);
@@ -80,7 +80,7 @@ class AppKernelChart extends AggregateChart
         $this->_chart['layout']['annotations'][1]['font']['color'] = '#5078a0';
         $this->_chart['layout']['annotations'][1]['font']['size'] = (12 + $font_size);
 
-        if ($resultCount > 1) {
+        if ($showUnifiedHoverLabel) {
             $this->_chart['layout']['hovermode'] = 'closest';
         }
 
