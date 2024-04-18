@@ -330,7 +330,7 @@ class AppKernelChart extends AggregateChart
                 $trace['rawNumProcUnits'] = $dataset->rawNumProcUnits;
             }
 
-            if ($resultCount > 1) {
+            if ($showClosestHoverLabel) {
                 $trace['hovertemplate'] = '%{hovertext|%Y/%m/%d %H:%M:%S} <br>' . "<span style=\"color:$color\";> ●</span> "
                                           . $datasetName . ": <b>%{y:,}</b> <extra></extra>";
             }
@@ -377,7 +377,7 @@ class AppKernelChart extends AggregateChart
             if ($this->_swapXY) {
                 $this->_chart['layout']['hovermode'] = 'y unified';
                 $trace['hovertemplate'] = $datasetName . ": <b>%{x:,}</b> <extra></extra>";
-                if ($resultCount > 1) {
+                if ($showClosestHoverLabel) {
                     $this->_chart['layout']['hovermode'] = 'closest';
                     $trace['hovertemplate'] = '%{hovertext} <br>' . "<span style=\"color:$color\";> ●</span> "
                                               . $datasetName . ": <b>%{x:,}</b> <extra></extra>";
