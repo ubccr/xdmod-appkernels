@@ -24,7 +24,7 @@ class ResourceLevel extends AppKernelLevel
         $this->problemSizes=array_keys($runStatsAppKernel->sum_map);
         $this->appKerShortname=$appKerShortname;*/
     }
-    public function detect($problemsAppKernelLevel=array()){
+    public function detect($problemsAppKernelLevel = array()){
         /*AppKernelLevel::detect();
         print "Resource:\n";
         print_r($this->problems);
