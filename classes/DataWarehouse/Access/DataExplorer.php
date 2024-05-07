@@ -34,7 +34,6 @@ class DataExplorer extends Common
         $legend_location = $this->getLegendLocation();
 
         $font_size = $this->getFontSize();
-
         $datasets = array();
 
         foreach($selectedMetrics as $metric)
@@ -120,11 +119,12 @@ class DataExplorer extends Common
         $filename = substr($filename,0,100);
         if($format === 'hc_jsonstore' || $format === 'png' || $format === 'svg' || $format === 'pdf' || $format === 'png_inline' || $format === 'svg_inline')
         {
-            $hc = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
+            $chart = new \DataWarehouse\Visualization\AppKernelChart($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
 			$title=$title?$title:implode(', ',$filename_resources).'; '.implode(', ',$filename_kernels).'; '.implode(', ',$filename_metrics);
-            $hc->setTitle($show_title?($title):NULL, $font_size);
-            $hc->setLegend($legend_location, $font_size);//called before and after
-            $hc->configure($datasets,
+            $chart->setTitle($show_title?($title):NULL, $font_size);
+            $chart->setLegend($legend_location, $font_size);//called before and after
+            $show_closest_hover_label = count($datasets) > 1;
+            $chart->configure($datasets,
                 $font_size,
                 $limit,
                 $offset,
@@ -132,10 +132,10 @@ class DataExplorer extends Common
                 false,
                 false,
                 true,
-                $showChangeIndicator
+                $showChangeIndicator,
+                $show_closest_hover_label
             );
-            $hc->setLegend($legend_location, $font_size);
-
+            $chart->setLegend($legend_location, $font_size);
             $message = NULL;
 
             if(count($selectedMetrics) < 1)
@@ -150,9 +150,9 @@ class DataExplorer extends Common
 
             if($message !== NULL)
             {
-                $hc->setTitle($message);
+                $chart->setTitle($message);
             }
-            $returnData = $hc->exportJsonStore();
+            $returnData = $chart->exportJsonStore();
 
 
             $requestDescripter = new \User\Elements\RequestDescripter($this->request);
@@ -163,7 +163,7 @@ class DataExplorer extends Common
             $returnData['data'][0]['reportGeneratorMeta'] = array(
                 'chart_args' => $chartIdentifier,
                 'title' => $title,
-                'params_title' => $hc->getSubtitleText(),
+                'params_title' => $chart->getSubtitleText(),
                 'start_date' => $start_date,
                 'end_date' => $end_date,
                 'included_in_report' => $includedInReport?'y':'n'

@@ -139,7 +139,8 @@ Ext.extend(XDMoD.Arr.AppKerSuccessRatePlotPanel, Ext.Panel, {
       var chartScale = 1;
       var chartWidth = 757;
       var chartHeight = 400;
-      
+      let plotlyPanel;
+
       // Interrogate various components for parameters to send to the chart controller
 
       var getBaseParams = function ()
@@ -218,7 +219,7 @@ Ext.extend(XDMoD.Arr.AppKerSuccessRatePlotPanel, Ext.Panel, {
         if ( ! this.durationToolbar.validate() ) return;
 
         this.mask('Loading...');
-        highChartPanel.un('resize', onResize, this); 
+        plotlyPanel.un('resize', onResize, this);
 
         chartStore.baseParams = {};
         Ext.apply(this.chartStore.baseParams, getBaseParams.call(this));
@@ -252,7 +253,7 @@ Ext.extend(XDMoD.Arr.AppKerSuccessRatePlotPanel, Ext.Panel, {
                                                   reportGeneratorMeta.included_in_report);
          */                                        
 
-         highChartPanel.on('resize', onResize, this); //re-register this after loading/its unregistered beforeload
+         plotlyPanel.on('resize', onResize, this); //re-register this after loading/its unregistered beforeload
          this.unmask();
        },this);
 
@@ -560,10 +561,10 @@ Ext.extend(XDMoD.Arr.AppKerSuccessRatePlotPanel, Ext.Panel, {
       });
      
      
-  // HighChart panel to render from the chart store
+  // Plotly panel to render from the chart store
 
-     var highChartPanel = new CCR.xdmod.ui.HighChartPanel({
-       id: 'hc-panel' + this.id,
+     plotlyPanel = new CCR.xdmod.ui.PlotlyPanel({
+       id: `plotly-panel${this.id}`,
        store: chartStore
      });
 
@@ -576,7 +577,7 @@ Ext.extend(XDMoD.Arr.AppKerSuccessRatePlotPanel, Ext.Panel, {
        tools: [
        ],
        border: false,
-       items: [highChartPanel]
+       items: [plotlyPanel]
      });
      
      
@@ -660,8 +661,8 @@ Ext.extend(XDMoD.Arr.AppKerSuccessRatePlotPanel, Ext.Panel, {
 
       function maximizeScale()
       {
-        var vWidth = highChartPanel.getWidth();
-        var vHeight = highChartPanel.getHeight() - (chartPanel.tbar? chartPanel.tbar.getHeight() : 0);
+        var vWidth = plotlyPanel.getWidth();
+        var vHeight = plotlyPanel.getHeight() - (chartPanel.tbar? chartPanel.tbar.getHeight() : 0);
         
         chartScale =  ((vWidth / 757) + (vHeight / 400))/2;
         
@@ -673,18 +674,18 @@ Ext.extend(XDMoD.Arr.AppKerSuccessRatePlotPanel, Ext.Panel, {
            
         if (aspect < 0.5) //width is less than the height
         {
-          chartWidth = highChartPanel.getWidth()/chartScale;
-          chartHeight = (highChartPanel.getWidth()/0.5)/chartScale;
+          chartWidth = plotlyPanel.getWidth()/chartScale;
+          chartHeight = (plotlyPanel.getWidth()/0.5)/chartScale;
         }
         else if (aspect > 4) //width is more than 4 times of the height
         {
-          chartWidth = highChartPanel.getWidth()/chartScale;
-          chartHeight = (highChartPanel.getWidth()/4)/chartScale;
+          chartWidth = plotlyPanel.getWidth()/chartScale;
+          chartHeight = (plotlyPanel.getWidth()/4)/chartScale;
         }
         else
         {
-          chartWidth = highChartPanel.getWidth()/chartScale;
-          chartHeight = highChartPanel.getHeight()/chartScale;
+          chartWidth = plotlyPanel.getWidth()/chartScale;
+          chartHeight = plotlyPanel.getHeight()/chartScale;
         }     
       }  // maximizeScale()
 
@@ -693,7 +694,14 @@ Ext.extend(XDMoD.Arr.AppKerSuccessRatePlotPanel, Ext.Panel, {
       function onResize(t, adjWidth, adjHeight)
       {
         maximizeScale.call(this);
-        highChartPanel.setSize(adjWidth, adjHeight);
+        const chartDiv = document.getElementById(`plotly-panel${this.id}`);
+        if (chartDiv) {
+            Plotly.relayout(`plotly-panel${this.id}`, { width: adjWidth, height: adjHeight });
+            if (chartDiv._fullLayout.annotations.length > 0) {
+                const update = relayoutChart(chartDiv, adjHeight, false);
+                Plotly.relayout(`plotly-panel${this.id}`, update);
+            }
+        }
       }  // onResize()
       
       viewPanel.on('resize', onResize, this); 

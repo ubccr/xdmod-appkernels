@@ -877,6 +877,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 'tooltip',
                 'legend',
                 'series',
+                'layout',
+                'data',
                 'plotOptions',
                 'credits',
                 'dimensions',
@@ -903,7 +905,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 return;
             }
             // eslint-disable-next-line no-use-before-define
-            highChartPanel.un('resize', onResize, this);
+            plotlyPanel.un('resize', onResize, this);
 
             // eslint-disable-next-line no-use-before-define
             maximizeScale.call(this);
@@ -961,7 +963,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
                 reportGeneratorMeta.end_date,
                 reportGeneratorMeta.included_in_report);
             // eslint-disable-next-line no-use-before-define
-            highChartPanel.on('resize', onResize, this);
+            plotlyPanel.on('resize', onResize, this);
         }, this); // chartStore.on('load'
 
         var reloadChartFunc = function () {
@@ -985,12 +987,13 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
 
         }); // assistPanel
 
-        var highChartPanel = new CCR.xdmod.ui.HighChartPanel({
-
-            id: 'hc-panel' + this.id,
+        var plotlyPanel = new CCR.xdmod.ui.PlotlyPanel({
+            id: 'plotly-panel' + this.id,
+            layout: {
+                appkernels: true
+            },
             store: chartStore
-
-        }); // highChartPanel
+        }); // plotlyPanel
 
         var chartViewPanel = new Ext.Panel({
 
@@ -1003,7 +1006,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
             border: false,
 
             items: [
-                highChartPanel,
+                plotlyPanel,
                 assistPanel
             ]
 
@@ -1087,8 +1090,17 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
             chartHeight = chartViewPanel.getHeight() - (chartViewPanel.tbar ? chartViewPanel.tbar.getHeight() : 0);
         } // maximizeScale
 
-        function onResize(t) {
+        function onResize(t, adjWidth, adjHeight, rawWidth, rawHeight) {
             maximizeScale.call(this);
+            const chartDiv = document.getElementById(`plotly-panel${this.id}`);
+
+            if (chartDiv) {
+                Plotly.relayout(`plotly-panel${this.id}`, { width: adjWidth, height: adjHeight });
+                if (chartDiv._fullLayout.annotations.length > 0) {
+                    const update = relayoutChart(chartDiv, adjHeight, false);
+                    Plotly.relayout(`plotly-panel${this.id}`, update);
+                }
+            }
         } // onResize
 
         Ext.apply(this, {

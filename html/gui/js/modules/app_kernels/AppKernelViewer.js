@@ -422,7 +422,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
         this.largeChartTemplate = new Ext.XTemplate(this.largeTemplate);
 
         this.chartStore = new Ext.data.JsonStore({
-            highChartPanels: [],
+            plotlyPanels: [],
             storeId: 'Performance',
             autoDestroy: false,
             root: 'results',
@@ -549,63 +549,13 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                             this.chartHeight * this.chartScale;
 
                     var baseChartOptions = {
-                        chart: {
-                            renderTo: id,
+                        renderTo: id,
+                        layout: {
                             width: width,
                             height: height,
-                            animation: false,
-                            events: {
-                                load: function (e) {
-                                    // Check if an empty data set was
-                                    // returned.  If not, display the
-                                    // "no data" image.
-                                    this.checkSeries = function () {
-                                        if (this.series.length === 0) {
-                                            if (this.placeholder_element) {
-                                                this.placeholder_element.destroy();
-                                            }
-
-                                            this.placeholder_element = this.renderer.image(
-                                                'gui/images/report_thumbnail_no_data.png',
-                                                isMenu ? 0 : (this.chartWidth - 400) / 2,
-                                                isMenu ? 0 : (this.chartHeight - 300) / 2,
-                                                isMenu ? this.chartWidth : 400,
-                                                isMenu ? this.chartHeight : 300
-                                            ).add();
-                                        }
-                                    };
-
-                                    this.checkSeries();
-                                },
-                                redraw: function (e) {
-                                    if (this.checkSeries) {
-                                        this.checkSeries();
-                                    }
-                                }
-                            }
+                            appkernels: true
                         },
-                        plotOptions: {
-                            series: {
-                                animation: false,
-                                point: {
-                                    events: {
-                                        click: function () {
-                                            if (this.series.userOptions.rawNumProcUnits) {
-                                                XDMoD.Module.AppKernels.AppKernelViewer.selectChildUnitsChart(this.series.userOptions.rawNumProcUnits);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        loading: {
-                            labelStyle: {
-                                top: '45%'
-                            }
-                        },
-                        exporting: {
-                            enabled: false
-                        },
+                        data: [],
                         credits: {
                             enabled: true
                         }
@@ -614,13 +564,33 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                     var chartOptions = r.get('hc_jsonstore');
                     jQuery.extend(true, chartOptions, baseChartOptions);
 
-                    chartOptions.exporting.enabled = false;
-                    chartOptions.credits.enabled = isChart;
-
                     if (isMenu) {
+                        chartOptions.layout.thumbnail = true;
+                        chartOptions.layout.margin = {
+                            t: 20,
+                            l: 5,
+                            r: 5,
+                            b: 35
+                        };
+                        for (let j = 0; j < chartOptions.layout.images.length; j++) {
+                            chartOptions.layout.images[j].sizex *= 2;
+                            chartOptions.layout.images[j].sizey = 40;
+                        }
                         this.charts.push(XDMoD.utils.createChart(chartOptions));
                     } else {
                         this.chart = XDMoD.utils.createChart(chartOptions);
+                        this.chart.id = id;
+
+                        const chartDiv = document.getElementById(id);
+                        chartDiv.on('plotly_click', (evt) => {
+                            if (evt.points && evt.points.length !== 0) {
+                                // Drilldowns exist when hovermode = 'closest' so theres only one point
+                                const drilldown = evt.points[0].data.rawNumProcUnits;
+                                if (drilldown) {
+                                    XDMoD.Module.AppKernels.AppKernelViewer.selectChildUnitsChart(drilldown);
+                                }
+                            }
+                        });
                     }
                 }, this);
 
@@ -1265,7 +1235,14 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
         this.maximizeScale();
 
         if (this.chart) {
-            this.chart.setSize(adjWidth, adjHeight);
+            const chartDiv = document.getElementById(this.chart.id);
+            if (chartDiv) {
+                Plotly.relayout(this.chart.id, { width: adjWidth, height: adjHeight });
+                if (chartDiv._fullLayout.annotations.length > 0) {
+                    const update = relayoutChart(chartDiv, adjHeight, false);
+                    Plotly.relayout(this.chart.id, update);
+                }
+            }
         }
     },
 

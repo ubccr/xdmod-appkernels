@@ -495,12 +495,12 @@ class AppKernelControllerProvider extends BaseControllerProvider
         }
 
         $lastResult = new \AppKernel\Dataset('Empty App Kernel Dataset', -1, "", -1, "", -1, "", "", "", "");
-        $hc = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
-        $hc->setTitle($show_title ? 'Empty App Kernel Dataset' : null, $font_size);
-        $hc->setLegend($legend_location, $font_size);
+        $chart = new \DataWarehouse\Visualization\AppKernelChart($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
+        $chart->setTitle($show_title ? 'Empty App Kernel Dataset' : null, $font_size);
+        $chart->setLegend($legend_location, $font_size);
 
         $datasets = array();
-        $hc->configure(
+        $chart->configure(
             $datasets,
             $font_size,
             $limit,
@@ -510,6 +510,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
             true,
             false,
             $show_change_indicator,
+            false,
             $single_metric && $show_control_plot,
             $single_metric && $discrete_controls,
             $single_metric && $show_control_zones,
@@ -517,13 +518,14 @@ class AppKernelControllerProvider extends BaseControllerProvider
             $single_metric && $show_control_interval,
             $contextMenuOnClick
         );
-
+        $chart->setLegend($legend_location, $font_size);
         srand(\DataWarehouse\VisualizationBuilder::make_seed());
 
         $paramBag = new ParameterBag();
         $paramBag->add($request->query->all());
         $paramBag->add($request->request->all());
         $params = $paramBag->all();
+        $show_closest_hover_label = count($results) > 1;
 
         foreach ($results as $result) {
             $result = $result->autoAggregate();
@@ -544,7 +546,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
                     if ($format == 'session_variable') {
                         $vis = array(
                             'random_id' => 'chart_' . rand(),
-                            'title' => $hc->getTitle(),
+                            'title' => $chart->getTitle(),
                             'short_title' => $lastResult->metric,
                             'comments' => $lastResult->description,
                             'ak_name' => $lastResult->akName,
@@ -560,25 +562,24 @@ class AppKernelControllerProvider extends BaseControllerProvider
                             'resource_id' => $lastResult->resourceId,
                             'metric_id' => $lastResult->metricId
                         );
-                        $json = $hc->exportJsonStore();
+                        $json = $chart->exportJsonStore();
                         $vis['hc_jsonstore'] = $json['data'][0];
                     } else {
-                        $vis = $hc->getRawImage($format, $params);
+                        $vis = $chart->getRawImage($format, $params);
                     }
                     $returnValue[] = $vis;
 
                 }
                 if ($format != 'params') {
-                    $hc = new \DataWarehouse\Visualization\HighChartAppKernel($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
-                    $hc->setTitle($show_title ? $result->metric : null, $font_size);
-                    $hc->setSubtitle($show_title ? $result->resourceName : null, $font_size);
+                    $chart = new \DataWarehouse\Visualization\AppKernelChart($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
+                    $chart->setTitle($show_title ? $result->metric : null, $font_size);
+                    $chart->setSubtitle($show_title ? $result->resourceName : null, $font_size);
                 }
             }
 
             if ($format != 'params') {
                 $datasets = array($result);
-
-                $hc->configure(
+                $chart->configure(
                     $datasets,
                     $font_size,
                     $limit,
@@ -588,6 +589,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
                     true,
                     false,
                     $show_change_indicator,
+                    $show_closest_hover_label,
                     $single_metric && $show_control_plot,
                     $single_metric && $discrete_controls,
                     $single_metric && $show_control_zones,
@@ -596,6 +598,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
                     true,
                     $contextMenuOnClick
                 );
+                $chart->setLegend($legend_location, $font_size);
             }
             $lastResult = $result;
         }
@@ -605,7 +608,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
         if ($format == 'session_variable') {
             $vis = array(
                 'random_id' => 'chart_' . rand(),
-                'title' => $hc->getTitle(),
+                'title' => $chart->getTitle(),
                 'short_title' => $lastResult->metric,
                 'comments' => $lastResult->description,
                 'ak_name' => $lastResult->akName,
@@ -622,10 +625,10 @@ class AppKernelControllerProvider extends BaseControllerProvider
                 'metric_id' => $lastResult->metricId
             );
 
-            $json = $hc->exportJsonStore();
+            $json = $chart->exportJsonStore();
             $vis['hc_jsonstore'] = $json['data'][0];
         } else {
-            $vis = $hc->getRawImage($format, $params);
+            $vis = $chart->getRawImage($format, $params);
         }
 
         $returnValue[] = $vis;
