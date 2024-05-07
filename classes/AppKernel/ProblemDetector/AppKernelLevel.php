@@ -52,7 +52,7 @@ class AppKernelLevel
         return $s;
     }
 
-    public function detect($problemsAppKernelLevel){
+    public function detect($problemsAppKernelLevel = array()){
         $max_days=max(array_keys($this->runStatsAppKernel->NE));
         $all_problems=array();
         $init_max_days=10;
