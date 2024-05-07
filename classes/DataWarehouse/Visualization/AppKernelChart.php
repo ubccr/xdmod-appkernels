@@ -102,7 +102,6 @@ class AppKernelChart extends AggregateChart
             'spikecolor' => '#c0c0c0',
             'showgrid' => false,
             'zeroline' => false,
-            //'dtick' => 14 * 24 * 60 * 60 * 1000, Need to look into if keep this off is better
             'linewidth' => 1 + $font_size/4,
             'linecolor' => '#c0d0e0',
         );
@@ -176,23 +175,21 @@ class AppKernelChart extends AggregateChart
                     'zeroline' => false,
                 );
 
-                if ($this->_axisCount > 0){
-                    if ($this->_axisCount % 2 == 0) {
-                        $yAxis = array_merge($yAxis, array(
-                            'side' => 'left',
-                            'anchor' => 'free',
-                            'autoshift' => true,
-                        ));
+                if ($this->_axisCount > 0) {
+                    $side = 'left';
+                    $anchor = 'free';
+                    if ($this->_axisCount % 2 == 1) {
+                        $side = 'right';
                     }
-                    else {
-                        $yAxis = array_merge($yAxis, array(
-                            'side' => 'right',
-                            'anchor' => $this->_axisCount > 1 ? 'free' : 'x',
-                            'autoshift' => true,
-                        ));
+                    if ($this->_axisCount == 1) {
+                        $anchor = 'x';
                     }
+                    $yAxis = array_merge($yAxis, array(
+                        'side' => $side,
+                        'anchor' => $anchor,
+                        'autoshift' => true,
+                    ));
                 }
-
 
                 $this->_axis[$dataset->metricUnit] = $yAxis;
                 $this->_axis_index[$dataset->metricUnit]= $yIndex - 1;

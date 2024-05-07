@@ -775,6 +775,7 @@ XDMoD.Arr.ControlRegionsPanel=Ext.extend(XDMoD.PortalModule,
                             for (let j = 0; j < haystack.length; j++) {
                                 if (haystack[j].y === needle) {
                                     xValue = haystack[j].x;
+                                    break;
                                 }
                             }
                             if (xValue) {
