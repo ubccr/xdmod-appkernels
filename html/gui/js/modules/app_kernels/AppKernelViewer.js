@@ -1,4 +1,4 @@
-/* global XDMoD, CCR, Ext, document, jQuery */
+/* global XDMoD, CCR, Ext, document */
 /**
  * This class contains functionality for the App Kernels tab.
  *

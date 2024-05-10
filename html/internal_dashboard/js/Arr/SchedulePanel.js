@@ -136,7 +136,7 @@ XDMoD.Arr.SchedulePanel = Ext.extend(Ext.FormPanel, {
                             fetch(`${XDMoD.REST.url}/akrr/tasks/scheduled/${self.getForm().active_record.data.task_id}?token=${XDMoD.REST.token}`, {
                                 method: 'DELETE'
                             })
-                            .then((respone) => {
+                            .then((response) => {
                                 if (!response.ok) {
                                     throw new Error(`An Exception has occurred: [${response.status}] ${response.statusText}`);
                                 }
