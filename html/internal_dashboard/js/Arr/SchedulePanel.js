@@ -133,25 +133,24 @@ XDMoD.Arr.SchedulePanel = Ext.extend(Ext.FormPanel, {
                     scope: this,
                     handler: function () {
                         if (self.getForm().active_record) {
-
-                            var url =  XDMoD.REST.url + '/akrr/tasks/scheduled/' +
-                                self.getForm().active_record.data.task_id +
-                                '?token=' + XDMoD.REST.token;
-
-                            jQuery.ajax({
-                                method: 'DELETE',
-                                url: url,
-                                success: function (data, textStatus, jqXHR) {
-                                    self.fireEvent('task_removed', self.getForm().active_record);
-                                },
-                                error: function (jqXHR, textStatus, errorThrown) {
-                                    console.log('An Exception has occurred: ' + textStatus + ' ' + errorThrown);
+                            fetch(`${XDMoD.REST.url}/akrr/tasks/scheduled/${self.getForm().active_record.data.task_id}?token=${XDMoD.REST.token}`, {
+                                method: 'DELETE'
+                            })
+                            .then((respone) => {
+                                if (!response.ok) {
+                                    throw new Error(`An Exception has occurred: [${response.status}] ${response.statusText}`);
                                 }
+                                return response.json();
+                            })
+                            .then((data) => {
+                                self.fireEvent('task_removed', self.getForm().active_record);
+                            })
+                            .catch((error) => {
+                                console.log(error);
                             });
                         } else {
                             console.log("No record selected for deletion.");
                         }
-
                     }
                 },
                 {

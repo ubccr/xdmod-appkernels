@@ -562,7 +562,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                     };
 
                     var chartOptions = r.get('hc_jsonstore');
-                    jQuery.extend(true, chartOptions, baseChartOptions);
+                    chartOptions = XDMoD.utils.deepExtend({}, baseChartOptions, chartOptions);
 
                     if (isMenu) {
                         chartOptions.layout.thumbnail = true;
