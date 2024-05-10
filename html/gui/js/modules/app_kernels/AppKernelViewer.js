@@ -555,14 +555,13 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                             height: height,
                             appkernels: true
                         },
-                        data: [],
                         credits: {
                             enabled: true
                         }
                     };
 
                     var chartOptions = r.get('hc_jsonstore');
-                    chartOptions = XDMoD.utils.deepExtend({}, baseChartOptions, chartOptions);
+                    chartOptions = XDMoD.utils.deepExtend({}, chartOptions, baseChartOptions);
 
                     if (isMenu) {
                         chartOptions.layout.thumbnail = true;
