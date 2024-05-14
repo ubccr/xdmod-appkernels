@@ -734,14 +734,13 @@ XDMoD.Arr.ControlRegionsPanel=Ext.extend(XDMoD.PortalModule,
                             width: isMenu ? CCR.xdmod.ui.thumbWidth * this.chartThumbScale : this.chartWidth * this.chartScale,
                             height: isMenu ? CCR.xdmod.ui.thumbHeight * this.chartThumbScale : this.chartHeight * this.chartScale
                         },
-                        data: [],
                         credits: {
                             enabled: true
                         }
                     }; //baseChartOptions
 
                     var chartOptions = r.get('hc_jsonstore');
-                    jQuery.extend(true, chartOptions, baseChartOptions);
+                    chartOptions = XDMoD.utils.deepExtend({}, chartOptions, baseChartOptions);
 
                     chartOptions.layout.hovermode = chartOptions.swapXY ? 'y unified' : 'x unified';
                     if (chartOptions.data && chartOptions.data.length !== 0) {

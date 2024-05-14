@@ -1,4 +1,4 @@
-/* global XDMoD, CCR, Ext, document, jQuery */
+/* global XDMoD, CCR, Ext, document */
 /**
  * This class contains functionality for the App Kernels tab.
  *
@@ -555,14 +555,13 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                             height: height,
                             appkernels: true
                         },
-                        data: [],
                         credits: {
                             enabled: true
                         }
                     };
 
                     var chartOptions = r.get('hc_jsonstore');
-                    jQuery.extend(true, chartOptions, baseChartOptions);
+                    chartOptions = XDMoD.utils.deepExtend({}, chartOptions, baseChartOptions);
 
                     if (isMenu) {
                         chartOptions.layout.thumbnail = true;
