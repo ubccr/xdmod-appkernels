@@ -174,7 +174,7 @@ class IncaParser_Performance
       }
       return current($this->_benchmarkInfo);
     }  // if ( NULL === $benchmarkName && NULL === $measurement )
-      $msg = "Benchmark does not exist: '$benchmarkName'.  Valid values are ('" .
+        $msg = "Benchmark does not exist: '$benchmarkName'.  Valid values are ('" .
           implode("', '", $this->benchmarkNames()) . "')";
     if ( ! array_key_exists($benchmarkName, $this->_benchmarkInfo) )
     {
