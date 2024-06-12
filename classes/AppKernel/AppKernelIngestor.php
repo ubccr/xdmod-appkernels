@@ -565,33 +565,29 @@ class AppKernelIngestor
                                     $this->appKernelSummaryReport['parse_error']++;
                                     $this->logger->err("Parse error: '$msg'");
                                     $this->logger->debug("Raw instance data:\n{$akInstance->data}\n");
-                                    continue;
                                     break;
                                 case AppKernel\AppKernelException::Queued:
                                     $resourceReport[$akInstance->akNickname]['queued']++;
                                     $this->appKernelSummaryReport['queued']++;
                                     $this->logger->notice("Queued: '$msg'");
-                                    continue;
                                     break;
                                 case AppKernel\AppKernelException::Error:
                                     $resourceReport[$akInstance->akNickname]['error']++;
                                     $this->appKernelSummaryReport['error']++;
                                     $this->logger->err("Error: '$msg'");
-                                    continue;
                                     break;
                                 case AppKernel\AppKernelException::UnknownType:
                                     $resourceReport[$akInstance->akNickname]['unknown_type']++;
                                     $this->appKernelSummaryReport['unknown_type']++;
                                     $this->logger->warning("Unknown Type: '$msg'");
-                                    continue;
                                     break;
                                 default:
                                     $this->logger->err(array(
                                         'message' => "AppKernelException: '$msg'",
                                         'stacktrace' => $e->getTraceAsString(),
                                     ));
-                                    continue;
                                     break;
+
                             }
                         }
 
