@@ -24,7 +24,7 @@ jobs:
     steps:
       - run:
           name: Enable PHP 7.4 module
-          command: dnf module -y reset php && dnf module -y module enable php:7.4
+          command: dnf module -y reset php && dnf module -y enable php:7.4
       - run:
           name: Install PHP 7.4 and PHP module pre-reqs & an updated version of PHP Pear
           command: dnf install -y php libzip-devel php-pear php-devel
