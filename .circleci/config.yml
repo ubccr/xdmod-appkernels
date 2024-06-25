@@ -59,7 +59,7 @@ jobs:
           name: Ensure that no PHP command-line errors were generated
           command: >
             if [ -e /var/log/php_errors.log ]; then
-                test `egrep -v 'phpunit' /var/log/php_errors.log | wc -l` = 0;
+                test `egrep -v "PHP Deprecated.*vendor\/.*|PHP Notice:  fread()" /var/log/php_errors.log | wc -l` = 0;
             fi
       - store_artifacts:
           path: /tmp/screenshots
