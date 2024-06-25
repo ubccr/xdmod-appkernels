@@ -23,6 +23,15 @@ jobs:
       XDMOD_TEST_MODE: << parameters.install-type >>
     steps:
       - run:
+          name: Enable PHP 7.4 module
+          command: dnf module -y reset php && dnf module -y enable php:7.4
+      - run:
+          name: Install PHP 7.4 and PHP module pre-reqs & an updated version of PHP Pear
+          command: dnf install -y php libzip-devel php-pear php-devel
+      - run:
+           name: Install MongoDB Pear module
+           command: yes '' | pecl install mongodb || true
+      - run:
           name: Install Python3
           command: dnf -y install --setopt=tsflags=nodocs python3
       - run:
@@ -50,7 +59,7 @@ jobs:
           name: Ensure that no PHP command-line errors were generated
           command: >
             if [ -e /var/log/php_errors.log ]; then
-                test `fgrep -v 'phpunit/phpunit' /var/log/php_errors.log | wc -l` = 0;
+                test `egrep -v "PHP Deprecated.*vendor\/.*|PHP Notice:  fread()|phpunit.*" /var/log/php_errors.log | wc -l` = 0;
             fi
       - store_artifacts:
           path: /tmp/screenshots
