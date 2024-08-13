@@ -564,7 +564,7 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelViewer, XDMoD.PortalModule, {
                     chartOptions = XDMoD.utils.deepExtend({}, chartOptions, baseChartOptions);
 
                     if (isMenu) {
-                        chartOptions.layout.thumbnail = true;
+                        chartOptions.realmOverview = true;
                         chartOptions.layout.margin = {
                             t: 20,
                             l: 5,
