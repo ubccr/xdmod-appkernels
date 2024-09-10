@@ -1,7 +1,7 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
-## 2024-08-XX v11.0.0
+## 2024-08-11 v11.0.0
 
 - Maintenance / Code Quality
     - Change resource specs query to use new resourcespecs column name ([\#102](https://github.com/ubccr/xdmod-appkernels/pull/102))
