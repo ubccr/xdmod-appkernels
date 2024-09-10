@@ -1,6 +1,15 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
+## 2024-08-11 v11.0.0
+
+- Maintenance / Code Quality
+    - Change resource specs query to use new resourcespecs column name ([\#102](https://github.com/ubccr/xdmod-appkernels/pull/102))
+    - Updates for compatibility with PHP 7.4 ([\#104](https://github.com/ubccr/xdmod-appkernels/pull/104), [\#110](https://github.com/ubccr/xdmod-appkernels/pull/110))
+    - Replace jQuery with native JS ([\#108](https://github.com/ubccr/xdmod-appkernels/pull/108))
+- Bug Fixes
+    - Add default argument value for `AppKernelLevel::detect` ([\#107](https://github.com/ubccr/xdmod-appkernels/pull/107))
+
 ## 2023-09-11 v10.5.0
 
 - Miscellaneous
