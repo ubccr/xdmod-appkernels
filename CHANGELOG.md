@@ -1,7 +1,7 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
-## 2024-XX-XX v11.0.0
+## 2024-09-16 v11.0.0
 
 - Enhancements
     - Change charting library to Plotly ([\#106](https://github.com/ubccr/xdmod-appkernels/pull/106))
