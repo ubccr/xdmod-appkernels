@@ -1,10 +1,10 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
-## 2024-08-11 v11.0.0
+## 2024-09-16 v11.0.0
 
 - Enhancements
-    - Change charting library to Plotly ([\#https://github.com/ubccr/xdmod-appkernels/pull/106](https://github.com/ubccr/xdmod-appkernels/pull/106))
+    - Change charting library to Plotly ([\#106](https://github.com/ubccr/xdmod-appkernels/pull/106))
 - Maintenance / Code Quality
     - Change resource specs query to use new resourcespecs column name ([\#102](https://github.com/ubccr/xdmod-appkernels/pull/102))
     - Updates for compatibility with PHP 7.4 ([\#104](https://github.com/ubccr/xdmod-appkernels/pull/104), [\#110](https://github.com/ubccr/xdmod-appkernels/pull/110))
