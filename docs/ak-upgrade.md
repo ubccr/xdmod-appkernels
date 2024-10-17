@@ -1,5 +1,5 @@
 ---
-title: Application Kernels XDMoD module Upgrade Guide
+title: Application Kernels Upgrade Guide
 ---
 
 General Upgrade Notes
