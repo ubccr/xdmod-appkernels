@@ -27,16 +27,26 @@ url: "http://appkernels.xdmod.org" # the base hostname & protocol for your site
 github_username: ubccr
 github_url: https://github.com/ubccr/xdmod-appkernels
 xdmod_module_name: Application Kernels
-latest_version: "10.5"
-latest_sw_version: "10.5.0"
+latest_version: "11.0"
+latest_sw_version: "11.0.0"
 version_list:
+  - "11.0"
   - "10.5"
 unsupported_version_list:
   - "10.0"
   - "9.5"
-  - "9.0"
 
 defaults:
+  -
+    scope:
+      path: "11.0"
+      type: "pages"
+    values:
+      layout: "page"
+      version: "11.0"
+      sw_version: "11.0.0"
+      style: "effervescence"
+      tocversion: "v11_0toc"
   -
     scope:
       path: "10.5"
