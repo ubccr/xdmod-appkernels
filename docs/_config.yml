@@ -36,9 +36,9 @@ defaults:
     values:
       layout: "page"
       version: "11.0"
-      sw_version: "11.0.0"
+      sw_version: "11.0.1"
       style: "effervescence"
-      tocversion: "toc"
+      tocversion: "v11_0toc"
 
 # Build settings
 markdown: kramdown
