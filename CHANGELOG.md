@@ -1,8 +1,6 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
-## v11.0.1 development branch
-
 ## 2024-09-16 v11.0.0
 
 - Enhancements
