@@ -23,7 +23,7 @@ description: >
   week) to continuously monitor HPC system performance and reliability from the
   application users' point of view.
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://appkernels.xdmod.org" # the base hostname & protocol for your site
+url: "https://appkernels.xdmod.org" # the base hostname & protocol for your site
 github_username: ubccr
 github_url: https://github.com/ubccr/xdmod-appkernels
 xdmod_module_name: Application Kernels
@@ -36,7 +36,7 @@ defaults:
     values:
       layout: "page"
       version: "10.5"
-      sw_version: "10.5.0"
+      sw_version: "10.5.1"
       style: "effervescence"
       tocversion: "toc"
 
