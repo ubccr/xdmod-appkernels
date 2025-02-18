@@ -23,8 +23,17 @@ jobs:
       XDMOD_TEST_MODE: << parameters.install-type >>
     steps:
       - run:
+          name: Enable PHP 7.4 module
+          command: dnf module -y reset php && dnf module -y enable php:7.4
+      - run:
+          name: Install PHP 7.4 and PHP module pre-reqs & an updated version of PHP Pear
+          command: dnf install -y php libzip-devel php-pear php-devel
+      - run:
+           name: Install MongoDB Pear module
+           command: yes '' | pecl install mongodb || true
+      - run:
           name: Install Python3
-          command: yum -y install --setopt=tsflags=nodocs python3
+          command: dnf -y install --setopt=tsflags=nodocs python3
       - run:
           name: Generate OpenSSL Key
           command: openssl genrsa -rand /proc/cpuinfo:/proc/dma:/proc/filesystems:/proc/interrupts:/proc/ioports:/proc/uptime 2048 > /etc/pki/tls/private/localhost.key
