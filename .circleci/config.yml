@@ -23,14 +23,10 @@ jobs:
       XDMOD_TEST_MODE: << parameters.install-type >>
     steps:
       - run:
-          name: Enable PHP 7.4 module
-          command: dnf module -y reset php && dnf module -y enable php:7.4
-      - run:
-          name: Install PHP 7.4 and PHP module pre-reqs & an updated version of PHP Pear
-          command: dnf install -y php libzip-devel php-pear php-devel
-      - run:
-           name: Install MongoDB Pear module
-           command: yes '' | pecl install mongodb || true
+          name: Update nodejs version
+          command: |
+            dnf module -y reset nodejs
+            dnf module -y install nodejs:16
       - run:
           name: Install Python3
           command: dnf -y install --setopt=tsflags=nodocs python3
