@@ -114,7 +114,7 @@ then
     # Add an upstream branch so that the QA tests will run successfully
     git remote add upstream https://github.com/ubccr/xdmod-appkernels.git
 
-    git clone --depth=1 --branch=v1 https://github.com/ubccr/xdmod-qa.git .qa
+    git clone --depth=1 --branch=v2 https://github.com/ubccr/xdmod-qa.git .qa
 
     cd $XDMOD_APPKERNEL_DIR
     $SHIPPABLE_BUILD_DIR/.qa/scripts/install.sh ./
