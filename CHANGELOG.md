@@ -1,7 +1,7 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
-## XXXX-XX-XX v11.0.1
+## 2025-03-17 v11.0.1
 
 - Miscellaneous
     - Updated for compatibility with Open XDMoD 11.0.1
