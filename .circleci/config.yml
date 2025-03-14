@@ -30,7 +30,7 @@ jobs:
           command: dnf install -y php libzip-devel php-pear php-devel
       - run:
            name: Install MongoDB Pear module
-           command: yes '' | pecl install mongodb || true
+           command: yes '' | pecl install mongodb-1.18-1 || true
       - run:
           name: Install Python3
           command: dnf -y install --setopt=tsflags=nodocs python3
