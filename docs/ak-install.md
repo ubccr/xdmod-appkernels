@@ -15,9 +15,6 @@ source package.
 RPM Installation
 ----------------
 
-Suggested for installing Open XDMoD on Red Hat, CentOS, Fedora or any
-other Linux distribution that supports RPM packages.
-
 [RPM Installation Guide](ak-install-rpm.html)
 
 Source Installation
