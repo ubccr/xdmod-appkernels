@@ -16,7 +16,7 @@ Open XDMoD in `/opt/xdmod-{{ page.sw_version }}`.
 
     # tar zxvf xdmod-appkernels-{{ page.sw_version }}.tar.gz
     # cd xdmod-appkernels-{{ page.sw_version }}
-    # ./install -prefix=/opt/xdmod-{{ page.sw_version }}
+    # ./install --prefix=/opt/xdmod-{{ page.sw_version }}
 
 ### Copy Configuration Files
 
