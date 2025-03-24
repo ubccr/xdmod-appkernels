@@ -11,4 +11,4 @@ as the main Open XDMoD software. The upgrade procedure is documented on the
 RPMs and source packages for the Open XDMoD Application Kernels module are
 available from [GitHub][github-latest-release].
 
-[github-latest-release]: https://github.com/ubccr/xdmod-appkernels/releases/latest
+[github-latest-release]: https://github.com/ubccr/xdmod-appkernels/releases/tag/v{{ page.rpm_version }}
