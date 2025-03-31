@@ -37,6 +37,7 @@ defaults:
       layout: "page"
       version: "10.5"
       sw_version: "10.5.0"
+      rpm_version: "10.5.0-1.0"
       style: "effervescence"
       tocversion: "toc"
 
