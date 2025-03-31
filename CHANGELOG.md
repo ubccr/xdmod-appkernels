@@ -1,12 +1,6 @@
 Open XDMoD Application Kernels Change Log
 =========================================
 
-## 2025-03-17 v10.5.1
-
-- Bug Fixes
-    - Fix PHP error when calculating control regions
-      ([\#128](https://github.com/ubccr/xdmod-appkernels/pull/128)).
-
 ## 2023-09-11 v10.5.0
 
 - Miscellaneous
