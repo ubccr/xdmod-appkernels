@@ -20,6 +20,8 @@ toc:
         url: /10.5/ak-configuration.html
       - page: Database Guide
         url: /10.5/ak-databases.html
+      - page: Upgrade Guide
+        url: /10.5/ak-upgrade.html
   - title: Using
     subfolderitems:
       - page: AK Usage
