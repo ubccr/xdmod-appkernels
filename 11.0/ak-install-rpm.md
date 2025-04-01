@@ -5,7 +5,16 @@ title: Application Kernels RPM Installation Guide
 Install RPM Package
 -------------------
 
-    # dnf install xdmod-appkernels-{{ page.sw_version }}-1.0.el8.noarch.rpm
+If your web server can reach GitHub via HTTPS, you can install the RPM package
+directly:
+
+    # dnf install https://github.com/ubccr/xdmod-appkernels/releases/download/v{{ page.rpm_version }}/xdmod-appkernels-{{ page.rpm_version }}.el8.noarch.rpm
+
+Otherwise, you can download the RPM file from the [GitHub page for the
+release](https://github.com/ubccr/xdmod-appkernels/releases/tag/v{{
+page.rpm_version }}) and install it:
+
+    # dnf install xdmod-appkernels-{{ page.rpm_version }}.el8.noarch.rpm
 
 Run Configuration Script
 ------------------------

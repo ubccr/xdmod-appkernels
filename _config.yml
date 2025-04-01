@@ -31,8 +31,8 @@ latest_version: "11.0"
 latest_sw_version: "11.0.0"
 version_list:
   - "11.0"
-  - "10.5"
 unsupported_version_list:
+  - "10.5"
   - "10.0"
   - "9.5"
 
@@ -45,6 +45,7 @@ defaults:
       layout: "page"
       version: "11.0"
       sw_version: "11.0.0"
+      rpm_version: "11.0.0-1.0"
       style: "effervescence"
       tocversion: "v11_0toc"
   -
@@ -55,6 +56,7 @@ defaults:
       layout: "page"
       version: "10.5"
       sw_version: "10.5.0"
+      rpm_version: "10.5.0-1.0"
       style: "effervescence"
       tocversion: "v10_5toc"
   -
