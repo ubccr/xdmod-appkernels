@@ -1,11 +1,12 @@
 <?php
 
-namespace AppKernelTest;
+namespace UnitTests;
 
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . "/../../classes/AppKernel/AppKernelDb.php";
+require_once __DIR__ . "/../../../classes/AppKernel/AppKernelDb.php";
 
+use AppKernel\AppKernelDb;
 use AppKernel\ProcessingUnit;
 use AppKernel\AppKernelDefinition;
 use AppKernel\InstanceMetric;
@@ -13,7 +14,7 @@ use AppKernel\InstanceData;
 
 function create_instance_data($ak_name, $deployment_num_proc_units, $deployment_time, $status)
 {
-    $ak_db = new \AppKernel\AppKernelDb();
+    $ak_db = new AppKernelDb();
     $db = $ak_db->getDB();
 
     $db_ak_id = $db->query(
@@ -43,7 +44,7 @@ final class AppKernelDbTest extends TestCase
         $proc_unit_node_1to4 = array_slice($proc_unit_node_1to32, 0, 3);
         $proc_unit_node_2to8 = array_slice($proc_unit_node_1to32, 1, 3);
 
-        $ak_db = new \AppKernel\AppKernelDb();
+        $ak_db = new AppKernelDb();
         $metrics_id = intval(
             $ak_db->getDB()->query(
                 'SELECT metric_id FROM mod_appkernel.metric WHERE name="Wall Clock Time"'
@@ -75,7 +76,7 @@ final class AppKernelDbTest extends TestCase
      */
     public function testProcessingUnit($start_date, $end_date, array $resource_ids, array $metrics, $expected)
     {
-        $ak_db = new \AppKernel\AppKernelDb();
+        $ak_db = new AppKernelDb();
         $actual = $ak_db->getProcessingUnits($start_date, $end_date, $resource_ids, $metrics);
 
         if ($expected === null) {
@@ -245,7 +246,7 @@ final class AppKernelDbTest extends TestCase
         $n_expected = null,
         $expected = null
     ) {
-        $ak_db = new \AppKernel\AppKernelDb();
+        $ak_db = new AppKernelDb();
         $actual = $ak_db->getUniqueAppKernels($resource_ids, $node_counts, $core_counts);
 
         if ($expected === null && $n_expected === null) {
@@ -284,7 +285,7 @@ final class AppKernelDbTest extends TestCase
 
     public function getMetricsProvider()
     {
-        $ak_db = new \AppKernel\AppKernelDb();
+        $ak_db = new AppKernelDb();
         $db = $ak_db->getDB();
         # Get metric id
         $ak_exec_exists_id = intval(
@@ -356,7 +357,7 @@ final class AppKernelDbTest extends TestCase
         $n_expected = null,
         $expected = null
     ) {
-        $ak_db = new \AppKernel\AppKernelDb();
+        $ak_db = new AppKernelDb();
         $actual = $ak_db->getMetrics($ak_def_id, $start_date, $end_date, $resource_ids, $pu_counts);
 
         if ($n_expected === null && $expected !== null) {
@@ -434,7 +435,7 @@ final class AppKernelDbTest extends TestCase
      */
     public function testLoadAppKernelInstances($ak_def_id, $resource_id, $n_expected = null, $expected = null)
     {
-        $ak_db = new \AppKernel\AppKernelDb();
+        $ak_db = new AppKernelDb();
         $actual = $ak_db->loadAppKernelInstances($ak_def_id, $resource_id);
         $db = $ak_db->getDB();
 
@@ -472,7 +473,7 @@ final class AppKernelDbTest extends TestCase
 
     public function testNewControlRegions()
     {
-        $ak_db = new \AppKernel\AppKernelDb();
+        $ak_db = new AppKernelDb();
 
         // update initial control for 5 points
         $ak_db->newControlRegions(
