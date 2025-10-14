@@ -115,7 +115,7 @@ class ArrParser implements iAppKernelParser
                        $reporter,
                        date("Y-m-d H:i:s", $parsedData->deployment_time),
                        $cause);
-        $this->logger->log(\CCR\Log::DEBUG, $msg . "\nMessage: $errMsg");
+        $this->logger->debug($msg . "\nMessage: $errMsg");
 
         $parsedData->status = InstanceData::STATUS_ERROR;
         $parsedData->ak_error_cause = $cause;
@@ -130,7 +130,7 @@ class ArrParser implements iAppKernelParser
                        $reporter,
                        $waitTime,
                        date("Y-m-d H:i:s", $parsedData->deployment_time));
-        $this->logger->log(\CCR\Log::DEBUG, $msg);
+        $this->logger->debug($msg);
 
         $parsedData->status = InstanceData::STATUS_QUEUED;
         $parsedData->ak_queue_time = $waitTime;
@@ -158,7 +158,7 @@ class ArrParser implements iAppKernelParser
         date("Y-m-d H:i:s", $parsedData->deployment_time);
       if ( InstanceData::STATUS_SUCCESS == $parsedData->status && isset($exitStatus->deployment_message) )
         $msg .= "  Message: '" . $exitStatus->deployment_message . "'";
-      $this->logger->log(\CCR\Log::WARNING, $msg);
+      $this->logger->warning($msg);
       throw new AppKernelException($msg, AppKernelException::UnknownType);
     }  // if ( NULL === $reporterType )
 

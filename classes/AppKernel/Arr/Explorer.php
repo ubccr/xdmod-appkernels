@@ -161,7 +161,7 @@ class ArrExplorer implements iAppKernelExplorer
     if ( $summary ) $sql .= " group by resource, reporternickname";
     $sql .= " order by resource" . ( $summary ? ", reporternickname" : "" );
 
-    $this->_logger->log(\CCR\Log::DEBUG, __FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
+    $this->_logger->debug(__FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
                         " - " . date("Y-m-d H:i:s", $this->_end) . ")");
 
     $result = $this->_db_akrr->query($sql);
@@ -241,7 +241,7 @@ class ArrExplorer implements iAppKernelExplorer
 
     $sql .= " group by " . ( $baseNameOnly ? "reporter" : "reporternickname" );
 
-    $this->_logger->log(\CCR\Log::DEBUG, __FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
+    $this->_logger->debug(__FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
                         " - " . date("Y-m-d H:i:s", $this->_end) . ")");
 
     $result = $this->_db_akrr->query($sql);
@@ -286,10 +286,10 @@ class ArrExplorer implements iAppKernelExplorer
     if ( 0 != count($criteriaList) ) $sql .= " where " . implode(" and ", $criteriaList);
     $sql .= " order by collected";
 
-    $this->_logger->log(\CCR\Log::DEBUG, __FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
+    $this->_logger->debug(__FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
                         " - " . date("Y-m-d H:i:s", $this->_end) . "), options: " .
                         $this->optionsToString($options));
-    $this->_logger->log(\CCR\Log::DEBUG, $sql );
+    $this->_logger->debug($sql);
 
     $result = $this->_db_akrr->query($sql);
 
@@ -332,10 +332,10 @@ class ArrExplorer implements iAppKernelExplorer
     if ( 0 != count($criteriaList) ) $sql .= " where " . implode(" and ", $criteriaList);
     $sql .= " order by reporternickname, collected";
 
-    $this->_logger->log(\CCR\Log::DEBUG, __FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
+    $this->_logger->debug(__FUNCTION__ . "() Query database (" . date("Y-m-d H:i:s", $this->_start) .
                         " - " . date("Y-m-d H:i:s", $this->_end) . "), options: " .
                         $this->optionsToString($options));
-    $this->_logger->log(\CCR\Log::DEBUG, $sql);
+    $this->_logger->debug($sql);
 
     $result = $this->_db_akrr->query($sql);
 

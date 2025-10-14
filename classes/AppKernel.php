@@ -114,7 +114,7 @@ class AppKernel
     }
     */
 
-    $logger->log(\CCR\Log::convertToMonologLevel(\CCR\Log::DEBUG), "Instantiating $classFile");
+    $logger->debug("Instantiating $classFile");
     return $className::factory($config, $logger);
 
   }  // instantiate()

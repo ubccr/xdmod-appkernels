@@ -147,7 +147,7 @@ class AppKernelDb
         );
         $numRows = $this->db->execute($sql, $params);
         if (1 === $numRows) {
-            $this->log("Added entry to ingestion log");
+            $this->logger->info("Added entry to ingestion log");
         }
 
         return (1 === $numRows);
@@ -248,7 +248,7 @@ class AppKernelDb
         while (false !== ($row = current($result))) {
             $basename = $row['ak_base_name'];
             if (empty($basename)) {
-                $this->log("App kernel definition {$row['name']} has no base name, skipping.");
+                $this->logger->info("App kernel definition {$row['name']} has no base name, skipping.");
                 continue;
             }
 
@@ -1470,10 +1470,9 @@ class AppKernelDb
         $result = $this->db->query($sql, $paramList);
 
         if (0 == count($result)) {
-            $this->log(
+            $this->logger->warning(
                 "No matching app kernels found (ak_def_id = {$options['ak_def_id']}, " .
-                "collected = {$options['collected']}, resource_id = {$options['resource_id']})",
-                \CCR\Log::WARNING
+                "collected = {$options['collected']}, resource_id = {$options['resource_id']})"
             );
             return false;
         }
@@ -1701,7 +1700,7 @@ class AppKernelDb
         // Create an app kernel instance
 
         try {
-            $this->log("Store app kernel $ak", \CCR\Log::DEBUG);
+            $this->logger->debug("Store app kernel $ak");
 
             $this->db->handle()->beginTransaction();
             if ($replace) {
@@ -1750,7 +1749,7 @@ class AppKernelDb
             }
             $this->db->handle()->commit();
         } catch (Exception $e) {
-            $this->log("Rolling back transaction", \CCR\Log::DEBUG);
+            $this->logger->debug("Rolling back transaction");
             if ($replace) {
                 $this->db->execute('set foreign_key_checks=1;');
             }
@@ -1799,7 +1798,7 @@ class AppKernelDb
         if (!$dryRunMode) {
             $this->db->execute($sql, $params);
         }
-        $this->log("-> Created new app kernel instance: $ak", \CCR\Log::DEBUG);
+        $this->logger->debug("-> Created new app kernel instance: $ak");
 
         // Set some data that will be needed for adding metrics and parameters
         // TODO These should be preset during InstanceData &$ak query
@@ -1842,7 +1841,7 @@ class AppKernelDb
         if (!$dryRunMode) {
             $this->db->execute($sql, $params);
         }
-        $this->log("-> Logged debug info for app kernel instance $ak", \CCR\Log::DEBUG);
+        $this->logger->debug("-> Logged debug info for app kernel instance $ak");
 
         return true;
     }
@@ -1873,12 +1872,11 @@ class AppKernelDb
             if (!$dryRunMode) {
                 $this->db->execute($sql, $params);
             } else {
-                $this->log("$sql  " . print_r($params, 1), \CCR\Log::DEBUG);
+                $this->logger->debug("$sql  " . print_r($params, 1));
             }
             $this->akMetrics[$ak->deployment_ak_base_name][$ak->deployment_num_proc_units][$guid] = $this->akMetricGuids[$guid];
-            $this->log(
-                "-> Associated metric '{$metric->name}' (id = {$metric->id}) with app kernel '{$ak->deployment_ak_name}' (ak_id = {$ak->db_ak_id})",
-                \CCR\Log::DEBUG
+            $this->logger->debug(
+                "-> Associated metric '{$metric->name}' (id = {$metric->id}) with app kernel '{$ak->deployment_ak_name}' (ak_id = {$ak->db_ak_id})"
             );
         }
 
@@ -1899,9 +1897,8 @@ class AppKernelDb
                 $rows = $this->db->query($sql, $params);
 
                 if (count($rows) > 1) {
-                    $this->log(
-                        "a_tree has more then one entries for ak_def_id, resource_id, metric_id, num_units",
-                        \CCR\Log::ERR
+                    $this->logger->error(
+                        "a_tree has more then one entries for ak_def_id, resource_id, metric_id, num_units"
                     );
                 }
 
@@ -1990,9 +1987,8 @@ class AppKernelDb
                 $rows = $this->db->query($sql, $params);
 
                 if (count($rows) > 1) {
-                    $this->log(
-                        "a_tree2 has more then one entries for ak_def_id, resource_id, metric_id, num_units",
-                        \CCR\Log::ERR
+                    $this->logger->error(
+                        "a_tree2 has more then one entries for ak_def_id, resource_id, metric_id, num_units"
                     );
                 }
 
@@ -2076,7 +2072,7 @@ class AppKernelDb
                 }
             }
         }
-        $this->log("-> Stored metric '{$metric->name}' for app kernel $ak", \CCR\Log::DEBUG);
+        $this->logger->debug("-> Stored metric '{$metric->name}' for app kernel $ak");
         return true;
     }
 
@@ -2100,12 +2096,11 @@ class AppKernelDb
             if (!$dryRunMode) {
                 $this->db->execute($sql, $params);
             } else {
-                $this->log("$sql  " . print_r($params, 1), \CCR\Log::DEBUG);
+                $this->logger->debug("$sql  " . print_r($params, 1));
             }
             $this->akParameters[$ak->deployment_ak_base_name][$ak->deployment_num_proc_units][$guid] = $this->akParameterGuids[$guid];
-            $this->log(
-                "-> Associated parameter '{$parameter->name}' (id = {$parameter->id}) with app kernel '{$ak->deployment_ak_name}' (ak_id = {$ak->db_ak_id})",
-                \CCR\Log::DEBUG
+            $this->logger->debug(
+                "-> Associated parameter '{$parameter->name}' (id = {$parameter->id}) with app kernel '{$ak->deployment_ak_name}' (ak_id = {$ak->db_ak_id})"
             );
         }
 
@@ -2122,7 +2117,7 @@ class AppKernelDb
         if (!$dryRunMode) {
             $this->db->execute($sql, $params);
         }
-        $this->log("-> Stored parameter '{$parameter->name}' for app kernel $ak", \CCR\Log::DEBUG);
+        $this->logger->debug("-> Stored parameter '{$parameter->name}' for app kernel $ak");
 
         return true;
     }
@@ -2152,7 +2147,7 @@ class AppKernelDb
         $this->db->execute($sql, $params);
         $id = $this->db->handle()->lastInsertId();
         $this->akIdMap[$ak->deployment_ak_base_name][$ak->deployment_num_proc_units] = $id;
-        $this->log("Added new app kernel {$ak->deployment_ak_name}", \CCR\Log::DEBUG);
+        $this->logger->debug("Added new app kernel {$ak->deployment_ak_name}");
 
         return $id;
     }
@@ -2188,13 +2183,12 @@ class AppKernelDb
 
             $sql = "INSERT INTO ak_has_metric (ak_id, metric_id, num_units) VALUES (?,?,?)";
             $params = array($ak->db_ak_id, $metricId, $ak->deployment_num_proc_units);
-            $this->log("$sql  " . print_r($params, 1), \CCR\Log::DEBUG);
+            $this->logger->debug("$sql  " . print_r($params, 1));
             $this->db->execute($sql, $params);
 
             $this->akMetricGuids[$metric->guid()] = $metricId;
-            $this->log(
-                "Add metric to ak: name='{$metric->name}', unit='{$metric->unit}' ak='{$ak->deployment_ak_name}' (id = $metricId)",
-                \CCR\Log::DEBUG
+            $this->logger->debug(
+                "Add metric to ak: name='{$metric->name}', unit='{$metric->unit}' ak='{$ak->deployment_ak_name}' (id = $metricId)"
             );
 
             return $metricId;
@@ -2204,13 +2198,12 @@ class AppKernelDb
 
         $sql = "INSERT INTO metric (name, unit, guid) VALUES (?,?,?)";
         $params = array($metric->name, $metric->unit, $guid);
-        $this->log("$sql  " . print_r($params, 1), \CCR\Log::DEBUG);
+        $this->logger->debug("$sql  " . print_r($params, 1));
         $this->db->execute($sql, $params);
         $metricId = $this->db->handle()->lastInsertId();
         $this->akMetricGuids[$metric->guid()] = $metricId;
-        $this->log(
-            "Created new metric: name='{$metric->name}', unit='{$metric->unit}' (id = $metricId)",
-            \CCR\Log::DEBUG
+        $this->logger->debug(
+            "Created new metric: name='{$metric->name}', unit='{$metric->unit}' (id = $metricId)"
         );
 
         return $metricId;
@@ -2242,13 +2235,12 @@ class AppKernelDb
 
         $sql = "INSERT INTO parameter (tag, name, unit, guid) VALUES (?,?,?,?)";
         $params = array($parameter->tag, $parameter->name, $parameter->unit, $guid);
-        $this->log("$sql  " . print_r($params, 1), \CCR\Log::DEBUG);
+        $this->logger->debug("$sql  " . print_r($params, 1));
         $this->db->execute($sql, $params);
         $parameterId = $this->db->handle()->lastInsertId();
         $this->akParameterGuids[$guid] = $parameterId;
-        $this->log(
-            "Created new parameter: name='{$parameter->name}' unit='{$parameter->unit}' tag='{$parameter->tag}' (id = $parameterId)",
-            \CCR\Log::DEBUG
+        $this->logger->debug(
+            "Created new parameter: name='{$parameter->name}' unit='{$parameter->unit}' tag='{$parameter->tag}' (id = $parameterId)"
         );
 
         return $parameterId;
@@ -2267,16 +2259,6 @@ class AppKernelDb
             return false;
         }
         return $this->resourceList[$ak->deployment_hostname]->id;
-    }
-
-    // --------------------------------------------------------------------------------
-
-    private function log($message, $level = \CCR\Log::INFO)
-    {
-        if (null === $this->logger) {
-            return;
-        }
-        $this->logger->log($level, $message);
     }
 
     // --------------------------------------------------------------------------------
@@ -2551,7 +2533,7 @@ class AppKernelDb
             );
         }
 
-        $this->log("recalculate control_region_def based on enviroment change\n", \CCR\Log::INFO);
+        $this->logger->info("recalculate control_region_def based on enviroment change\n");
         $this->db->execute("TRUNCATE TABLE control_region_def");
         if ($initial) {
             //Set initial region
@@ -2565,9 +2547,8 @@ class AppKernelDb
                 ORDER BY ak_def_id,resource_id"
             );
             foreach ($initial_regions_start as $first_run) {
-                $this->log(
-                    "Adding initial control region for app kernel: {$first_run['ak_name']} on resource: {$resourceIdMap[$first_run['resource_id']]['name']}",
-                    \CCR\Log::INFO
+                $this->logger->info(
+                    "Adding initial control region for app kernel: {$first_run['ak_name']} on resource: {$resourceIdMap[$first_run['resource_id']]['name']}"
                 );
                 $t = date_format(date_create($first_run['collected']), "Y-m-d") . " 00:00:00";
                 $t = date_format(
@@ -2605,9 +2586,8 @@ class AppKernelDb
                     $resource_id = $newenv_regions_start[$i]['resource_id'];
                     $collected = $newenv_regions_start[$i]['collected'];
                     $t = $collected;
-                    $this->log(
-                        "Adding control region due enviroment change, app kernel: {$newenv_regions_start[$i]['ak_name']} on resource: {$resourceIdMap[$newenv_regions_start[$i]['resource_id']]['name']}",
-                        \CCR\Log::INFO
+                    $this->logger->info(
+                        "Adding control region due enviroment change, app kernel: {$newenv_regions_start[$i]['ak_name']} on resource: {$resourceIdMap[$newenv_regions_start[$i]['resource_id']]['name']}"
                     );
 
                     $sql = "INSERT INTO control_region_def
@@ -2638,7 +2618,7 @@ class AppKernelDb
         $restrictToResource = null,
         $restrictToAppKernel = null
     ) {
-        $this->log("Calculating control metrics");
+        $this->logger->info("Calculating control metrics");
         $runningAverageSize = intval($runningAverageSize);
         if ($runningAverageSize < 1) {
             echo "calculateControls: runningAverageSize must be greater than zero. Aborting...\n";
@@ -2779,9 +2759,8 @@ class AppKernelDb
 
             $this->db->execute($sql, $params);
             $time_end = microtime(true);
-            $this->log(
-                "Timing(update metric_data set control = null, running_average = null)=" . ($time_end - $time_start),
-                \CCR\Log::DEBUG
+            $this->logger->debug(
+                "Timing(update metric_data set control = null, running_average = null)=" . ($time_end - $time_start)
             );
         }
 
@@ -2814,9 +2793,8 @@ class AppKernelDb
         $datasetsLength = count($datasets);
         $time_end = microtime(true);
 
-        $this->log(
-            "Timing(Get a list of possible unique datasets (datasetsQuery))=" . ($time_end - $time_start),
-            \CCR\Log::DEBUG
+        $this->logger->debug(
+            "Timing(Get a list of possible unique datasets (datasetsQuery))=" . ($time_end - $time_start)
         );
 
         $time_start_bigcycle = microtime(true);
@@ -2842,7 +2820,7 @@ class AppKernelDb
             if ($progressVerbosity === 1) {
                 $message = "Calculating running average and control values. " .
                     number_format(100.0 * $di / $datasetsLength, 2) . "% " . json_encode($dataset);
-                $this->log($message, \CCR\Log::DEBUG);
+                $this->logger->debug($message);
             }
             $control_criteria = $this->control_criteria;
             if ($akId2akDefIdMap[$dataset['ak_id']]['control_criteria'] !== null) {
@@ -2852,10 +2830,9 @@ class AppKernelDb
             // if we dont know whether smaller or larger is better it (hopefully :) ) means
             // we don't want to calculate control on it so skip
             if (!isset($metricIdToLargerMap[$dataset['metric_id']])) {
-                $this->log(
+                $this->logger->warning(
                     "Skipping metric {$dataset['metric_id']} {$metricsLookupById[$dataset['metric_id']]['name']} " .
-                    "as there was no value in metric_attributes for its larger/smaller property",
-                    \CCR\Log::WARNING
+                    "as there was no value in metric_attributes for its larger/smaller property"
                 );
                 continue;
             }
@@ -2898,10 +2875,9 @@ class AppKernelDb
 
                     // if there is no control regions initiate the first one
                     if (count($controlRegionDef) == 0) {
-                        $this->log(
+                        $this->logger->info(
                             "Adding initial control region for app kernel: {$akId2akDefIdMap[$dataset['ak_id']]['name']} " .
-                            "on resource: {$resourceIdMap[$dataset['resource_id']]['name']}",
-                            \CCR\Log::INFO
+                            "on resource: {$resourceIdMap[$dataset['resource_id']]['name']}"
                         );
                         $t = date_format(date_create($data[0]['collected']), "Y-m-d") . " 00:00:00";
                         $t = date_format(
@@ -2922,11 +2898,10 @@ class AppKernelDb
                         ];
                         $this->db->execute($sql, $params);
                     } elseif (date_create($controlRegionDef[0]['control_region_starts']) > date_create($data[0]['collected'])) {
-                        $this->log(
+                        $this->logger->info(
                             "Updating initial control region for app kernel: " .
                             "{$akId2akDefIdMap[$dataset['ak_id']]['name']} on resource: " .
-                            "{$resourceIdMap[$dataset['resource_id']]['name']}",
-                            \CCR\Log::INFO
+                            "{$resourceIdMap[$dataset['resource_id']]['name']}"
                         );
                         $t = date_format(date_create($data[0]['collected']), "Y-m-d") . " 00:00:00";
                         $t = date_format(
@@ -3404,41 +3379,36 @@ class AppKernelDb
         $time_end_bigcycle = microtime(true);
         $t_bigcycle = $time_end_bigcycle - $time_start_bigcycle;
 
-        $this->log("Timing(Cycle for calculating running average and control values)=" . ($t_bigcycle), \CCR\Log::DEBUG);
-        $this->log(
+        $this->logger->debug("Timing(Cycle for calculating running average and control values)=" . ($t_bigcycle));
+        $this->logger->debug(
             "    Timing(data for control calc)=" . sprintf("%.4f", $timing['dataQuery']) . " (" . sprintf(
                 "%.2f",
                 100.0 * $timing['dataQuery'] / $t_bigcycle
-            ) . "%)",
-            \CCR\Log::DEBUG
+            ) . "%)"
         );
-        $this->log(
+        $this->logger->debug(
             "    Timing(Control region calculation)=" . sprintf(
                 "%.4f",
                 $timing['contRegCalc']
-            ) . " (" . sprintf("%.2f", 100.0 * $timing['contRegCalc'] / $t_bigcycle) . "%)",
-            \CCR\Log::DEBUG
+            ) . " (" . sprintf("%.2f", 100.0 * $timing['contRegCalc'] / $t_bigcycle) . "%)"
         );
-        $this->log(
+        $this->logger->debug(
             "    Timing(data for control calc)=" . sprintf("%.4f", $timing['contCalc']) . " (" . sprintf(
                 "%.2f",
                 100.0 * $timing['contCalc'] / $t_bigcycle
-            ) . "%)",
-            \CCR\Log::DEBUG
+            ) . "%)"
         );
-        $this->log(
+        $this->logger->debug(
             "        Timing(sql update)=" . sprintf("%.4f", $timing['sqlupdate1']) . " (" . sprintf(
                 "%.2f",
                 100.0 * $timing['sqlupdate1'] / $t_bigcycle
-            ) . "%)",
-            \CCR\Log::DEBUG
+            ) . "%)"
         );
-        $this->log(
+        $this->logger->debug(
             "        Timing(sql update)=" . sprintf("%.4f", $timing['sqlupdate2']) . " (" . sprintf(
                 "%.2f",
                 100.0 * $timing['sqlupdate2'] / $t_bigcycle
-            ) . "%)",
-            \CCR\Log::DEBUG
+            ) . "%)"
         );
     }
 
@@ -3632,7 +3602,7 @@ class AppKernelDb
                 $this->db->execute($sql);
             }
         } catch (Exception $e) {
-            $this->log("Error building aggregate tables '$sql': " . $e->getMessage());
+            $this->logger->error("Error building aggregate tables '$sql': " . $e->getMessage());
             $this->db->handle()->rollback();
             throw $e;
         }
@@ -3696,7 +3666,7 @@ class AppKernelDb
                                 "ak_id={$instanceData->db_ak_id} AND collected=FROM_UNIXTIME($timestamp) AND " .
                                 "resource_id={$resource->id} AND env_version='{$instanceData->environmentVersion}'\n";
                         } catch (Exception $e) {
-                            $this->log("Error executing query '$sql': " . $e->getMessage());
+                            $this->logger->error("Error executing query '$sql': " . $e->getMessage());
                             $this->db->handle()->rollback();
                         }
                     }
