@@ -237,9 +237,8 @@ class AppKernelDb
             $sql .= " WHERE " . implode(" AND ", $sqlCriteria);
         }
 
-        $this->logger->debug(
+        $this->logger->debug('Executing query',
             array(
-                'message' => 'Executing query',
                 'sql' => $sql,
                 'params' => json_encode($sqlParams),
             )

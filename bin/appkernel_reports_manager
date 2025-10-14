@@ -150,8 +150,7 @@ $logger = Log::factory('ak-reports', $conf);
 $db = DB::factory('appkernel');
 
 // NOTE: "process_start_time" is needed for log summary.
-$logger->notice(array(
-    'message' => 'Report scheduler start',
+$logger->notice('Report scheduler start', array(
     'process_start_time' => date('Y-m-d H:i:s')
 ));
 
@@ -224,7 +223,7 @@ foreach ($allGroupDeliveries as $groupDeliveries) {
     foreach ($deliveries as $delivery) {
         $user       = XDUser::getUserByID($delivery['user_id']);
         if(is_null($user)){
-            $logger->err( "can not find user with id: {$delivery['user_id']}");
+            $logger->error( "can not find user with id: {$delivery['user_id']}");
             continue;
         }
 
@@ -262,9 +261,7 @@ foreach ($allGroupDeliveries as $groupDeliveries) {
 
             $report->sendReportToEmail($user_email);
         } catch (Exception $e) {
-            $logger->err(array(
-                'message'    =>
-                    "Error Preparing $report_type for $username ({$delivery['user_id']}): " . $e->getMessage(),
+            $logger->error("Error Preparing $report_type for $username ({$delivery['user_id']}): " . $e->getMessage(), array(
                 'stacktrace' => $e->getTraceAsString(),
             ));
         }
@@ -272,7 +269,6 @@ foreach ($allGroupDeliveries as $groupDeliveries) {
 }
 
 // NOTE: "process_end_time" is needed for log summary.
-$logger->notice(array(
-    'message'          => 'Report scheduler end',
+$logger->notice('Report scheduler end', array(
     'process_end_time' => date('Y-m-d H:i:s'),
 ));

@@ -326,8 +326,7 @@ class AppKernelIngestor
             $this->logger->debug("Loaded database resources: " . json_encode(array_keys($this->dbResourceList)));
         } catch (\PDOException $e) {
             $msg = "Error querying database for resoures: " . formatPdoExceptionMessage($e);
-            $this->logger->crit(array(
-                'message' => $msg,
+            $this->logger->critical($msg, array(
                 'stacktrace' => $e->getTraceAsString(),
             ));
             $this->ingestionLog->setStatus(false, $msg);
@@ -348,8 +347,7 @@ class AppKernelIngestor
             $this->logger->debug('DB AK ID Map: ' . json_encode($this->dbAKIdMap));
         } catch (\PDOException $e) {
             $msg = "Error querying database for appkernels: " . formatPdoExceptionMessage($e);
-            $this->logger->crit(array(
-                'message' => $msg,
+            $this->logger->critical($msg, array(
                 'stacktrace' => $e->getTraceAsString(),
             ));
             $this->ingestionLog->setStatus(false, $msg);
@@ -485,8 +483,7 @@ class AppKernelIngestor
             }
         } catch (Exception $e) {
             $msg = "Error retrieving app kernel instances: " . $e->getMessage();
-            $this->logger->crit(array(
-                'message' => $msg,
+            $this->logger->critical($msg, array(
                 'stacktrace' => $e->getTraceAsString(),
             ));
             return false;
@@ -563,7 +560,7 @@ class AppKernelIngestor
                                 case AppKernel\AppKernelException::ParseError:
                                     $resourceReport[$akInstance->akNickname]['parse_error']++;
                                     $this->appKernelSummaryReport['parse_error']++;
-                                    $this->logger->err("Parse error: '$msg'");
+                                    $this->logger->error("Parse error: '$msg'");
                                     $this->logger->debug("Raw instance data:\n{$akInstance->data}\n");
                                     break;
                                 case AppKernel\AppKernelException::Queued:
@@ -574,7 +571,7 @@ class AppKernelIngestor
                                 case AppKernel\AppKernelException::Error:
                                     $resourceReport[$akInstance->akNickname]['error']++;
                                     $this->appKernelSummaryReport['error']++;
-                                    $this->logger->err("Error: '$msg'");
+                                    $this->logger->error("Error: '$msg'");
                                     break;
                                 case AppKernel\AppKernelException::UnknownType:
                                     $resourceReport[$akInstance->akNickname]['unknown_type']++;
@@ -582,8 +579,7 @@ class AppKernelIngestor
                                     $this->logger->warning("Unknown Type: '$msg'");
                                     break;
                                 default:
-                                    $this->logger->err(array(
-                                        'message' => "AppKernelException: '$msg'",
+                                    $this->logger->error("AppKernelException: '$msg'", array(
                                         'stacktrace' => $e->getTraceAsString(),
                                     ));
                                     break;
@@ -624,7 +620,7 @@ class AppKernelIngestor
                         }
 
                         if (!$akInstance->completed) {
-                            $this->logger->err("$akInstance did not complete. message: '{$akInstance->message}'");
+                            $this->logger->error("$akInstance did not complete. message: '{$akInstance->message}'");
                             $this->logger->debug("$akInstance did not complete. message: '{$akInstance->message}', stderr: '{$akInstance->stderr}'");
                             $resourceReport[$akInstance->akNickname]['incomplete']++;
                             $this->appKernelSummaryReport['incomplete']++;
@@ -635,8 +631,7 @@ class AppKernelIngestor
                         }
                     } catch (\PDOException $e) {
                         $msg = formatPdoExceptionMessage($e);
-                        $this->logger->err(array(
-                            'message' => $msg,
+                        $this->logger->error($msg, array(
                             'stacktrace' => $e->getTraceAsString(),
                         ));
                         $resourceReport[$akInstance->akNickname]['sql_error']++;
@@ -693,8 +688,7 @@ class AppKernelIngestor
     public function run()
     {
         // NOTE: "process_start_time" is needed for the log summary.
-        $this->logger->notice(array(
-            'message' => 'Ingestion start',
+        $this->logger->notice('Ingestion start', array(
             'process_start_time' => date('Y-m-d H:i:s'),
         ));
 
@@ -710,8 +704,7 @@ class AppKernelIngestor
             $this->logger->info("OPTION: Load only app kernels starting with '$this->restrictToAppKernel'");
         }
 
-        $this->logger->notice(array(
-            'message' => 'Ingestion data time period',
+        $this->logger->notice('Ingestion data time period', array(
             'data_start_time' => date("Y-m-d H:i:s", $this->startTimestamp),
             'data_end_time' => date("Y-m-d H:i:s", $this->endTimestamp),
         ));
@@ -735,8 +728,7 @@ class AppKernelIngestor
             $this->deploymentExplorer->setQueryInterval($this->startTimestamp, $this->endTimestamp);
         } catch (Exception $e) {
             $msg = "Error creating explorer ($this->explorerType): " . $e->getMessage();
-            $this->logger->crit(array(
-                'message' => $msg,
+            $this->logger->critical($msg, array(
                 'stacktrace' => $e->getTraceAsString(),
             ));
             $this->ingestionLog->setStatus(false, $msg);
@@ -748,8 +740,7 @@ class AppKernelIngestor
             $this->parser = AppKernel::parser($this->explorerType, null, $this->logger);
         } catch (Exception $e) {
             $msg = "Error creating parser ($this->explorerType): " . $e->getMessage();
-            $this->logger->crit(array(
-                'message' => $msg,
+            $this->logger->critical($msg, array(
                 'stacktrace' => $e->getTraceAsString(),
             ));
             $this->ingestionLog->setStatus(false, $msg);
@@ -792,13 +783,11 @@ class AppKernelIngestor
                 );
             } catch (\PDOException $e) {
                 $msg = formatPdoExceptionMessage($e);
-                $this->logger->err(array(
-                    'message' => $msg,
+                $this->logger->error($msg, array(
                     'stacktrace' => $e->getTraceAsString(),
                 ));
             } catch (Exception $e) {
-                $this->logger->err(array(
-                    'message' => "Error: {$e->getMessage()} ({$e->getCode()})",
+                $this->logger->error("Error: {$e->getMessage()} ({$e->getCode()})", array(
                     'stacktrace' => $e->getTraceAsString(),
                 ));
             }
@@ -821,8 +810,7 @@ class AppKernelIngestor
         $this->logger->info($summaryReport);
 
         // NOTE: This is needed for the log summary.
-        $this->logger->notice(array(
-            'message' => 'Summary data',
+        $this->logger->notice('Summary data', array(
             'records_examined' => $this->appKernelSummaryReport['examined'],
             'records_loaded' => $this->appKernelSummaryReport['loaded'],
             'records_incomplete' => $this->appKernelSummaryReport['incomplete'],
@@ -846,8 +834,7 @@ class AppKernelIngestor
         }
 
         // NOTE: "process_end_time" is needed for the log summary.
-        $this->logger->notice(array(
-            'message' => 'Ingestion End',
+        $this->logger->notice('Ingestion End', array(
             'process_end_time' => date('Y-m-d H:i:s'),
         ));
 
