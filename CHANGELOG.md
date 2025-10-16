@@ -3,6 +3,10 @@ Open XDMoD Application Kernels Change Log
 
 ## XXXX-XX-XX v11.5.0
 
+- Enhancements
+    - Add support for PHP 8.2
+      ([\#139](https://github.com/ubccr/xdmod-appkernels/pull/139)).
+
 ## 2025-03-17 v11.0.1
 
 - Miscellaneous
