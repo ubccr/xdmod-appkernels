@@ -217,8 +217,7 @@ try {
     $appKernelIngestor = new AppKernelIngestor($logger, $config = $ingestingConfig);
     $success = $appKernelIngestor->run();
 } catch (Exception $e) {
-    $logger->crit(array(
-        'message' => "Error in Appkernel Ingestion: " . $e->getMessage(),
+    $logger->critical("Error in Appkernel Ingestion: " . $e->getMessage(), array(
         'stacktrace' => $e->getTraceAsString(),
     ));
     cleanup_and_exit(1);
