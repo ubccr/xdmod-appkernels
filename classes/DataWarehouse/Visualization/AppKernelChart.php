@@ -1012,7 +1012,6 @@ class AppKernelChart extends AggregateChart
             $scale = $this->_swapXY ? $this->_chart['layout']['xaxis']['range'][1] : $this->_chart['layout']['yaxis']['range'][1];
             $this->_chart['layout']['images'][$i]['sizey'] = max($scale * 0.025, 1);
         }
-        $this->_chart['data'] = array_reverse($this->_chart['data']); // Put data traces on top of 'Control Bands'
         $this->setDataSource(array('XDMoD App Kernels'));
     }
 
