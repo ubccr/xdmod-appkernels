@@ -470,7 +470,7 @@ class AppKernelChart extends AggregateChart
                     );
                 }
 
-                $aColor = '#'.str_pad(dechex(\DataWarehouse\Visualization::alterBrightness($color, -200)), 6, '0', STR_PAD_LEFT);
+                $aColor = '#'.str_pad(dechex(\DataWarehouse\Visualization::alterBrightness($color_value, -200)), 6, '0', STR_PAD_LEFT);
                 $average_trace = array_merge($trace, array(
                     'name' => 'Running Average',
                     'zIndex' => 8,
@@ -1012,6 +1012,7 @@ class AppKernelChart extends AggregateChart
             $scale = $this->_swapXY ? $this->_chart['layout']['xaxis']['range'][1] : $this->_chart['layout']['yaxis']['range'][1];
             $this->_chart['layout']['images'][$i]['sizey'] = max($scale * 0.025, 1);
         }
+        $this->_chart['data'] = array_reverse($this->_chart['data']); // Put data traces on top of 'Control Bands'
         $this->setDataSource(array('XDMoD App Kernels'));
     }
 
