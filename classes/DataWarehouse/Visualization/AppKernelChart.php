@@ -270,7 +270,7 @@ class AppKernelChart extends AggregateChart
                     $this->_chart['layout']['images'][] = array(
                         'source' => $this->_indicator_url,
                         'name' => 'Change Indicator',
-                        'sizex' => 2*24*60*60*1000,
+                        'sizex' => 24*60*60*1000,
                         'xref' => 'x',
                         'yref' => 'y',
                         'xanchor' => 'center',
