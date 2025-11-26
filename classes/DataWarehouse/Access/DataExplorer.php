@@ -124,7 +124,7 @@ class DataExplorer extends Common
             $chart->setTitle($show_title?($title):NULL, $font_size);
             $chart->setLegend($legend_location, $font_size);//called before and after
             $show_closest_hover_label = count($datasets) > 1;
-            $chart->configure($datasets,
+            $chart->configureAppKernelChart($datasets,
                 $font_size,
                 $limit,
                 $offset,
