@@ -55,7 +55,7 @@ class AppKernelChart extends AggregateChart
         $this->_indicator_url = '/gui/images/exclamation_ak.png';
     }
 
-    public function configure(
+    public function configureAppKernelChart(
         &$datasets,
         $font_size = 0,
         $limit = null,

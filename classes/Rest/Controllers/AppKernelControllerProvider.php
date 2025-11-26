@@ -500,7 +500,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
         $chart->setLegend($legend_location, $font_size);
 
         $datasets = array();
-        $chart->configure(
+        $chart->configureAppKernelChart(
             $datasets,
             $font_size,
             $limit,
@@ -579,7 +579,7 @@ class AppKernelControllerProvider extends BaseControllerProvider
 
             if ($format != 'params') {
                 $datasets = array($result);
-                $chart->configure(
+                $chart->configureAppKernelChart(
                     $datasets,
                     $font_size,
                     $limit,
