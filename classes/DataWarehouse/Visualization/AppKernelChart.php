@@ -413,8 +413,6 @@ class AppKernelChart extends AggregateChart
                 unset($this->_chart['layout']['yaxis']['position']);
             }
 
-            $this->_chart['data'][] = $trace;
-
             $versionSum = array_sum($dataset->versionVector);
             if($showChangeIndicator && $versionSum > 0 && !isset($this->changeIndicatorInLegend) ) {
                 $versionXValues = array();
@@ -454,49 +452,6 @@ class AppKernelChart extends AggregateChart
 
                 $this->changeIndicatorInLegend = true;
                 $this->_chart['data'][] = $version_trace;
-            }
-
-            if($showRunningAverages) {
-                $averageXValues = array();
-                $averageYValues = array();
-                $averageSeries = array();
-                foreach($dataset->runningAverageVector as $i => $v)
-                {
-                    $averageXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
-                    $averageYValues[] = $v ? (double)$v : null;
-                    $averageSeries[] = array(
-                        'x' => $dataset->timeVector[$i],
-                        'y' => $v ? (double)$v : null
-                    );
-                }
-
-                $aColor = '#'.str_pad(dechex(\DataWarehouse\Visualization::alterBrightness($color, -200)), 6, '0', STR_PAD_LEFT);
-                $average_trace = array_merge($trace, array(
-                    'name' => 'Running Average',
-                    'zIndex' => 8,
-                    'marker' => array(
-                        'color' => $aColor,
-                    ),
-                    'line' => array(
-                        'width' => 1 + $font_size/4,
-                        'dash' => 'dash',
-                    ),
-                    'showInLegend' => true,
-                    'legendrank' => 1001,
-                    'hovertemplate' => 'Running Average: <b>%{y:,}</b> <extra></extra>',
-                    'x' => $this->_swapXY ? $averageYValues : $averageXValues,
-                    'y' => $this->_swapXY ? $averageXValues : $averageYValues,
-                    'seriesData' => $averageSeries,
-                ));
-
-                if ($this->_swapXY) {
-                    $average_trace['xaxis'] = "x{$yIndex}";
-                    $average_trace['hovertemplate'] = 'Running Average: <b>%{x:,}</b> <extra></extra>';
-                    unset($average_trace['yaxis']);
-                }
-
-
-                $this->_chart['data'][] = $average_trace;
             }
 
             if($showControls) {
@@ -1005,12 +960,59 @@ class AppKernelChart extends AggregateChart
                     $this->_chart['data'][] = $crti_trace;
                 }
             }
+
+            if ($showRunningAverages) {
+                $averageXValues = array();
+                $averageYValues = array();
+                $averageSeries = array();
+                foreach($dataset->runningAverageVector as $i => $v)
+                {
+                    $averageXValues[] = date('Y-m-d H:i:s', $dataset->timeVector[$i]);
+                    $averageYValues[] = $v ? (double)$v : null;
+                    $averageSeries[] = array(
+                        'x' => $dataset->timeVector[$i],
+                        'y' => $v ? (double)$v : null
+                    );
+                }
+
+                $aColor = '#'.str_pad(dechex(\DataWarehouse\Visualization::alterBrightness($color, -200)), 6, '0', STR_PAD_LEFT);
+                $average_trace = array_merge($trace, array(
+                    'name' => 'Running Average',
+                    'zIndex' => 8,
+                    'marker' => array(
+                        'color' => $aColor,
+                    ),
+                    'line' => array(
+                        'width' => 1 + $font_size/4,
+                        'dash' => 'dash',
+                    ),
+                    'showInLegend' => true,
+                    'legendrank' => 1001,
+                    'hovertemplate' => 'Running Average: <b>%{y:,}</b> <extra></extra>',
+                    'x' => $this->_swapXY ? $averageYValues : $averageXValues,
+                    'y' => $this->_swapXY ? $averageXValues : $averageYValues,
+                    'seriesData' => $averageSeries,
+                ));
+
+                if ($this->_swapXY) {
+                    $average_trace['xaxis'] = "x{$yIndex}";
+                    $average_trace['hovertemplate'] = 'Running Average: <b>%{x:,}</b> <extra></extra>';
+                    unset($average_trace['yaxis']);
+                }
+
+                $this->_chart['data'][] = $average_trace;
+            }
+
+            $this->_chart['data'][] = $trace;
             $this->_datasetCount++;
         }
         // Fix change indicator y sizing based on max range on plot
         for ($i = 0; $i < count($this->_chart['layout']['images']); $i++) {
-            $scale = $this->_swapXY ? $this->_chart['layout']['xaxis']['range'][1] : $this->_chart['layout']['yaxis']['range'][1];
-            $this->_chart['layout']['images'][$i]['sizey'] = max($scale * 0.025, 1);
+            $yScale = $this->_swapXY ? $this->_chart['layout']['xaxis']['range'][1] : $this->_chart['layout']['yaxis']['range'][1];
+            $days = $this->_swapXY ? count($this->_chart['data'][0]['y']) : count($this->_chart['data'][0]['x']);
+            $xScale = ceil($days / 30);
+            $this->_chart['layout']['images'][$i]['sizey'] = $yScale * 0.015;
+            $this->_chart['layout']['images'][$i]['sizex'] = $xScale*24*60*60*1000;
         }
         $this->setDataSource(array('XDMoD App Kernels'));
     }
