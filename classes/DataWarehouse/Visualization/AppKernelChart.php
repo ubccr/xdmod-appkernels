@@ -284,6 +284,7 @@ class AppKernelChart extends AggregateChart
                 $yValues[] = $sv['y'];
             }
             $trace = array(
+                'oname' => $datasetName,
                 'name' => $datasetName,
                 'zIndex' => 10,
                 'cliponaxis' => false,
