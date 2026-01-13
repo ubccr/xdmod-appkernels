@@ -1651,7 +1651,7 @@ XDMoD.Arr.ControlRegionsPanel=Ext.extend(XDMoD.PortalModule,
                     Plotly.relayout(this.chart.id, { width: adjWidth, height: adjHeight });
                     if (chartDiv._fullLayout.annotations.length > 0) {
                         const update = relayoutChart(chartDiv, adjWidth, adjHeight, false);
-                        Plotly.update(this.chart.id, update.data, update.layout, update.traces);
+                        Plotly.update(this.chart.id, update.data, update.layout);
                     }
                 }
             }
