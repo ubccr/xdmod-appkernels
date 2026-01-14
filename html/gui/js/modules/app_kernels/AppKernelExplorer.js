@@ -1097,8 +1097,8 @@ Ext.extend(XDMoD.Module.AppKernels.AppKernelExplorer, XDMoD.PortalModule, {
             if (chartDiv) {
                 Plotly.relayout(`plotly-panel${this.id}`, { width: adjWidth, height: adjHeight });
                 if (chartDiv._fullLayout.annotations.length > 0) {
-                    const update = relayoutChart(chartDiv, adjHeight, false);
-                    Plotly.relayout(`plotly-panel${this.id}`, update);
+                    const update = relayoutChart(chartDiv, adjWidth, adjHeight, false);
+                    Plotly.update(`plotly-panel${this.id}`, update.data, update.layout, update.traces);
                 }
             }
         } // onResize
