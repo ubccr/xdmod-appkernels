@@ -12,8 +12,8 @@
                 "internal_dashboard/js/AppKernel/InstancePanel.js",
                 "internal_dashboard/js/AppKernel/InstanceWindow.js",
                 "internal_dashboard/js/AppKernel/InstanceStore.js",
-                "internal_dashboard/js/Arr/ErrorMessageStore.js",
-                "internal_dashboard/js/Arr/ErrorMessagePanel.js"
+                "internal_dashboard/gui/js/dashboard/Arr/ErrorMessageStore.js",
+                "internal_dashboard/gui/js/dashboard/Arr/ErrorMessagePanel.js"
             ],
             "css": [
                 "gui/lib/extjs/examples/ux/css/ColumnHeaderGroup.css"
@@ -21,34 +21,34 @@
         },
         "internal_dashboard": {
             "js": [
-                "js/Arr/SummaryStore.js",
-                "js/Arr/SummaryPortlet.js",
-                "js/Arr/ActiveTasksStore.js",
-                "js/Arr/ActiveTasksGrid.js",
-                "js/Arr/AppKerSuccessRateStore.js",
-                "js/Arr/AppKerSuccessRateGrid.js",
-                "js/Arr/AppKerSuccessRatePanel.js",
-                "js/Arr/StatusPanel.js",
-                "js/Arr/ErrorMessageStore.js",
-                "js/Arr/ErrorMessagePanel.js",
-                "js/Arr/ControlRegionsPanel.js",
-                "js/Arr/SchedulePanel.js",
-                "js/Arr/AppKernelDashboardPanel.js",
-                "js/Arr/WalltimePanel.js",
-                "js/Arr/WalltimeNewEntryPanel.js",
-                "js/Arr/WalltimeEditEntryPanel.js",
-                "js/AppKernel/InstancePanel.js",
-                "js/AppKernel/InstanceWindow.js",
-                "js/Arr/ActiveTasksPanel.js",
-                "js/Arr/EditActiveTaskPanel.js",
-                "js/Arr/CreateSchedulePanel.js",
-                "js/Arr/EditSchedulePanel.js",
-                "js/Ingestion/AppKernelStore.js",
-                "js/Ingestion/AppKernelGrid.js",
-                "js/Ingestion/ReportsPanel.js"
+                "gui/js/dashboard/Arr/SummaryStore.js",
+                "gui/js/dashboard/Arr/SummaryPortlet.js",
+                "gui/js/dashboard/Arr/ActiveTasksStore.js",
+                "gui/js/dashboard/Arr/ActiveTasksGrid.js",
+                "gui/js/dashboard/Arr/AppKerSuccessRateStore.js",
+                "gui/js/dashboard/Arr/AppKerSuccessRateGrid.js",
+                "gui/js/dashboard/Arr/AppKerSuccessRatePanel.js",
+                "gui/js/dashboard/Arr/StatusPanel.js",
+                "gui/js/dashboard/Arr/ErrorMessageStore.js",
+                "gui/js/dashboard/Arr/ErrorMessagePanel.js",
+                "gui/js/dashboard/Arr/ControlRegionsPanel.js",
+                "gui/js/dashboard/Arr/SchedulePanel.js",
+                "gui/js/dashboard/Arr/AppKernelDashboardPanel.js",
+                "gui/js/dashboard/Arr/WalltimePanel.js",
+                "gui/js/dashboard/Arr/WalltimeNewEntryPanel.js",
+                "gui/js/dashboard/Arr/WalltimeEditEntryPanel.js",
+                "gui/js/dashboard/AppKernel/InstancePanel.js",
+                "gui/js/dashboard/AppKernel/InstanceWindow.js",
+                "gui/js/dashboard/Arr/ActiveTasksPanel.js",
+                "gui/js/dashboard/Arr/EditActiveTaskPanel.js",
+                "gui/js/dashboard/Arr/CreateSchedulePanel.js",
+                "gui/js/dashboard/Arr/EditSchedulePanel.js",
+                "gui/js/dashboard/Ingestion/AppKernelStore.js",
+                "gui/js/dashboard/Ingestion/AppKernelGrid.js",
+                "gui/js/dashboard/Ingestion/ReportsPanel.js"
             ],
             "css": [
-                "css/appKer.css"
+                "gui/css/dashboard/appKer.css"
             ]
         }
     }

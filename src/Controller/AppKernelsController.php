@@ -1,5 +1,5 @@
 <?php
-namespace Rest\Controllers;
+namespace Rest\Controller;
 
 use DataWarehouse\Access\MetricExplorer;
 use DateTime;
@@ -8,12 +8,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\ParameterBag;
-
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+use Psr\Log\LoggerInterface;
+use Twig\Environment;
+use CCR\Security\Helpers\Tokens;
 
 use Exception;
 use CCR\DB;
 use AppKernel\Report;
-use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 /**
  * Class AppKernelControllerProvider
@@ -21,7 +23,8 @@ use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
  * This class is responsible for maintaining routes for the REST stack that
  * handle app kernel-related functionality.
  */
-class AppKernelController extends BaseControllerProvider
+#[Route('/app_kernels')]
+class AppKernelsController extends BaseController
 {
     // Tree node types, shown here in hierarchical order
     //

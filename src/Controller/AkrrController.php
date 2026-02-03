@@ -1,6 +1,6 @@
 <?php
 
-namespace CCR\Controllers;
+namespace CCR\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,6 +16,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
  *
  * @author Ryan Rathsam <ryanrath@buffalo.edu>
  */
+#[Route('/akrr')]
 class AkrrController extends BaseController
 {
     private $token = null;

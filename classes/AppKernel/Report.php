@@ -243,8 +243,8 @@ class Report
             if ($message===null) { //i.e. do not send report (e.g. user asked to send report only on errors)
                 return;
             }
-        } catch (Exception $e) {
-            throw new Exception('Can not prepare report. '.$e->getMessage());
+        } catch (\Exception $e) {
+            throw new \Exception('Can not prepare report. '.$e->getMessage());
         }
         //send report
         try {
