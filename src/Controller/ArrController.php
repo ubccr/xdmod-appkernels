@@ -504,7 +504,7 @@ class ArrController extends BaseController
     private function loadDefaultNotificationSettings()
     {
         try{
-            $current_tmp_settings = $this->getStringParam('curent_tmp_settings', true)
+            $current_tmp_settings = $this->getStringParam('curent_tmp_settings', true);
 
             if(isset($current_tmp_settings))
                 $curent_tmp_settings=json_decode($current_tmp_settings,true);
