@@ -1,5 +1,5 @@
 <?php
-namespace AppKernel;
+namespace CCR\AppKernel;
 use \SimpleXmlElement;
 
 class IncaParser_Performance

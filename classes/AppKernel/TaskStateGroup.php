@@ -1,6 +1,6 @@
 <?php
 
-namespace AppKernel;
+namespace CCR\AppKernel;
 
 /**
  * Class for group of similar TaskState for a single day

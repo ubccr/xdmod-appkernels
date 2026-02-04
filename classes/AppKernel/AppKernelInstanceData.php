@@ -1,5 +1,5 @@
 <?php
-namespace AppKernel;
+namespace CCR\AppKernel;
 
 // ================================================================================
 // Container for instance data returned by getAvalableInstances() and

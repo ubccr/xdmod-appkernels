@@ -1,6 +1,6 @@
 <?php
 
-namespace AppKernel\ProblemDetector;
+namespace CCR\AppKernel\ProblemDetector;
 
 class AppKernelLevel
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace AppKernel;
+namespace CCR\AppKernel;
 
 //require_once __DIR__.'/../../../configuration/linker.php';
 

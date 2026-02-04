@@ -1,5 +1,5 @@
 <?php
-namespace AppKernel;
+namespace CCR\AppKernel;
 
 // ================================================================================
 // Application kernel exceptions to experiment using exception codes for various
@@ -19,7 +19,7 @@ class AppKernelException extends \Exception
 
   // No data returned by app kernel
   const NoDataReturned = 4;
-  
+
   // Could not determine app kernel type
   const UnknownType = 5;
 

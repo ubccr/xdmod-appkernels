@@ -6,6 +6,8 @@
 // iAppKernelExplorer interface.
 // --------------------------------------------------------------------------------
 
+namespace CCR;
+
 class AppKernel
 {
   const PARSER_CLASS = "Parser";  // Parser class name
