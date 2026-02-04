@@ -1,5 +1,5 @@
 <?php
-namespace Rest\Controller;
+namespace CCR\Controller;
 
 use DataWarehouse\Access\MetricExplorer;
 use DateTime;
