@@ -1,6 +1,6 @@
 <?php
 
-namespace CCR\AppKernel;
+namespace AppKernel;
 
 /**
  * Class for state of particulat AK execution

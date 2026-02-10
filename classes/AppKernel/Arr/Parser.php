@@ -1,5 +1,5 @@
 <?php
-namespace CCR\AppKernel;
+namespace AppKernel;
 use \Exception, \SimpleXmlElement;
 use libXMLError;
 use Psr\Log\LoggerInterface;

@@ -1,5 +1,5 @@
 <?php
-namespace CCR\AppKernel;
+namespace AppKernel;
 
 // ================================================================================
 // Extend the AppKernelInstanceData class to include information specific to

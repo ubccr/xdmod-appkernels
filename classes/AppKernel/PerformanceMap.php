@@ -1,6 +1,6 @@
 <?php
 
-namespace CCR\AppKernel;
+namespace AppKernel;
 
 use CCR\DB;
 use xd_utilities;

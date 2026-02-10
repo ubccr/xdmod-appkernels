@@ -1,5 +1,5 @@
 <?php
-namespace CCR\AppKernel;
+namespace AppKernel;
 
 // ================================================================================
 // Data describing an application kernels ingestion session.  This includes

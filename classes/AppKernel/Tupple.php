@@ -1,6 +1,6 @@
 <?php
 
-namespace CCR\AppKernel;
+namespace AppKernel;
 
 // ================================================================================
 // An N-Tuple is a set of N ordered values.  Set up an N-Tuple that can be used

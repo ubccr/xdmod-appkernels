@@ -2,10 +2,11 @@
 
 namespace CCR\Controller;
 
+use SessionExpiredException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Bundle\SecurityBundle\Security;
 
 
 class DataExplorerController extends BaseController
@@ -31,7 +32,7 @@ class DataExplorerController extends BaseController
     }
 
     /**
-     * Migrated from `html/controllers/data_explorer/get_ak_plot.php`
+     *
      *
      * @param Request $request
      * @param $user
@@ -39,13 +40,10 @@ class DataExplorerController extends BaseController
      */
     private function getAkPlot(Request $request, $user): Response
     {
-        $m = new \DataWarehouse\Access\DataExplorer();
+        $m = new \DataWarehouse\Access\DataExplorer($request);
 
         $result = $m->get_ak_plot($user);
-        $response = new Response($result['results']);
-        foreach ($response['headers'] as $key => $value) {
-            $response->headers->set($key, $value);
-        }
+        $response = new Response($result['results'], 200, $result['headers']);
         return $response;
     }
 
@@ -60,19 +58,19 @@ class DataExplorerController extends BaseController
         try {
             $ak_db = new \AppKernel\AppKernelDb();
 
-            $node = $this->getStringParam('node');
-
+            $node = $this->getStringParam($request, 'node');
+            $returnData = [];
             if (isset($node) && $node === 'resources') {
-                $selectedResourceIds = $this->getArrayParam('selectedResourceIds');
-                $selectedMetrics = $this->getArrayParam('selectedMetrics');
-                $expandedAppKernels = $this->getArrayParam('expandedAppKernels');
+                $selectedResourceIds = $this->getArrayParam($request, 'selectedResourceIds');
+                $selectedMetrics = $this->getArrayParam($request, 'selectedMetrics');
+                $expandedAppKernels = $this->getArrayParam($request, 'expandedAppKernels');
 
-                $startDate = $this->getStringParam('start_date');
-                $endDate = $this->getStringParam('end_date');
+                $startDate = $this->getStringParam($request, 'start_date');
+                $endDate = $this->getStringParam($request, 'end_date');
 
                 $selectedProcessingUnits = array();
 
-                /*checkDateParameters();*/
+                $this->checkDateParameters($request);
 
                 $resources = $ak_db->getResources(
                     $startDate,
@@ -102,12 +100,12 @@ class DataExplorerController extends BaseController
                 }
                 $returnData = array('totalCount' => 1, 'data' => array(array('nodes' => json_encode($returnData))));
             } elseif (isset($node) && $node === 'pus') {
-                $selectedResourceIds = $this->getArrayParam('selectedResourceIds');
-                $selectedMetrics = $this->getArrayParam('selectedMetrics');
-                $selectedProcessingUnits = $this->getArrayParam('selectedPUCounts');
-                $expandedAppKernels = $this->getArrayParam('expandedAppKernels');
+                $selectedResourceIds = $this->getArrayParam($request, 'selectedResourceIds');
+                $selectedMetrics = $this->getArrayParam($request, 'selectedMetrics');
+                $selectedProcessingUnits = $this->getArrayParam($request, 'selectedPUCounts');
+                $expandedAppKernels = $this->getArrayParam($request, 'expandedAppKernels');
 
-                /*checkDateParameters();*/
+                $this->checkDateParameters($request);
                 $selectedProcessingUnitsCount = count($selectedProcessingUnits);
 
                 $processing_units = $ak_db->getProcessingUnits(
@@ -142,10 +140,10 @@ class DataExplorerController extends BaseController
                 $returnData = array('totalCount' => 1, 'data' => array(array('nodes' => json_encode(array_values($pus)))));
 
             } elseif (isset($node) && $node === 'app_kernels') {
-                $selectedResourceIds = $this->getArrayParam('selectedResourceIds');
-                $selectedMetrics = $this->getArrayParam('selectedMetrics');
-                $expandedAppKernels = $this->getArrayParam('expandedAppKernels');
-                /*checkDateParameters();*/
+                $selectedResourceIds = $this->getArrayParam($request, 'selectedResourceIds');
+                $selectedMetrics = $this->getArrayParam($request, 'selectedMetrics');
+                $expandedAppKernels = $this->getArrayParam($request, 'expandedAppKernels');
+                $this->checkDateParameters($request);
 
                 $all_app_kernels = $ak_db->getUniqueAppKernels();
                 foreach ($all_app_kernels as $app_kernel) {
@@ -227,14 +225,70 @@ class DataExplorerController extends BaseController
         return $this->json($returnData);
     }
 
-    private function getArrayParam($paramName, $delim = ','): array
+    private function getArrayParam($request, $paramName, $delim = ','): array
     {
-        $paramValue = $this->getStringParam($paramName, []);
+        $paramValue = $this->getStringParam($request, $paramName, []);
         if (is_array($paramValue)) {
             return $paramValue;
         }
         return explode($delim, $paramValue);
     }
 
+    protected function checkDateParameters(Request $request): array
+    {
+        $startDate = $request->get('start_date');
+        if (!isset($startDate)) {
+            throw new BadRequestHttpException(
+                'missing required start_date parameter'
+            );
+        }
+
+        $start_date_parsed = date_parse_from_format(
+            'Y-m-d',
+            $startDate
+        );
+
+        if ($start_date_parsed['error_count'] !== 0) {
+            throw new BadRequestHttpException(
+                'start_date param is not in the correct format of Y-m-d.'
+            );
+        }
+
+        $endDate = $request->get('end_date');
+        if (!isset($endDate)) {
+            throw new BadRequestHttpException(
+                'missing required end_date parameter'
+            );
+        }
+
+        $end_date_parsed = date_parse_from_format('Y-m-d', $endDate);
+
+        if ($end_date_parsed['error_count'] !== 0) {
+            throw new BadRequestHttpException(
+                'end_date param is not in the correct format of Y-m-d.'
+            );
+        }
+
+        return array(
+            $startDate,
+            $endDate,
+            mktime(
+                $start_date_parsed['hour'],
+                $start_date_parsed['minute'],
+                $start_date_parsed['second'],
+                $start_date_parsed['month'],
+                $start_date_parsed['day'],
+                $start_date_parsed['year']
+            ),
+            mktime(
+                23,
+                59,
+                59,
+                $end_date_parsed['month'],
+                $end_date_parsed['day'],
+                $end_date_parsed['year']
+            )
+        );
+    }
 
 }

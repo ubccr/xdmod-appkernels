@@ -5,7 +5,7 @@
 // parameters.
 // ================================================================================
 
-namespace CCR\AppKernel;
+namespace AppKernel;
 
 // ================================================================================
 // Application kernel data.  Data is classified into three categories and named

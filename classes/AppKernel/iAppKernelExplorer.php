@@ -4,7 +4,7 @@
 // such as Inca, Ganglia, etc.
 // --------------------------------------------------------------------------------
 
-namespace CCR\AppKernel;
+namespace AppKernel;
 
 use Psr\Log\LoggerInterface;
 

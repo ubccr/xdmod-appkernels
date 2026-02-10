@@ -1,6 +1,6 @@
 <?php
 
-namespace CCR\AppKernel;
+namespace AppKernel;
 
 use PDO;
 use Psr\Log\LoggerInterface;
