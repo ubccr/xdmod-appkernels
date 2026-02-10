@@ -1,21 +1,21 @@
 <?php
 namespace CCR\Controller;
 
+use CCR\AppKernel\Report;
+use CCR\DB;
+use CCR\Security\Helpers\Tokens;
 use DataWarehouse\Access\MetricExplorer;
+use DateInterval;
 use DateTime;
-
+use Exception;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
-use Psr\Log\LoggerInterface;
+use Symfony\Component\Routing\Attribute\Route;
 use Twig\Environment;
-use CCR\Security\Helpers\Tokens;
-
-use Exception;
-use CCR\DB;
-use AppKernel\Report;
 
 /**
  * Class AppKernelControllerProvider
@@ -107,7 +107,7 @@ class AppKernelsController extends BaseController
      *
      * @param array $s the input array
      *
-     * @return null
+     * @return void
      */
     public static function formatNotificationSettingsForClient(&$s)
     {
@@ -155,7 +155,7 @@ class AppKernelsController extends BaseController
     public function getDetails(Request $request): Response
     {
         $results = array();
-        $db = new \AppKernel\AppKernelDb();
+        $db = new \CCR\AppKernel\AppKernelDb();
 
         // Extract the parameters that were sent
 
@@ -273,7 +273,7 @@ class AppKernelsController extends BaseController
                 $results[] = $node;
             }  // foreach ( $retval as $row )
         } else {
-            $ak = new \AppKernel\InstanceData;
+            $ak = new \CCR\AppKernel\InstanceData;
 
             $akOptions = array('ak_def_id' => $akId,
                 'collected' => $collected,
@@ -300,16 +300,16 @@ class AppKernelsController extends BaseController
      * @param boolean $returnRawData (Optional) If true, returns the data
      *                                    without converting it to a format.
      *                                    (Defaults to false.)
-     * @return array                Response data containing the following info:
+     * @return Response|array               Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              results: The requested datasets.
      * @throws Exception
      */
     #[Route('/datasets', methods: ["GET"])]
-    public function getDatasets(Request $request, $returnRawData = false)
+    public function getDatasets(Request $request, $returnRawData = false): Response|array
     {
         $results = array();
-        $db = new \AppKernel\AppKernelDb();
+        $db = new \CCR\AppKernel\AppKernelDb();
 
         // Extract the parameters that were sent
 
@@ -462,7 +462,7 @@ class AppKernelsController extends BaseController
             array('session_variable', 'png_inline', 'img_tag', 'png', 'svg', 'pdf')
         );
 
-        $dataset = $this->getDatasets($request, $app, true);
+        $dataset = $this->getDatasets($request, true);
         if (!$dataset['success']) {
             throw new Exception('Dataset is empty');
         }
@@ -476,7 +476,7 @@ class AppKernelsController extends BaseController
             $chartPool = new \XDChartPool($user);
         }
 
-        $lastResult = new \AppKernel\Dataset('Empty App Kernel Dataset', -1, "", -1, "", -1, "", "", "", "");
+        $lastResult = new \CCR\AppKernel\Dataset('Empty App Kernel Dataset', -1, "", -1, "", -1, "", "", "", "");
         $chart = new \DataWarehouse\Visualization\AppKernelChart($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
         $chart->setTitle($show_title ? 'Empty App Kernel Dataset' : null, $font_size);
         $chart->setLegend($legend_location, $font_size);
@@ -648,6 +648,8 @@ class AppKernelsController extends BaseController
             }
 
         }
+
+        throw new HttpException(500, 'Unexpected error has occurred.');
     }
 
     /**
@@ -656,7 +658,7 @@ class AppKernelsController extends BaseController
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
      * @param  Request     $request The request used to make this call.
-     * @return JsonResponse Response data containing the following info:
+     * @return Response Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              results: The requested control regions.
      *                              count: The number of control regions.
@@ -667,7 +669,7 @@ class AppKernelsController extends BaseController
         $resource_id = $this->getIntParam($request, 'resource_id', true);
         $ak_def_id = $this->getIntParam($request, 'ak_def_id', true);
         // TODO: wire in the db.logger.
-        $db = new \AppKernel\AppKernelDb($this->dbLogger);
+        $db = new \CCR\AppKernel\AppKernelDb($this->dbLogger);
         $results = $db->getControlRegions($resource_id, $ak_def_id);
 
         return $this->json(array(
@@ -696,7 +698,7 @@ class AppKernelsController extends BaseController
         $this->authorize($request, array(ROLE_ID_MANAGER));
 
         // Get an app kernel database connection.
-        $db = new \AppKernel\AppKernelDb($this->dbLogger);
+        $db = new \CCR\AppKernel\AppKernelDb($this->dbLogger);
 
         // Load the application kernel definitions for the description
         $akList = $this->getAppKernelMapping($db);
@@ -758,7 +760,7 @@ class AppKernelsController extends BaseController
         $this->authorize($request, array(ROLE_ID_MANAGER));
 
         // Get an app kernel database connection.
-        $db = new \AppKernel\AppKernelDb($this->dbLogger);
+        $db = new \CCR\AppKernel\AppKernelDb($this->dbLogger);
 
         // Load the application kernel definitions for the description
         $akList = $this->getAppKernelMapping($db);
@@ -941,7 +943,7 @@ class AppKernelsController extends BaseController
      * Send e-mail report
      *
      * @param Request     $request
-     * @return JsonResponse|Response Response data containing the following info:
+     * @return Response Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              results: The requested information.
      */
@@ -979,7 +981,7 @@ class AppKernelsController extends BaseController
 
 
             //PerformanceMap
-            $perfMap = new \AppKernel\PerformanceMap(array(
+            $perfMap = new \CCR\AppKernel\PerformanceMap(array(
                 'start_date' => $start_date,
                 'end_date' => $end_date,
                 'resource' => $resources,
@@ -1102,14 +1104,14 @@ class AppKernelsController extends BaseController
     /**
      * Get list of resources active in last 90 days
      * @param Request     $request
-     * @return JsonResponse
+     * @return Response
      */
     #[Route('/resources', methods: ["GET"])]
     public function getResources(Request $request): Response
     {
         $response = array();
         try {
-            $ak_db = new \AppKernel\AppKernelDb();
+            $ak_db = new \CCR\AppKernel\AppKernelDb();
 
             $user = $this->getUserFromRequest($request);
 
@@ -1156,7 +1158,7 @@ class AppKernelsController extends BaseController
     {
         $response = array();
         try {
-            $ak_db = new \AppKernel\AppKernelDb();
+            $ak_db = new \CCR\AppKernel\AppKernelDb();
             $start_ts = date_timestamp_get(date_sub(date_create(), date_interval_create_from_date_string("90 days")));
 
             $all_app_kernels = $ak_db->getUniqueAppKernels();
@@ -1334,11 +1336,11 @@ class AppKernelsController extends BaseController
     /**
      * Get a mapping of app kernel IDs to app kernels from the database.
      *
-     * @param  \AppKernel\AppKernelDb $db The app kernel database.
+     * @param  \CCR\AppKernel\AppKernelDb $db The app kernel database.
      * @return array                      An associative array of app kernel
      *                                    IDs to app kernels.
      */
-    private function getAppKernelMapping(\AppKernel\AppKernelDb $db)
+    private function getAppKernelMapping(\CCR\AppKernel\AppKernelDb $db)
     {
         $appKernelDefs = $db->loadAppKernelDefinitions();
         $akList = array();
@@ -1351,11 +1353,11 @@ class AppKernelsController extends BaseController
     /**
      * Get a mapping of resource IDs to resources from the database.
      *
-     * @param  \AppKernel\AppKernelDb $db The app kernel database.
+     * @param  \CCR\AppKernel\AppKernelDb $db The app kernel database.
      * @return array                      An associative array of resource
      *                                    IDs to resources.
      */
-    private function getResourceMapping(\AppKernel\AppKernelDb $db)
+    private function getResourceMapping(\CCR\AppKernel\AppKernelDb $db)
     {
         $resourceDefs = $db->loadResources();
         $resourceList = array();
@@ -1365,7 +1367,7 @@ class AppKernelsController extends BaseController
         return $resourceList;
     }
 
-    public function getAppKernelSuccessRate(Request $req, Application $app)
+    public function getAppKernelSuccessRate(Request $req)
     {
         $response = null;
 
@@ -1711,7 +1713,7 @@ or "Show Details of Successful Tasks" options to see details on tasks';
 
         $data = array();
         try {
-            $perfMap = new \AppKernel\PerformanceMap(array(
+            $perfMap = new \CCR\AppKernel\PerformanceMap(array(
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'resource' => $resource,

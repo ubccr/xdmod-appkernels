@@ -35,7 +35,7 @@ class AppKernel
     $reporterType = NULL;
     if ( empty($source) )
     {
-      throw new Exception("No application kernel source provided");
+      throw new \Exception("No application kernel source provided");
     }
 
     return self::instantiate($source, "Explorer", "iAppKernelExplorer", $config, $logger);
@@ -63,7 +63,7 @@ class AppKernel
     $reporterType = NULL;
     if ( empty($source) )
     {
-      throw new Exception("No application kernel source provided");
+      throw new \Exception("No application kernel source provided");
     }
 
     return self::instantiate($source, "Parser", "iAppKernelParser", $config, $logger);
@@ -105,7 +105,7 @@ class AppKernel
     if ( ! class_exists($className) )
     {
       $msg = "Unsupported source '$source' ($className)";
-      throw new Exception($msg);
+      throw new \Exception($msg);
     }
 
     /*

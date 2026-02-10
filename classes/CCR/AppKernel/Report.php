@@ -1,11 +1,11 @@
 <?php
 
-namespace AppKernel;
+namespace CCR\AppKernel;
 
-use xd_utilities;
-use DateTime;
-use DateInterval;
 use CCR\MailWrapper;
+use DateInterval;
+use DateTime;
+use xd_utilities;
 
 /**
  * class for App kernel report generator

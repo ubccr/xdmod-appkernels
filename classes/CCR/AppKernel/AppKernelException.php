@@ -1,5 +1,6 @@
 <?php
-namespace AppKernel;
+
+namespace CCR\AppKernel;
 
 // ================================================================================
 // Application kernel exceptions to experiment using exception codes for various

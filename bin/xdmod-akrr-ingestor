@@ -16,8 +16,8 @@
 
 require_once __DIR__ . '/../configuration/linker.php';
 
+use CCR\AppKernel\AppKernelIngestor;
 use CCR\Log;
-use AppKernel\AppKernelIngestor;
 
 /**
  * Log level determined by "verbose", "debug" and "quiet".

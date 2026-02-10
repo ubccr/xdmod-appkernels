@@ -56,7 +56,7 @@ class DataExplorerController extends BaseController
     private function getTree(Request $request, $user): Response
     {
         try {
-            $ak_db = new \AppKernel\AppKernelDb();
+            $ak_db = new \CCR\AppKernel\AppKernelDb();
 
             $node = $this->getStringParam($request, 'node');
             $returnData = [];

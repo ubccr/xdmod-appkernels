@@ -2,14 +2,14 @@
 
 namespace CCR\Controller;
 
+use CCR\AppKernel\Report;
+use CCR\DB;
+use DateInterval;
+use DateTime;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Bundle\SecurityBundle\Security;
-use Appkernel\Report;
-use Rest\Controllers\AppKernelController;
-
-use CCR\DB;
 
 class ArrController extends BaseController
 {
@@ -238,7 +238,7 @@ class ArrController extends BaseController
             case 'load_notification_settings':
                 return $this->loadNotificationSettings($user->getUserID());
             case 'load_default_notification_settings':
-                return $this->loadDefaultNotificationSettings();
+                return $this->loadDefaultNotificationSettings($request);
             default :
                 return $this->json(array(
                     'success' => false,
@@ -331,10 +331,10 @@ class ArrController extends BaseController
             $start_date = isset($startDateParam) ?? new DateTime($startDateParam);
             $end_date = isset($startDateParam) ?? new DateTime($request->get('end_date'));
 
-            $reportParam = $this->getStringparam('report_param');
+            $reportParam = $this->getStringparam($request,'report_param');
             $report_param=json_decode($reportParam,true);
 
-            AppKernelController::formatNotificationSettingsFromClient($report_param);
+            AppKernelsController::formatNotificationSettingsFromClient($report_param);
 
 
             $report=new Report(array(
@@ -366,7 +366,7 @@ class ArrController extends BaseController
 
     private function getResourcesList()
     {
-        $ak_db = new \AppKernel\AppKernelDb();
+        $ak_db = new \CCR\AppKernel\AppKernelDb();
         $allResources = $ak_db->getResources(date_format(date_sub(date_create(), new DateInterval('P90D')),'Y-m-d'),date_format(date_create(),'Y-m-d'));
         $returnData = array();
         foreach($allResources as $resource)
@@ -391,7 +391,7 @@ class ArrController extends BaseController
     private function getAppkernelsList()
     {
         try{
-            $ak_db = new \AppKernel\AppKernelDb();
+            $ak_db = new \CCR\AppKernel\AppKernelDb();
             $start_ts=date_timestamp_get(date_sub(date_create(), new DateInterval('P90D')));
             $end_ts=date_timestamp_get(date_create());
 
@@ -423,7 +423,7 @@ class ArrController extends BaseController
         try{
             $pdo = DB::factory('database');
             $curent_tmp_settings=json_decode($_REQUEST['curent_tmp_settings'],true);
-            AppKernelController::formatNotificationSettingsFromClient($curent_tmp_settings);
+            AppKernelsController::formatNotificationSettingsFromClient($curent_tmp_settings);
 
             $send_report_daily=($curent_tmp_settings['daily_report']['send_on_event']==='sendNever')?(0):(1);
             $send_report_weekly=($curent_tmp_settings['weekly_report']['send_on_event']==='sendNever')?(-$curent_tmp_settings['weekly_report']['send_on']):($curent_tmp_settings['weekly_report']['send_on']);
@@ -478,7 +478,7 @@ class ArrController extends BaseController
         else
             throw new \Exception('curent_tmp_settings is not set');
 
-        AppKernelController::formatNotificationSettingsFromClient($curent_tmp_settings,true);
+        AppKernelsController::formatNotificationSettingsFromClient($curent_tmp_settings,true);
 
         $sqlres=$pdo->query('SELECT user_id,send_report_daily,send_report_weekly,send_report_monthly,settings
                                         FROM mod_appkernel.report
@@ -495,28 +495,28 @@ class ArrController extends BaseController
         else{
             throw new \Exception('settings is not set in db use default');
         }
-        AppKernelController::formatNotificationSettingsForClient($curent_tmp_settings);
+        AppKernelsController::formatNotificationSettingsForClient($curent_tmp_settings);
         $response['data'] = $curent_tmp_settings;
         $response['success'] = true;
         return $this->json($response);
     }
 
-    private function loadDefaultNotificationSettings()
+    private function loadDefaultNotificationSettings(Request $request)
     {
         try{
-            $current_tmp_settings = $this->getStringParam('curent_tmp_settings', true);
+            $current_tmp_settings = $this->getStringParam($request,'curent_tmp_settings', true);
 
             if(isset($current_tmp_settings))
                 $curent_tmp_settings=json_decode($current_tmp_settings,true);
             else
                 throw new \Exception('curent_tmp_settings is not set in templates');
 
-            AppKernelController::formatNotificationSettingsFromClient($curent_tmp_settings,true);
+            AppKernelsController::formatNotificationSettingsFromClient($curent_tmp_settings,true);
 
             $curent_tmp_settings["controlThresholdCoeff"]='1.0';
             $curent_tmp_settings["resourcesList"]=array();//None means all
             $curent_tmp_settings["appkernelsList"]=array();//None means all
-            AppKernelController::formatNotificationSettingsForClient($curent_tmp_settings);
+            AppKernelsController::formatNotificationSettingsForClient($curent_tmp_settings);
             $response['data'] = $curent_tmp_settings;
             $response['success'] = true;
         }

@@ -1,6 +1,11 @@
 <?php
-namespace AppKernel;
-use \Exception, \SimpleXmlElement;
+namespace CCR\AppKernel\Arr;
+use CCR\AppKernel\AppKernelException;
+use CCR\AppKernel\AppKernelInstanceData;
+use CCR\AppKernel\iAppKernelParser;
+use CCR\AppKernel\InstanceData;
+use CCR\AppKernel\InstanceMetric;
+use Exception;
 use libXMLError;
 use Psr\Log\LoggerInterface;
 

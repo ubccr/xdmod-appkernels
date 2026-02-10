@@ -1,10 +1,8 @@
 <?php
 
-namespace AppKernel;
+namespace CCR\AppKernel;
 
 use CCR\Log;
-use AppKernel;
-
 use Exception;
 use PDOException;
 use Psr\Log\LoggerInterface;
@@ -358,7 +356,7 @@ class AppKernelIngestor
     public function __destruct()
     {
         if ($this->dryRunMode == false && $this->db !== null && $this->ingestionLog !== null) {
-            if ($this->db instanceof \AppKernel\AppKernelDb) {
+            if ($this->db instanceof \CCR\AppKernel\AppKernelDb) {
                 if ($this->ingestionLog->source !== null) {
                     $this->db->storeIngestionLogEntry($this->ingestionLog);
                 }
@@ -550,30 +548,30 @@ class AppKernelIngestor
                             $parsedInstanceData->db_ak_def_id = $ak_def_id;
                             $parsedInstanceData->db_ak_def_name = $ak_name;
                             $parsedInstanceData->db_ak_def_visible = $ak_def_visible;
-                        } catch (AppKernel\AppKernelException $e) {
+                        } catch (\CCR\AppKernel\AppKernelException $e) {
                             $msg = $e->getMessage();
 
                             // Handle errors during parsing.  In most cases log the error, increment
                             // a counter, and skip the saving of the data.
 
                             switch ($e->getCode()) {
-                                case AppKernel\AppKernelException::ParseError:
+                                case \CCR\AppKernel\AppKernelException::ParseError:
                                     $resourceReport[$akInstance->akNickname]['parse_error']++;
                                     $this->appKernelSummaryReport['parse_error']++;
                                     $this->logger->error("Parse error: '$msg'");
                                     $this->logger->debug("Raw instance data:\n{$akInstance->data}\n");
                                     break;
-                                case AppKernel\AppKernelException::Queued:
+                                case \CCR\AppKernel\AppKernelException::Queued:
                                     $resourceReport[$akInstance->akNickname]['queued']++;
                                     $this->appKernelSummaryReport['queued']++;
                                     $this->logger->notice("Queued: '$msg'");
                                     break;
-                                case AppKernel\AppKernelException::Error:
+                                case \CCR\AppKernel\AppKernelException::Error:
                                     $resourceReport[$akInstance->akNickname]['error']++;
                                     $this->appKernelSummaryReport['error']++;
                                     $this->logger->error("Error: '$msg'");
                                     break;
-                                case AppKernel\AppKernelException::UnknownType:
+                                case \CCR\AppKernel\AppKernelException::UnknownType:
                                     $resourceReport[$akInstance->akNickname]['unknown_type']++;
                                     $this->appKernelSummaryReport['unknown_type']++;
                                     $this->logger->warning("Unknown Type: '$msg'");
@@ -605,9 +603,9 @@ class AppKernelIngestor
                                     $this->dryRunMode
                                 );
                             }
-                        } catch (AppKernel\AppKernelException $e) {
+                        } catch (\CCR\AppKernel\AppKernelException $e) {
                             switch ($e->getCode()) {
-                                case AppKernel\AppKernelException::DuplicateInstance:
+                                case \CCR\AppKernel\AppKernelException::DuplicateInstance:
                                     $resourceReport[$akInstance->akNickname]['duplicate']++;
                                     $this->appKernelSummaryReport['duplicate']++;
                                     $this->logger->warning($e->getMessage());
@@ -724,7 +722,7 @@ class AppKernelIngestor
                 'config_akrr' => 'akrr-db',
                 'add_supremm_metrix' => false,
             );
-            $this->deploymentExplorer = AppKernel::explorer($this->explorerType, $config, $this->logger);
+            $this->deploymentExplorer = \CCR\AppKernel::explorer($this->explorerType, $config, $this->logger);
             $this->deploymentExplorer->setQueryInterval($this->startTimestamp, $this->endTimestamp);
         } catch (Exception $e) {
             $msg = "Error creating explorer ($this->explorerType): " . $e->getMessage();
@@ -737,7 +735,7 @@ class AppKernelIngestor
 
         // Instantiate the Parser
         try {
-            $this->parser = AppKernel::parser($this->explorerType, null, $this->logger);
+            $this->parser = \CCR\AppKernel::parser($this->explorerType, null, $this->logger);
         } catch (Exception $e) {
             $msg = "Error creating parser ($this->explorerType): " . $e->getMessage();
             $this->logger->critical($msg, array(

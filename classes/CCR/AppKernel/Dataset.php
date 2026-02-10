@@ -1,6 +1,6 @@
 <?php
 
-namespace AppKernel;
+namespace CCR\AppKernel;
 
 // ================================================================================
 // A dataset containing three vectors containing values to be plotted,

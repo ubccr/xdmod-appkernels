@@ -1,10 +1,10 @@
 <?php
 
-namespace AppKernel;
+namespace CCR\AppKernel;
 
-use CCR\DB;
 use AppKernel\ProblemDetector\AppKernelLevel;
 use AppKernel\ProblemDetector\ResourceLevel;
+use CCR\DB;
 
 /**
  * Class for recognition error patterns

@@ -1,5 +1,5 @@
 <?php
-namespace AppKernel;
+namespace CCR\AppKernel;
 
 // --------------------------------------------------------------------------------
 // Define an interface that all applicaiton kernel parser classes must implement

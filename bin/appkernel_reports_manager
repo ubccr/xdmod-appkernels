@@ -8,10 +8,9 @@
  */
 require_once __DIR__ . '/../configuration/linker.php';
 
+use CCR\AppKernel\Report;
 use CCR\DB;
 use CCR\Log;
-use AppKernel\AppKernelDb;
-use AppKernel\Report;
 
 /**
  * Log level determined by "verbose" and "debug".

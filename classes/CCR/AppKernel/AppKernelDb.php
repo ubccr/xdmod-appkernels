@@ -1,12 +1,12 @@
 <?php
 
-namespace AppKernel;
+namespace CCR\AppKernel;
 
+use CCR\DB;
+use Exception;
 use PDO;
 use Psr\Log\LoggerInterface;
 use xd_utilities;
-use CCR\DB;
-use Exception;
 
 // ================================================================================
 // Class for querying and manipulating the application kernel database.
