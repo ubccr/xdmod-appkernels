@@ -9,11 +9,11 @@
                 "gui/js/modules/app_kernels/AppKernelNotificationPanel.js",
                 "gui/js/modules/app_kernels/AppKerPerformanceMapPanel.js",
                 "gui/js/modules/dashboard/CenterReportCardComponent.js",
-                "internal_dashboard/js/AppKernel/InstancePanel.js",
-                "internal_dashboard/js/AppKernel/InstanceWindow.js",
-                "internal_dashboard/js/AppKernel/InstanceStore.js",
-                "internal_dashboard/gui/js/dashboard/Arr/ErrorMessageStore.js",
-                "internal_dashboard/gui/js/dashboard/Arr/ErrorMessagePanel.js"
+                "gui/js/dashboard/AppKernel/InstancePanel.js",
+                "gui/js/dashboard/AppKernel/InstanceWindow.js",
+                "gui/js/dashboard/AppKernel/InstanceStore.js",
+                "gui/js/dashboard/Arr/ErrorMessageStore.js",
+                "gui/js/dashboard/Arr/ErrorMessagePanel.js"
             ],
             "css": [
                 "gui/lib/extjs/examples/ux/css/ColumnHeaderGroup.css"
