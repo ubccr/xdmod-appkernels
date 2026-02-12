@@ -102,6 +102,6 @@ class TaskStateGroup
     }
     public function sort_by_collection_time()
     {
-        uasort($this->tasks,array('\AppKernel\TaskState','cmp_by_collection_time'));
+        uasort($this->tasks,array(TaskState::class,'cmp_by_collection_time'));
     }
 }
