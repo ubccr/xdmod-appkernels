@@ -1367,6 +1367,7 @@ class AppKernelsController extends BaseController
         return $resourceList;
     }
 
+    #[Route('/app_kernels/success_rate', methods: ["GET"])]
     public function getAppKernelSuccessRate(Request $req)
     {
         $response = null;
