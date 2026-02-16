@@ -1,5 +1,5 @@
 if (Ext.form.BasicForm) {
-    Ext.form.BasicForm.findField = function (id) {
+    Ext.form.BasicForm.prototype.findField = function (id) {
         var field = this.items.get(id);
 
         if (!Ext.isObject(field)) {
