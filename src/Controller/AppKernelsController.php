@@ -838,7 +838,7 @@ class AppKernelsController extends BaseController
             return $this->json($response);
         } catch (Exception $e) {
             //i.e. setting is not saved by user so send defaults
-            return $this->getDefaultNotifications($request, $app);
+            return $this->getDefaultNotifications($request);
         }
     }
 
@@ -916,6 +916,7 @@ class AppKernelsController extends BaseController
      *
      * @return Response
      */
+    #[Route('{prefix}app_kernels/notifications/defaults', requirements: ['prefix' => '.*'], methods: ["GET"])]
     public function getDefaultNotifications(Request $request): Response
     {
         $response = array();
