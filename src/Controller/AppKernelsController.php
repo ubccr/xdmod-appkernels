@@ -811,7 +811,8 @@ class AppKernelsController extends BaseController
             $curent_tmp_settings = $this->getStringParam($request, 'curent_tmp_settings', true);
             $curent_tmp_settings = json_decode($curent_tmp_settings, true);
 
-            $user_id = $this->getUserFromRequest($request)->getUserID();
+            $user = $this->authorize($request);
+            $user_id = $user->getUserID();
 
             self::formatNotificationSettingsFromClient($curent_tmp_settings, true);
 
