@@ -2,8 +2,8 @@
 
 namespace CCR\AppKernel;
 
-use AppKernel\ProblemDetector\AppKernelLevel;
-use AppKernel\ProblemDetector\ResourceLevel;
+use \CCR\AppKernel\ProblemDetector\AppKernelLevel;
+use \CCR\AppKernel\ProblemDetector\ResourceLevel;
 use CCR\DB;
 
 /**
