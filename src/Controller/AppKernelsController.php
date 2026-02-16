@@ -470,7 +470,7 @@ class AppKernelsController extends BaseController
 
         $returnValue = array();
 
-        $user = $this->getXDUser($session);
+        $user = $this->getXDUser($request->getSession());
         $userIsPublic = $user->isPublicUser();
         if (!$userIsPublic) {
             $chartPool = new \XDChartPool($user);
