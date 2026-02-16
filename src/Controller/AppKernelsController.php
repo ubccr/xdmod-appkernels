@@ -969,17 +969,6 @@ class AppKernelsController extends BaseController
             $appKers = null;
             $problemSizes = null;
 
-            if (count($resources) === 0) {
-                $resources = null;
-            }
-            if (count($appKers) === 0) {
-                $appKers = null;
-            }
-            if (count($problemSizes) === 0) {
-                $problemSizes = null;
-            }
-
-
             //PerformanceMap
             $perfMap = new \CCR\AppKernel\PerformanceMap(array(
                 'start_date' => $start_date,
