@@ -40,7 +40,8 @@ class DataExplorerController extends BaseController
      */
     private function getAkPlot(Request $request, $user): Response
     {
-        $m = new \DataWarehouse\Access\DataExplorer($request);
+        $params = array_merge($request->query->all(), $request->request->all());
+        $m = new \DataWarehouse\Access\DataExplorer($params);
 
         $result = $m->get_ak_plot($user);
         $response = new Response($result['results'], 200, $result['headers']);
@@ -227,7 +228,7 @@ class DataExplorerController extends BaseController
 
     private function getArrayParam($request, $paramName, $delim = ','): array
     {
-        $paramValue = $this->getStringParam($request, $paramName, []);
+        $paramValue = $this->getStringParam($request, $paramName, false, []);
         if (is_array($paramValue)) {
             return $paramValue;
         }
