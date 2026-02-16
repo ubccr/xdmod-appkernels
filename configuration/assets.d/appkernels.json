@@ -13,7 +13,8 @@
                 "gui/js/dashboard/AppKernel/InstanceWindow.js",
                 "gui/js/dashboard/AppKernel/InstanceStore.js",
                 "gui/js/dashboard/Arr/ErrorMessageStore.js",
-                "gui/js/dashboard/Arr/ErrorMessagePanel.js"
+                "gui/js/dashboard/Arr/ErrorMessagePanel.js",
+                "gui/js/ext-form-find-patch.js"
             ],
             "css": [
                 "gui/lib/extjs/examples/ux/css/ColumnHeaderGroup.css"
@@ -45,7 +46,8 @@
                 "gui/js/dashboard/Arr/EditSchedulePanel.js",
                 "gui/js/dashboard/Ingestion/AppKernelStore.js",
                 "gui/js/dashboard/Ingestion/AppKernelGrid.js",
-                "gui/js/dashboard/Ingestion/ReportsPanel.js"
+                "gui/js/dashboard/Ingestion/ReportsPanel.js",
+                "gui/js/ext-form-find-patch.js"
             ],
             "css": [
                 "gui/css/dashboard/appKer.css"
