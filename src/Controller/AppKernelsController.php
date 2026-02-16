@@ -470,7 +470,7 @@ class AppKernelsController extends BaseController
 
         $returnValue = array();
 
-        $user = $this->getUserFromRequest($request);
+        $user = $this->getXDUser($session);
         $userIsPublic = $user->isPublicUser();
         if (!$userIsPublic) {
             $chartPool = new \XDChartPool($user);
@@ -856,8 +856,8 @@ class AppKernelsController extends BaseController
 
             $curent_tmp_settings = $this->getStringParam($request, 'curent_tmp_settings', true);
             $curent_tmp_settings = json_decode($curent_tmp_settings, true);
-
-            $user_id = $this->getUserFromRequest($request)->getUserID();
+            $user = $this->authorize($request);
+            $user_id = $user->getUserID();
 
             self::formatNotificationSettingsFromClient($curent_tmp_settings);
 
@@ -1045,7 +1045,7 @@ class AppKernelsController extends BaseController
     {
         $response = array();
         try {
-            $user = $this->getUserFromRequest($request);
+            $user = $this->authorize($request);
             $recipient = $user->getEmailAddress();
             $internal_dashboard_user = $user->isDeveloper() || $user->isDeveloper();
 
@@ -1103,8 +1103,7 @@ class AppKernelsController extends BaseController
         try {
             $ak_db = new \CCR\AppKernel\AppKernelDb();
 
-            $user = $this->getUserFromRequest($request);
-
+            $user = $this->authorize($request);
 
             $allResources = $ak_db->getResources(
                 date_format(date_sub(date_create(), date_interval_create_from_date_string("90 days")), 'Y-m-d'),
