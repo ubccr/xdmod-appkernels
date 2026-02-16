@@ -119,7 +119,7 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
             columns: 5,
             vertical: true,
             items: [
-                { boxLabel: 'all', name: 'resourcesList_all', checked: true }
+                { boxLabel: 'all',  name: 'resourcesList_all', checked: true }
             ]
         });
         this.resourcesListStoreLoaded = false;
@@ -198,6 +198,7 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
             ['sendOnPatternRecAnyErrors', 'Send on Pattern Errors'],
             ['sendOnPatternRecFailedRuns', 'Send on Major Pattern Errors']
         ];
+        let self = this;
         this.notificationSettingsForm = new Ext.form.FormPanel({
             autoHeight: true,
             items: [
@@ -373,7 +374,7 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
                             tooltip: 'Reset selection of resources and appkernels to default',
                             scope: this,
                             handler: function () {
-                                var form = this.notificationSettingsForm.getForm();
+                                var form = self.notificationSettingsForm.getForm();
                                 var formData = Ext.encode(form.getValues());
 
                                 Ext.Ajax.request({
@@ -385,10 +386,15 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
                                     timeout: 60000, // 1 Minute,
                                     scope: this,
                                     success: function (response) {
-                                        var form2 = this.notificationSettingsForm.getForm();
+                                        var form2 = self.notificationSettingsForm.getForm();
                                         var response2 = Ext.decode(response.responseText);
                                         if (response2.success) {
-                                            form2.setValues(response2.data);
+                                            for (const [key, value] of Object.entries(response2.data)) {
+                                                const formField = form2.findField(key);
+                                                if (formField) {
+                                                    formField.setValue(value);
+                                                }
+                                            }
                                         } else {
                                             Ext.Msg.alert('Load failed', response2.message);
                                         }
