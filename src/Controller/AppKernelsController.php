@@ -916,7 +916,7 @@ class AppKernelsController extends BaseController
      *
      * @return Response
      */
-    #[Route('{prefix}app_kernels/notifications/defaults', requirements: ['prefix' => '.*'], methods: ["GET"])]
+    #[Route('{prefix}app_kernels/notifications/default', requirements: ['prefix' => '.*'], methods: ["GET"])]
     public function getDefaultNotifications(Request $request): Response
     {
         $response = array();
