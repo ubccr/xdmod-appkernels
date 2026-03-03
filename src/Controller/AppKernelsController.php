@@ -926,7 +926,7 @@ class AppKernelsController extends BaseController
 
             self::formatNotificationSettingsFromClient($curent_tmp_settings, true);
 
-            $curent_tmp_settings["controlThresholdCoeff"] = '1.0';
+            //$curent_tmp_settings["controlThresholdCoeff"] = '1.0';
             $curent_tmp_settings["resource"] = array();//None means all
             $curent_tmp_settings["appKer"] = array();//None means all
 
@@ -1755,10 +1755,26 @@ or "Show Details of Successful Tasks" options to see details on tasks';
                 'success' => true,
                 'results' => $data
             );
-        } catch (Exception $e) {
+        } catch (\Exception $exception) {
 
+            $logfile = LOG_DIR . "/" . \xd_utilities\getConfiguration('general', 'exceptions_logfile');
+
+            $logConf = array(
+                'file' => $logfile,
+                'mail' => false,
+                'db' => false,
+                'console' => false
+            );
             // make sure that we log the exception so that we dont lose sight of it.
-            handle_uncaught_exception($e);
+            $logger = \CCR\Log::singleton('exception', $logConf);
+
+            $logger->error('Exception Code: '.$exception->getCode());
+            $logger->error('Message: '.$exception->getMessage());
+            $logger->error('Origin: '.$exception->getFile().' (line '.$exception->getLine().')');
+
+            $stringTrace = (get_class($exception) == 'UniqueException') ? $exception->getVerboseTrace() : $exception->getTraceAsString();
+
+            $logger->error("Trace:\n".$stringTrace."\n-------------------------------------------------------");
 
             $results = array(
                 'success' => false,
