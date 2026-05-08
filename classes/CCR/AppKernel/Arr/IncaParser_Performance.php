@@ -1,6 +1,11 @@
 <?php
-namespace CCR\AppKernel;
-use \SimpleXmlElement;
+namespace CCR\AppKernel\Arr;
+use CCR\AppKernel\AppKernelException;
+use CCR\AppKernel\InstanceData;
+use CCR\AppKernel\InstancedParameter;
+use CCR\AppKernel\InstanceMetric;
+use CCR\AppKernel\InstanceParameter;
+use SimpleXmlElement;
 
 class IncaParser_Performance
 {

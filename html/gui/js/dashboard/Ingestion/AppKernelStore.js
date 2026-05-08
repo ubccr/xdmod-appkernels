@@ -7,7 +7,7 @@
 Ext.namespace('XDMoD', 'XDMoD.Ingestion');
 
 XDMoD.Ingestion.AppKernelStore = Ext.extend(Ext.data.JsonStore, {
-    url: 'controllers/app_kernel.php',
+    url: '/internal_dashboard/controllers/app_kernel.php',
 
     listeners: {
         exception: function () {

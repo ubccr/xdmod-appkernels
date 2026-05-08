@@ -2,12 +2,18 @@
 
 namespace IntegrationTests\REST\internal_dashboard;
 
+use IntegrationTests\TestHarness\XdmodTestHelper;
+
 class DashboardAppKernelTest extends \PHPUnit_Framework_TestCase
 {
+    private XdmodTestHelper $xdmodhelper;
+    private string $endpoint;
+
+
     public function __construct()
     {
         $xdmodConfig = array( "decodetextasjson" => true );
-        $this->xdmodhelper = new \TestHarness\XdmodTestHelper($xdmodConfig);
+        $this->xdmodhelper = new XdmodTestHelper($xdmodConfig);
 
         $this->endpoint = 'rest/v0.1/akrr/';
         $this->xdmodhelper->authenticate("mgr");

@@ -9,7 +9,7 @@ Ext.namespace('XDMoD', 'XDMoD.Arr');
 XDMoD.Arr.AppKerSuccessRateStore = Ext.extend(Ext.data.JsonStore, {
 
     proxy: new Ext.data.HttpProxy({
-        url: '/rest/v1.0/app_kernels/success_rate',
+        url: '/app_kernels/success_rate',
         method: 'GET'
     }),
 

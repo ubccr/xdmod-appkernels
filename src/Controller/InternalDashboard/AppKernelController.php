@@ -3,10 +3,11 @@
 namespace CCR\Controller\InternalDashboard;
 
 use CCR\Controller\BaseController;
-use CCR\Controller\DB;
+use CCR\DB;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use XDUser;
 
 /**
  */
@@ -37,7 +38,7 @@ class AppKernelController extends BaseController
      *
      * @return Response
      */
-    private function getIngestionReport(): Response
+    private function getIngestionReport(Request $request, XDUser $user): Response
     {
         try {
 
@@ -53,10 +54,10 @@ class AppKernelController extends BaseController
             $clauses = array();
             $params = array();
 
-            $onlyMostRecent = $this->getBoolParam('only_most_recent');
-            $startDate = $this->getStringParam('start_date');
-            $endDate = $this->getStringParam('end_date');
-            $onlyFailures = $this->getBoolParam(['only_failures']);
+            $onlyMostRecent = $this->getBooleanParam($request, 'only_most_recent');
+            $startDate = $this->getStringParam($request, 'start_date');
+            $endDate = $this->getStringParam($request, 'end_date');
+            $onlyFailures = $this->getBooleanParam($request, 'only_failures');
 
             if (isset($onlyMostRecent) && $onlyMostRecent) {
                 $limit = true;

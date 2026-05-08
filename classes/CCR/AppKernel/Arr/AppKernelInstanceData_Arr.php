@@ -1,5 +1,5 @@
 <?php
-namespace CCR\AppKernel;
+namespace CCR\AppKernel\Arr;
 
 // ================================================================================
 // Extend the AppKernelInstanceData class to include information specific to
@@ -7,6 +7,8 @@ namespace CCR\AppKernel;
 //
 // @see iAppKernelExplorer::AppKernelInstanceData
 // ================================================================================
+
+use CCR\AppKernel\AppKernelInstanceData;
 
 class AppKernelInstanceData_Arr extends AppKernelInstanceData
 {

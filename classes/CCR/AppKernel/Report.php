@@ -2,10 +2,10 @@
 
 namespace CCR\AppKernel;
 
-use xd_utilities;
-use DateTime;
-use DateInterval;
 use CCR\MailWrapper;
+use DateInterval;
+use DateTime;
+use xd_utilities;
 
 /**
  * class for App kernel report generator
@@ -122,7 +122,7 @@ class Report
         $this->report_params=array_merge(array(), $this->default_report_params['default']);
         if (array_key_exists('report_type', $options)) {
             if ((!in_array($options['report_type'], array_keys($this->default_report_params))) || ($options['report_type']==='default')) {
-                throw new Exception('Unknown type of report: '.$options['report_type']);
+                throw new \Exception('Unknown type of report: '.$options['report_type']);
             }
             $this->report_params=array_merge($this->report_params, $this->default_report_params[$options['report_type']]);
         } else {
@@ -161,7 +161,7 @@ class Report
 
         //
         if (array_key_exists('user', $options) && $options['user']!==null) {
-            $ak_db = new \AppKernel\AppKernelDb();
+            $ak_db = new \CCR\AppKernel\AppKernelDb();
             $allResources = $ak_db->getResources(
                 date_format(date_sub(date_create(), date_interval_create_from_date_string("90 days")), 'Y-m-d'),
                 date_format(date_create(), 'Y-m-d'),
@@ -232,7 +232,7 @@ class Report
      * @param string $send_to e-mail address for report
      *
      * @return void
-     * @throws Exception on failure
+     * @throws \Exception on failure
      *
      */
     public function sendReportToEmail($send_to, $internal_dashboard_user = false)
@@ -270,8 +270,8 @@ class Report
                 'toAddress' => $send_to,
                 'ishtml'    => true
             ));
-        } catch (Exception $e) {
-            throw new Exception('Failed to send e-mail. '.$e->getMessage());
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to send e-mail. '.$e->getMessage());
         }
     }
 

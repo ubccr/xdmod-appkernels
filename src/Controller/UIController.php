@@ -2,7 +2,7 @@
 
 namespace CCR\Controller;
 
-use \CCR\DataWarehouse;
+use \DataWarehouse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -31,19 +31,19 @@ class UIController extends BaseController
     {
         $logged_in_user = $this->authorize($request);
 
-        $scale = $this->getIntParam('scale', 1);
+        $scale = $this->getIntParam($request,'scale', 1);
 
         $person_id = $logged_in_user->getPersonID();
 
-        $data_only = $this->getBoolParam('data_only');
-        $show_title = $this->getBoolParam('show_title');
-        $node = $this->getStringParam('node');
+        $data_only = $this->getBooleanParam($request, 'data_only');
+        $show_title = $this->getBooleanParam($request, 'show_title');
+        $node = $this->getStringParam($request, 'node');
 
-        $metric_id = $this->getStringParam('metric_id');
-        $resource_id = $this->getStringParam('resource_id');
-        $kernel_name = $this->getStringParam('kernel_name');
-        $kernel_id = $this->getStringParam('kernel_id');
-        $date_range_id = $this->getStringParam('date_range');
+        $metric_id = $this->getStringParam($request, 'metric_id');
+        $resource_id = $this->getStringParam($request, 'resource_id');
+        $kernel_name = $this->getStringParam($request, 'kernel_name');
+        $kernel_id = $this->getStringParam($request, 'kernel_id');
+        $date_range_id = $this->getStringParam($request, 'date_range');
 
         if(isset($node) && $node == 'node_app_kernels')
         {
@@ -189,6 +189,7 @@ class UIController extends BaseController
             {
                 $format = $this->getStringParam('format', 'csv');
 
+                // DataExporter doesn't exist.
                 DataExporter::exportHeader($format, str_replace(' ','_',$c['title']).$c['start_date'].'to'.$c['end_date']);
 
                 DataExporter::export($format, $c['title'], 'From: '.$c['start_date'].' To: '.$c['end_date'], $c['chart_data'], $c['chart_png']);
@@ -219,6 +220,7 @@ class UIController extends BaseController
             $ret = array();
             foreach ($metrics as $metric)
             {
+                // this function doesn't exist
                 $c = \DataWarehouse\Visualization::getAppKernelChart($width, $height, $config[0]['left'], $config[0]['top'], $config[0]['right'],$config[0]['bottom'],
                     $kernel_name, $resource_id, $metric['metric_id'], $date_range_id, -1, $scale,$show_title  );
 
@@ -255,6 +257,7 @@ class UIController extends BaseController
 
                 foreach ($metrics as $metric)
                 {
+                    // this function doesn't exist
                     $c = \DataWarehouse\Visualization::getAppKernelChart($width, $height, $config[0]['left'], $config[0]['top'], $config[0]['right'],$config[0]['bottom'],
                         $kernel_name, $resource['resource_id'], $metric['metric_id'], $date_range_id, -1, $scale,$show_title );
                     $ret[] = $c;

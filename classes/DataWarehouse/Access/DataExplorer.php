@@ -6,7 +6,7 @@ class DataExplorer extends Common
 {
     public function get_ak_plot($user)
     {
-        $ak_db = new \AppKernel\AppKernelDb();
+        $ak_db = new \CCR\AppKernel\AppKernelDb();
 
         $selectedResourceIds = $this->getSelectedResourceIds();
         $selectedProcessingUnits = $this->getSelectedPUCounts();
@@ -182,7 +182,7 @@ class DataExplorer extends Common
             return \DataWarehouse\ExportBuilder::export($exportedDatas, $format, $inline, $filename);
         }
 
-        throw \Exception("Internal Error");
+        throw new \Exception("Internal Error");
     }
 
     private function getSelectedResourceIds()

@@ -27,6 +27,24 @@ class AppKernelChart extends AggregateChart
      * @var string
      */
     protected $_indicator_url;
+    /**
+     * @var true
+     */
+    private bool $outOfControlInLegend;
+    private array $_axis;
+    private int $_datasetCount;
+    /**
+     * @var true
+     */
+    private bool $changeIndicatorInLegend;
+    /**
+     * @var true
+     */
+    private bool $betterThanControlInLegend;
+    /**
+     * @var true
+     */
+    private bool $controlRegionTimeIntervalInLegend;
 
     public function __construct(
         $start_date,

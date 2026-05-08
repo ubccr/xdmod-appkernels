@@ -1,9 +1,10 @@
 <?php
 
-namespace CCR\AppKernel;
+namespace CCR\AppKernel\Arr;
 
 //require_once __DIR__.'/../../../configuration/linker.php';
 
+use CCR\AppKernel\iAppKernelExplorer;
 use CCR\DB;
 use Exception;
 use Psr\Log\LoggerInterface;

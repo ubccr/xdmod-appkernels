@@ -15,7 +15,6 @@
     },
     "psr-4": {
         "DataWarehouse\\": "classes/DataWarehouse/",
-        "AppKernel\\": "classes/AppKernel/",
         "CCR\\": "src/"
     }
 }

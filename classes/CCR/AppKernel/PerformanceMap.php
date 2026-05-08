@@ -3,9 +3,9 @@
 namespace CCR\AppKernel;
 
 use CCR\DB;
-use xd_utilities;
-use DateTime;
 use DateInterval;
+use DateTime;
+use xd_utilities;
 
 class PerformanceMap
 {

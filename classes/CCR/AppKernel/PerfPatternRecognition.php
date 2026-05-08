@@ -2,9 +2,9 @@
 
 namespace CCR\AppKernel;
 
+use \CCR\AppKernel\ProblemDetector\AppKernelLevel;
+use \CCR\AppKernel\ProblemDetector\ResourceLevel;
 use CCR\DB;
-use AppKernel\ProblemDetector\AppKernelLevel;
-use AppKernel\ProblemDetector\ResourceLevel;
 
 /**
  * Class for recognition error patterns

@@ -1,21 +1,24 @@
 <?php
+
 namespace CCR\Controller;
 
+use CCR\AppKernel\Report;
+use CCR\DB;
+use CCR\Security\Helpers\Tokens;
 use DataWarehouse\Access\MetricExplorer;
+use DateInterval;
 use DateTime;
-
+use Exception;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
-use Psr\Log\LoggerInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
-use CCR\Security\Helpers\Tokens;
-
-use Exception;
-use CCR\DB;
-use AppKernel\Report;
 
 /**
  * Class AppKernelControllerProvider
@@ -23,7 +26,6 @@ use AppKernel\Report;
  * This class is responsible for maintaining routes for the REST stack that
  * handle app kernel-related functionality.
  */
-#[Route('/app_kernels')]
 class AppKernelsController extends BaseController
 {
     // Tree node types, shown here in hierarchical order
@@ -35,13 +37,13 @@ class AppKernelsController extends BaseController
     const TREENODE_UNITS = "units";
     const TREENODE_INSTANCE = "instance";
 
-    const DEFAULT_DELIM=',';
+    const DEFAULT_DELIM = ',';
 
     private $dbLogger;
 
-    public function __construct(LoggerInterface $logger, Environment $twig, Tokens $tokenHelper)
+    public function __construct(LoggerInterface $logger, Environment $twig, Tokens $tokenHelper, ContainerBagInterface $parameters, UrlGeneratorInterface $urlGenerator)
     {
-        parent::__construct($logger, $twig, $tokenHelper);
+        parent::__construct($logger, $twig, $tokenHelper, $parameters, $urlGenerator);
         $this->dbLogger = \CCR\Log::factory('rest.logger.db', array(
             'console' => false,
             'file' => false,
@@ -53,52 +55,52 @@ class AppKernelsController extends BaseController
     /**
      * Format NotificationSettings from client form submittion
      *
-     * @param array $s                  the input array.
-     * @param bool  $preserveCheckBoxes ?
+     * @param array $s the input array.
+     * @param bool $preserveCheckBoxes ?
      *
      * @return null
      */
     public static function formatNotificationSettingsFromClient(&$s, $preserveCheckBoxes = false)
     {
         //set report periodisity
-        $groupCombine=array('daily_report','weekly_report','monthly_report');
+        $groupCombine = array('daily_report', 'weekly_report', 'monthly_report');
 
         foreach ($groupCombine as $g) {
-            $s[$g]=array();
+            $s[$g] = array();
             foreach ($s as $key => $value) {
-                if (strpos($key, $g.'_') === 0) {
-                    $s[$g][str_replace($g.'_', '', $key)]=$value;
+                if (strpos($key, $g . '_') === 0) {
+                    $s[$g][str_replace($g . '_', '', $key)] = $value;
                     unset($s[$key]);
                 }
             }
         }
         //make list of resources and appkernels
-        $s['resource']=array();
-        $s['appKer']=array();
+        $s['resource'] = array();
+        $s['appKer'] = array();
         foreach ($s as $key => $value) {
             if (strpos($key, 'resourcesList_') === 0) {
-                $s['resource'][]=str_replace('resourcesList_', '', $key);
+                $s['resource'][] = str_replace('resourcesList_', '', $key);
                 if ($preserveCheckBoxes) {
-                    $s[$key]='';
+                    $s[$key] = '';
                 } else {
                     unset($s[$key]);
                 }
             }
             if (strpos($key, 'appkernelsList_') === 0) {
-                $s['appKer'][]=str_replace('appkernelsList_', '', $key);
+                $s['appKer'][] = str_replace('appkernelsList_', '', $key);
                 if ($preserveCheckBoxes) {
-                    $s[$key]='';
+                    $s[$key] = '';
                 } else {
                     unset($s[$key]);
                 }
             }
         }
 
-        if (count($s['resource'])==1 && $s['resource'][0]=='all') {
-            $s["resource"]=array();//None means all
+        if (count($s['resource']) == 1 && $s['resource'][0] == 'all') {
+            $s["resource"] = array();//None means all
         }
-        if (count($s['appKer'])==1 && $s['appKer'][0]=='all') {
-            $s["appKer"]=array();//None means all
+        if (count($s['appKer']) == 1 && $s['appKer'][0] == 'all') {
+            $s["appKer"] = array();//None means all
         }
     }
 
@@ -107,32 +109,32 @@ class AppKernelsController extends BaseController
      *
      * @param array $s the input array
      *
-     * @return null
+     * @return void
      */
     public static function formatNotificationSettingsForClient(&$s)
     {
         //make list of resources and appkernels
-        if (count($s['resource'])==0) {
-            $s["resource"]=array('all');//None means all
+        if (count($s['resource']) == 0) {
+            $s["resource"] = array('all');//None means all
         }
-        if (count($s['appKer'])==0) {
-            $s["appKer"]=array('all');//None means all
+        if (count($s['appKer']) == 0) {
+            $s["appKer"] = array('all');//None means all
         }
         foreach ($s['resource'] as $value) {
-            $s['resourcesList_'.$value]='on';
+            $s['resourcesList_' . $value] = 'on';
         }
         foreach ($s['appKer'] as $value) {
-            $s['appkernelsList_'.$value]='on';
+            $s['appkernelsList_' . $value] = 'on';
         }
 
         unset($s['resource']);
         unset($s['appKer']);
 
-        $groupCombine=array('daily_report','weekly_report','monthly_report');
+        $groupCombine = array('daily_report', 'weekly_report', 'monthly_report');
 
         foreach ($groupCombine as $g) {
             foreach ($s[$g] as $key => $value) {
-                $s[$g.'_'.$key]=$value;
+                $s[$g . '_' . $key] = $value;
             }
             unset($s[$g]);
         }
@@ -145,17 +147,17 @@ class AppKernelsController extends BaseController
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param  Request     $request The request used to make this call.
+     * @param Request $request The request used to make this call.
      * @return Response Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      * results: The requested information.
      * @throws Exception
      */
-    #[Route('/details', methods: ["GET"])]
+    #[Route('{prefix}app_kernels/details', requirements: ['prefix' => '.*'], methods: ["GET"])]
     public function getDetails(Request $request): Response
     {
         $results = array();
-        $db = new \AppKernel\AppKernelDb();
+        $db = new \CCR\AppKernel\AppKernelDb();
 
         // Extract the parameters that were sent
 
@@ -273,7 +275,7 @@ class AppKernelsController extends BaseController
                 $results[] = $node;
             }  // foreach ( $retval as $row )
         } else {
-            $ak = new \AppKernel\InstanceData;
+            $ak = new \CCR\AppKernel\InstanceData;
 
             $akOptions = array('ak_def_id' => $akId,
                 'collected' => $collected,
@@ -296,20 +298,20 @@ class AppKernelsController extends BaseController
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param Request     $request The request used to make this call.
+     * @param Request $request The request used to make this call.
      * @param boolean $returnRawData (Optional) If true, returns the data
      *                                    without converting it to a format.
      *                                    (Defaults to false.)
-     * @return array                Response data containing the following info:
+     * @return Response|array               Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              results: The requested datasets.
      * @throws Exception
      */
-    #[Route('/datasets', methods: ["GET"])]
-    public function getDatasets(Request $request, $returnRawData = false)
+    #[Route('{prefix}app_kernels/datasets', requirements: ['prefix' => '.*'], methods: ["GET"])]
+    public function getDatasets(Request $request, $returnRawData = false): Response|array
     {
         $results = array();
-        $db = new \AppKernel\AppKernelDb();
+        $db = new \CCR\AppKernel\AppKernelDb();
 
         // Extract the parameters that were sent
 
@@ -376,7 +378,7 @@ class AppKernelsController extends BaseController
         {
             return $this->json($results);
         } elseif ($format == 'jsonstore') //not supported yet
-            {
+        {
 
         } elseif ($format == 'xls' || $format == 'csv' || $format == 'xml') {
             $exportedDatas = array();
@@ -395,13 +397,13 @@ class AppKernelsController extends BaseController
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param Request     $request The request used to make this call.
+     * @param Request $request The request used to make this call.
      * @return Response response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              results: The requested plots.
      * @throws Exception
      */
-    #[Route('/plots', methods: ["GET"])]
+    #[Route('{prefix}app_kernels/plots', requirements: ['prefix' => '.*'], methods: ["GET"])]
     public function getPlots(Request $request): Response
     {
         $show_title = $this->getBooleanParam($request, 'show_title', false, false);
@@ -462,7 +464,7 @@ class AppKernelsController extends BaseController
             array('session_variable', 'png_inline', 'img_tag', 'png', 'svg', 'pdf')
         );
 
-        $dataset = $this->getDatasets($request, $app, true);
+        $dataset = $this->getDatasets($request, true);
         if (!$dataset['success']) {
             throw new Exception('Dataset is empty');
         }
@@ -470,13 +472,13 @@ class AppKernelsController extends BaseController
 
         $returnValue = array();
 
-        $user = $this->getUserFromRequest($request);
+        $user = $this->getXDUser($request->getSession());
         $userIsPublic = $user->isPublicUser();
         if (!$userIsPublic) {
             $chartPool = new \XDChartPool($user);
         }
 
-        $lastResult = new \AppKernel\Dataset('Empty App Kernel Dataset', -1, "", -1, "", -1, "", "", "", "");
+        $lastResult = new \CCR\AppKernel\Dataset('Empty App Kernel Dataset', -1, "", -1, "", -1, "", "", "", "");
         $chart = new \DataWarehouse\Visualization\AppKernelChart($start_date, $end_date, $scale, $width, $height, $user, $swap_xy);
         $chart->setTitle($show_title ? 'Empty App Kernel Dataset' : null, $font_size);
         $chart->setLegend($legend_location, $font_size);
@@ -648,6 +650,8 @@ class AppKernelsController extends BaseController
             }
 
         }
+
+        throw new HttpException(500, 'Unexpected error has occurred.');
     }
 
     /**
@@ -655,19 +659,19 @@ class AppKernelsController extends BaseController
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param  Request     $request The request used to make this call.
-     * @return JsonResponse Response data containing the following info:
+     * @param Request $request The request used to make this call.
+     * @return Response Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              results: The requested control regions.
      *                              count: The number of control regions.
      */
-    #[Route('/control/regions', methods: ["GET"])]
+    #[Route('{prefix}app_kernels/control/regions', requirements: ['prefix' => '.*'], methods: ["GET"])]
     public function getControlRegions(Request $request): Response
     {
         $resource_id = $this->getIntParam($request, 'resource_id', true);
         $ak_def_id = $this->getIntParam($request, 'ak_def_id', true);
         // TODO: wire in the db.logger.
-        $db = new \AppKernel\AppKernelDb($this->dbLogger);
+        $db = new \CCR\AppKernel\AppKernelDb($this->dbLogger);
         $results = $db->getControlRegions($resource_id, $ak_def_id);
 
         return $this->json(array(
@@ -682,21 +686,21 @@ class AppKernelsController extends BaseController
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param  Request     $request The request used to make this call.
-     * @param  boolean $update True if updating control regions. False if
+     * @param Request $request The request used to make this call.
+     * @param boolean $update True if updating control regions. False if
      *                              creating control regions.
      * @return Response Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              message: A human-readable message about what occurred.
      */
-    #[Route('/control_regions', methods: ["PUT"])]
+    #[Route('{prefix}app_kernels/control_regions', requirements: ['prefix' => '.*'], methods: ["PUT"])]
     public function createOrUpdateControlRegions(Request $request, bool $update = true): Response
     {
         // Ensure that the user is a manager.
         $this->authorize($request, array(ROLE_ID_MANAGER));
 
         // Get an app kernel database connection.
-        $db = new \AppKernel\AppKernelDb($this->dbLogger);
+        $db = new \CCR\AppKernel\AppKernelDb($this->dbLogger);
 
         // Load the application kernel definitions for the description
         $akList = $this->getAppKernelMapping($db);
@@ -746,19 +750,19 @@ class AppKernelsController extends BaseController
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param  Request     $request The request used to make this call.
+     * @param Request $request The request used to make this call.
      * @return Response Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              message: A human-readable message about what occurred.
      */
-    #[Route('/control_regions', methods: ['DELETE'])]
+    #[Route('{prefix}app_kernels/control_regions', requirements: ['prefix' => '.*'], methods: ['DELETE'])]
     public function deleteControlRegions(Request $request): Response
     {
         // Ensure that the user is a manager.
         $this->authorize($request, array(ROLE_ID_MANAGER));
 
         // Get an app kernel database connection.
-        $db = new \AppKernel\AppKernelDb($this->dbLogger);
+        $db = new \CCR\AppKernel\AppKernelDb($this->dbLogger);
 
         // Load the application kernel definitions for the description
         $akList = $this->getAppKernelMapping($db);
@@ -799,7 +803,7 @@ class AppKernelsController extends BaseController
      *                              success: A boolean indicating if the call was successful.
      *                              results: The requested information.
      */
-    #[Route('/notifications', methods: ["GET"])]
+    #[Route('{prefix}app_kernels/notifications', requirements: ['prefix' => '.*'], methods: ["GET"])]
     public function getNotifications(Request $request): Response
     {
         try {
@@ -809,7 +813,8 @@ class AppKernelsController extends BaseController
             $curent_tmp_settings = $this->getStringParam($request, 'curent_tmp_settings', true);
             $curent_tmp_settings = json_decode($curent_tmp_settings, true);
 
-            $user_id = $this->getUserFromRequest($request)->getUserID();
+            $user = $this->authorize($request);
+            $user_id = $user->getUserID();
 
             self::formatNotificationSettingsFromClient($curent_tmp_settings, true);
 
@@ -835,7 +840,7 @@ class AppKernelsController extends BaseController
             return $this->json($response);
         } catch (Exception $e) {
             //i.e. setting is not saved by user so send defaults
-            return $this->getDefaultNotifications($request, $app);
+            return $this->getDefaultNotifications($request);
         }
     }
 
@@ -845,7 +850,7 @@ class AppKernelsController extends BaseController
      * @return Response Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      */
-    #[Route('/notifications', methods: ["PUT"])]
+    #[Route('{prefix}app_kernels/notifications', requirements: ['prefix' => '.*'], methods: ["PUT"])]
     public function putNotifications(Request $request)
     {
         try {
@@ -853,8 +858,8 @@ class AppKernelsController extends BaseController
 
             $curent_tmp_settings = $this->getStringParam($request, 'curent_tmp_settings', true);
             $curent_tmp_settings = json_decode($curent_tmp_settings, true);
-
-            $user_id = $this->getUserFromRequest($request)->getUserID();
+            $user = $this->authorize($request);
+            $user_id = $user->getUserID();
 
             self::formatNotificationSettingsFromClient($curent_tmp_settings);
 
@@ -909,10 +914,11 @@ class AppKernelsController extends BaseController
     /**
      * Get DefaultNotifications settings
      *
-     * @param Request     $request
+     * @param Request $request
      *
      * @return Response
      */
+    #[Route('{prefix}app_kernels/notifications/default', requirements: ['prefix' => '.*'], methods: ["GET"])]
     public function getDefaultNotifications(Request $request): Response
     {
         $response = array();
@@ -922,7 +928,7 @@ class AppKernelsController extends BaseController
 
             self::formatNotificationSettingsFromClient($curent_tmp_settings, true);
 
-            $curent_tmp_settings["controlThresholdCoeff"] = '1.0';
+            //$curent_tmp_settings["controlThresholdCoeff"] = '1.0';
             $curent_tmp_settings["resource"] = array();//None means all
             $curent_tmp_settings["appKer"] = array();//None means all
 
@@ -940,12 +946,12 @@ class AppKernelsController extends BaseController
     /**
      * Send e-mail report
      *
-     * @param Request     $request
-     * @return JsonResponse|Response Response data containing the following info:
+     * @param Request $request
+     * @return Response Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              results: The requested information.
      */
-    #[Route('/performance_map', methods: ["GET"])]
+    #[Route('{prefix}app_kernels/performance_map', requirements: ['prefix' => '.*'], methods: ["GET"])]
     public function getPerformanceMap(Request $request)
     {
         $response = array();
@@ -967,19 +973,8 @@ class AppKernelsController extends BaseController
             $appKers = null;
             $problemSizes = null;
 
-            if (count($resources) === 0) {
-                $resources = null;
-            }
-            if (count($appKers) === 0) {
-                $appKers = null;
-            }
-            if (count($problemSizes) === 0) {
-                $problemSizes = null;
-            }
-
-
             //PerformanceMap
-            $perfMap = new \AppKernel\PerformanceMap(array(
+            $perfMap = new \CCR\AppKernel\PerformanceMap(array(
                 'start_date' => $start_date,
                 'end_date' => $end_date,
                 'resource' => $resources,
@@ -1043,17 +1038,17 @@ class AppKernelsController extends BaseController
     /**
      * Send e-mail report
      *
-     * @param Request     $request
+     * @param Request $request
      * @return Response Response data containing the following info:
      *                              success: A boolean indicating if the call was successful.
      *                              results: The requested information.
      */
-    #[Route('/notifications/send', methods: ["GET"])]
+    #[Route('{prefix}app_kernels/notifications/send', requirements: ['prefix' => '.*'], methods: ["GET"])]
     public function sendNotification(Request $request): Response
     {
         $response = array();
         try {
-            $user = $this->getUserFromRequest($request);
+            $user = $this->authorize($request);
             $recipient = $user->getEmailAddress();
             $internal_dashboard_user = $user->isDeveloper() || $user->isDeveloper();
 
@@ -1101,18 +1096,17 @@ class AppKernelsController extends BaseController
 
     /**
      * Get list of resources active in last 90 days
-     * @param Request     $request
-     * @return JsonResponse
+     * @param Request $request
+     * @return Response
      */
-    #[Route('/resources', methods: ["GET"])]
+    #[Route('{prefix}app_kernels/resources', requirements: ['prefix' => '.*'], methods: ["GET"])]
     public function getResources(Request $request): Response
     {
         $response = array();
         try {
-            $ak_db = new \AppKernel\AppKernelDb();
+            $ak_db = new \CCR\AppKernel\AppKernelDb();
 
-            $user = $this->getUserFromRequest($request);
-
+            $user = $this->authorize($request);
 
             $allResources = $ak_db->getResources(
                 date_format(date_sub(date_create(), date_interval_create_from_date_string("90 days")), 'Y-m-d'),
@@ -1148,15 +1142,15 @@ class AppKernelsController extends BaseController
 
     /**
      * Get list of app kernels active in last 90 days
-     * @param Request     $request
+     * @param Request $request
      * @return Response
      */
-    #[Route('/app_kernels', methods: ["GET"])]
+    #[Route('{prefix}app_kernels', requirements: ['prefix' => '.*'], methods: ["GET"])]
     public function getAppKernels(Request $request)
     {
         $response = array();
         try {
-            $ak_db = new \AppKernel\AppKernelDb();
+            $ak_db = new \CCR\AppKernel\AppKernelDb();
             $start_ts = date_timestamp_get(date_sub(date_create(), date_interval_create_from_date_string("90 days")));
 
             $all_app_kernels = $ak_db->getUniqueAppKernels();
@@ -1186,13 +1180,13 @@ class AppKernelsController extends BaseController
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param  DateTime $dateVal The DateTime to convert. If a DateTime is
+     * @param DateTime $dateVal The DateTime to convert. If a DateTime is
      *                               not given, null will be returned.
-     * @param  boolean $isEndDate (Optional) If true, the time will be set
+     * @param boolean $isEndDate (Optional) If true, the time will be set
      *                               to 23:59:59 of the date given. Otherwise,
      *                               the time will be set to midnight.
      *                               (Defaults to false.)
-     * @param  boolean $isYMDFormat (Optional) If true, the DateTime will be
+     * @param boolean $isYMDFormat (Optional) If true, the DateTime will be
      *                               converted to an ISO 8601 date string.
      *                               Otherwise, it will be converted to a Unix
      *                               timestamp. (Defaults to false.)
@@ -1234,8 +1228,8 @@ class AppKernelsController extends BaseController
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param String  $type           Tree node type
-     * @param array   $record Record  returned from the database
+     * @param String $type Tree node type
+     * @param array $record Record  returned from the database
      * @param boolean $resource_first (Optional) (Defaults to false.)
      *
      * @return Object An object representation of the tree node
@@ -1302,8 +1296,8 @@ class AppKernelsController extends BaseController
      *
      * Ported from: classes/REST/Appkernel/Explorer.php
      *
-     * @param  string $type The type of the tree node.
-     * @param  array $record The database record corresponding to the node.
+     * @param string $type The type of the tree node.
+     * @param array $record The database record corresponding to the node.
      * @return string         The ID for the tree node.
      */
     private function nodeId($type, $record)
@@ -1334,11 +1328,11 @@ class AppKernelsController extends BaseController
     /**
      * Get a mapping of app kernel IDs to app kernels from the database.
      *
-     * @param  \AppKernel\AppKernelDb $db The app kernel database.
+     * @param \CCR\AppKernel\AppKernelDb $db The app kernel database.
      * @return array                      An associative array of app kernel
      *                                    IDs to app kernels.
      */
-    private function getAppKernelMapping(\AppKernel\AppKernelDb $db)
+    private function getAppKernelMapping(\CCR\AppKernel\AppKernelDb $db)
     {
         $appKernelDefs = $db->loadAppKernelDefinitions();
         $akList = array();
@@ -1351,11 +1345,11 @@ class AppKernelsController extends BaseController
     /**
      * Get a mapping of resource IDs to resources from the database.
      *
-     * @param  \AppKernel\AppKernelDb $db The app kernel database.
+     * @param \CCR\AppKernel\AppKernelDb $db The app kernel database.
      * @return array                      An associative array of resource
      *                                    IDs to resources.
      */
-    private function getResourceMapping(\AppKernel\AppKernelDb $db)
+    private function getResourceMapping(\CCR\AppKernel\AppKernelDb $db)
     {
         $resourceDefs = $db->loadResources();
         $resourceList = array();
@@ -1365,7 +1359,8 @@ class AppKernelsController extends BaseController
         return $resourceList;
     }
 
-    public function getAppKernelSuccessRate(Request $req, Application $app)
+    #[Route('{prefix}app_kernels/success_rate', requirements: ['prefix' => '.*'], methods: ["GET"])]
+    public function getAppKernelSuccessRate(Request $req)
     {
         $response = null;
 
@@ -1610,7 +1605,7 @@ or "Show Details of Successful Tasks" options to see details on tasks';
                 }
             }
 
-            $response =  $this->json(
+            $response = $this->json(
                 array(
                     'success' => true,
                     'response' => $results2,
@@ -1664,12 +1659,12 @@ or "Show Details of Successful Tasks" options to see details on tasks';
      * **NOTE:** This function will throw an UnauthorizedException if the user making the request
      * does not have the Center Director or Center Staff acl.
      *
-     * @param Request     $request
+     * @param Request $request
      * @return Response
      * @throws Exception if there is a problem instantiating \DateTime objects.
      * @throws Exception if the user making the request is not a Center [Director|Staff]
      */
-    #[Route('/performance_map/raw', methods: ["GET"])]
+    #[Route('{prefix}app_kernels/performance_map/raw', requirements: ['prefix' => '.*'], methods: ["GET"])]
     public function getRawPerformanceMap(Request $request): Response
     {
         $user = $this->authorize($request);
@@ -1678,8 +1673,8 @@ or "Show Details of Successful Tasks" options to see details on tasks';
         // utilize this endpoint. Note, we do not utilize the `requirements` parameter of the above
         // `authorize` call because it utilizes `XDUser::hasAcls` which only checks if the user has
         // *all* of the supplied acls, not any of the supplied acls.
-        if ( ! ( $user->hasAcl(ROLE_ID_CENTER_DIRECTOR) ||  $user->hasAcl(ROLE_ID_CENTER_STAFF) ||
-            $user->hasAcl(ROLE_ID_DEVELOPER)  ||  $user->hasAcl(ROLE_ID_PROGRAM_OFFICER) ) ) {
+        if (!($user->hasAcl(ROLE_ID_CENTER_DIRECTOR) || $user->hasAcl(ROLE_ID_CENTER_STAFF) ||
+            $user->hasAcl(ROLE_ID_DEVELOPER) || $user->hasAcl(ROLE_ID_PROGRAM_OFFICER))) {
             throw  new UnauthorizedHttpException('xdmod', "Unable to complete action. User is not authorized.");
         }
 
@@ -1703,7 +1698,7 @@ or "Show Details of Successful Tasks" options to see details on tasks';
             $problemSizes = explode(self::DEFAULT_DELIM, $problemSizes);
         }
 
-        if ( $user->hasAcl(ROLE_ID_DEVELOPER)  ||  $user->hasAcl(ROLE_ID_PROGRAM_OFFICER)) {
+        if ($user->hasAcl(ROLE_ID_DEVELOPER) || $user->hasAcl(ROLE_ID_PROGRAM_OFFICER)) {
             $resource = null;
         } else {
             $resource = array('data' => $user->getResources());
@@ -1711,7 +1706,7 @@ or "Show Details of Successful Tasks" options to see details on tasks';
 
         $data = array();
         try {
-            $perfMap = new \AppKernel\PerformanceMap(array(
+            $perfMap = new \CCR\AppKernel\PerformanceMap(array(
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'resource' => $resource,
@@ -1729,17 +1724,17 @@ or "Show Details of Successful Tasks" options to see details on tasks';
             );
 
             // Now that we have the app kernel data, iterate through and extract / sum data for presentation.
-            foreach($perfMap->perfMap['runsStatus'] as $resource => $runData) {
-                foreach($runData as $appKernel => $nodeCountData) {
+            foreach ($perfMap->perfMap['runsStatus'] as $resource => $runData) {
+                foreach ($runData as $appKernel => $nodeCountData) {
 
                     // Values that we'll be collecting / summing by node count & date.
                     $values = array();
-                    foreach($nodeCountData as $nodeCount => $byDateData) {
-                        foreach($byDateData as $date => $runInfo) {
+                    foreach ($nodeCountData as $nodeCount => $byDateData) {
+                        foreach ($byDateData as $date => $runInfo) {
 
                             // Now that we've reached the data level, initialize or add in the data
                             // for the columns that we're interested in.
-                            foreach($valueCols as $valueCol) {
+                            foreach ($valueCols as $valueCol) {
                                 if (!isset($values[$valueCol])) {
                                     $values[$valueCol] = 0;
                                 }
@@ -1762,10 +1757,26 @@ or "Show Details of Successful Tasks" options to see details on tasks';
                 'success' => true,
                 'results' => $data
             );
-        } catch( Exception $e) {
+        } catch (\Exception $exception) {
 
+            $logfile = LOG_DIR . "/" . \xd_utilities\getConfiguration('general', 'exceptions_logfile');
+
+            $logConf = array(
+                'file' => $logfile,
+                'mail' => false,
+                'db' => false,
+                'console' => false
+            );
             // make sure that we log the exception so that we dont lose sight of it.
-            handle_uncaught_exception($e);
+            $logger = \CCR\Log::singleton('exception', $logConf);
+
+            $logger->error('Exception Code: '.$exception->getCode());
+            $logger->error('Message: '.$exception->getMessage());
+            $logger->error('Origin: '.$exception->getFile().' (line '.$exception->getLine().')');
+
+            $stringTrace = (get_class($exception) == 'UniqueException') ? $exception->getVerboseTrace() : $exception->getTraceAsString();
+
+            $logger->error("Trace:\n".$stringTrace."\n-------------------------------------------------------");
 
             $results = array(
                 'success' => false,
