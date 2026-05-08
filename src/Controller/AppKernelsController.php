@@ -10,12 +10,14 @@ use DateInterval;
 use DateTime;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
 /**
@@ -39,9 +41,9 @@ class AppKernelsController extends BaseController
 
     private $dbLogger;
 
-    public function __construct(LoggerInterface $logger, Environment $twig, Tokens $tokenHelper)
+    public function __construct(LoggerInterface $logger, Environment $twig, Tokens $tokenHelper, ContainerBagInterface $parameters, UrlGeneratorInterface $urlGenerator)
     {
-        parent::__construct($logger, $twig, $tokenHelper);
+        parent::__construct($logger, $twig, $tokenHelper, $parameters, $urlGenerator);
         $this->dbLogger = \CCR\Log::factory('rest.logger.db', array(
             'console' => false,
             'file' => false,
