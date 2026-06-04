@@ -78,7 +78,7 @@ XDMoD.Module.Dashboard.CenterReportCardComponent = Ext.extend(CCR.xdmod.ui.Portl
             ],
             proxy: new Ext.data.HttpProxy({
                 method: 'GET',
-                url: XDMoD.REST.url + '/app_kernels/performance_map/raw'
+                url: '/app_kernels/performance_map/raw'
             }),
             baseParams: {
                 start_date: this.config.start_date,

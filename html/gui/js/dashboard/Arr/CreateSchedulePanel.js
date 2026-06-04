@@ -25,7 +25,7 @@ XDMoD.Arr.CreateSchedulePanel = Ext.extend(Ext.FormPanel, {
 
         XDMoD.Arr.CreateSchedulePanel.superclass.initComponent.apply(this, arguments);
 
-        this.form.url = XDMoD.REST.url + '/akrr/tasks/scheduled?token=' + XDMoD.REST.token;
+        this.form.url = '/akrr/tasks/scheduled';
     },
 
     listeners: {
@@ -254,7 +254,7 @@ XDMoD.Arr.CreateSchedulePanel = Ext.extend(Ext.FormPanel, {
             idProperty: 'id',
             proxy: new Ext.data.HttpProxy({
                 method: 'GET',
-                url: XDMoD.REST.url + '/akrr/resources?token=' + XDMoD.REST.token
+                url: '/akrr/resources'
             }),
             fields: [
                 {name: 'id', type: 'int'},
@@ -277,7 +277,7 @@ XDMoD.Arr.CreateSchedulePanel = Ext.extend(Ext.FormPanel, {
             idProperty: 'id',
             proxy: new Ext.data.HttpProxy({
                 method: 'GET',
-                url: XDMoD.REST.url + '/akrr/kernels?token=' + XDMoD.REST.token,
+                url: '/akrr/kernels',
                 baseParams: {
                     disabled: false
                 }

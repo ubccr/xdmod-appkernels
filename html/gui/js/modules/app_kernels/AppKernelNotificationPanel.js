@@ -13,7 +13,7 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
             }
 
             Ext.Ajax.request({
-                url: XDMoD.REST.baseURL + 'app_kernels/notifications?token=' + XDMoD.REST.token,
+                url: 'app_kernels/notifications,
                 method: 'GET',
                 params: {
                     curent_tmp_settings: formData
@@ -56,7 +56,7 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
         });
 
         Ext.Ajax.request({
-            url: XDMoD.REST.baseURL + 'app_kernels/notifications/send?token=' + XDMoD.REST.token,
+            url: 'app_kernels/notifications/send',
             method: 'GET',
             params: baseParams,
             timeout: 120000, // 1 Minute,
@@ -124,7 +124,7 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
         });
         this.resourcesListStoreLoaded = false;
         this.resourcesListStore = new Ext.data.JsonStore({
-            url: XDMoD.REST.prependPathBase('/app_kernels/resources'),
+            url: '/app_kernels/resources',
             root: 'response',
             fields: ['name'],
             autoLoad: true,
@@ -160,7 +160,7 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
         });
         this.appkernelsListStoreLoaded = false;
         this.appkernelsListStore = new Ext.data.JsonStore({
-            url: XDMoD.REST.prependPathBase('/app_kernels/app_kernels'),
+            url: '/app_kernels/app_kernels',
             root: 'response',
             fields: ['name'],
             autoLoad: true,
@@ -377,7 +377,7 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
                                 var formData = Ext.encode(form.getValues());
 
                                 Ext.Ajax.request({
-                                    url: XDMoD.REST.baseURL + 'app_kernels/notifications/default?token=' + XDMoD.REST.token,
+                                    url: 'app_kernels/notifications/default',
                                     method: 'GET',
                                     params: {
                                         curent_tmp_settings: formData
@@ -420,7 +420,7 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
                         var formData = Ext.encode(form.getValues());
 
                         Ext.Ajax.request({
-                            url: XDMoD.REST.baseURL + 'app_kernels/notifications?token=' + XDMoD.REST.token,
+                            url: 'app_kernels/notifications',
                             method: 'PUT',
                             params: {
                                 curent_tmp_settings: formData
