@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Psr\Log\LoggerInterface;
 use Twig\Environment;
@@ -37,11 +38,16 @@ class AppKernelsController extends BaseController
 
     const DEFAULT_DELIM=',';
 
+    /**
+     * @var ContainerBagInterface
+     */
+    protected ContainerBagInterface $parameters;
+
     private $dbLogger;
 
-    public function __construct(LoggerInterface $logger, Environment $twig, Tokens $tokenHelper)
+    public function __construct(LoggerInterface $logger, Environment $twig, Tokens $tokenHelper, ContainerBagInterface $parameters)
     {
-        parent::__construct($logger, $twig, $tokenHelper);
+        parent::__construct($logger, $twig, $tokenHelper, $parameters);
         $this->dbLogger = \CCR\Log::factory('rest.logger.db', array(
             'console' => false,
             'file' => false,
