@@ -13,7 +13,7 @@ XDMoD.Module.AppKernels.AppKernelNotificationPanel = Ext.extend(Ext.Panel, {
             }
 
             Ext.Ajax.request({
-                url: 'app_kernels/notifications,
+                url: 'app_kernels/notifications',
                 method: 'GET',
                 params: {
                     curent_tmp_settings: formData
