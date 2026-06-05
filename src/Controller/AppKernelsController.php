@@ -16,6 +16,7 @@ use CCR\Security\Helpers\Tokens;
 
 use Exception;
 use CCR\DB;
+use AppKernel\PerformanceMap;
 use AppKernel\Report;
 
 /**
@@ -985,7 +986,7 @@ class AppKernelsController extends BaseController
 
 
             //PerformanceMap
-            $perfMap = new \AppKernel\PerformanceMap(array(
+            $perfMap = new PerformanceMap(array(
                 'start_date' => $start_date,
                 'end_date' => $end_date,
                 'resource' => $resources,
@@ -1717,7 +1718,7 @@ or "Show Details of Successful Tasks" options to see details on tasks';
 
         $data = array();
         try {
-            $perfMap = new \AppKernel\PerformanceMap(array(
+            $perfMap = new PerformanceMap(array(
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'resource' => $resource,
