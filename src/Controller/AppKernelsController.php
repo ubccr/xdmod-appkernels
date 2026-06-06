@@ -12,7 +12,6 @@ use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Psr\Log\LoggerInterface;
 use Twig\Environment;
-use CCR\Security\Helpers\Tokens;
 
 use Exception;
 use CCR\DB;
@@ -46,9 +45,9 @@ class AppKernelsController extends BaseController
 
     private $dbLogger;
 
-    public function __construct(LoggerInterface $logger, Environment $twig, Tokens $tokenHelper, ContainerBagInterface $parameters)
+    public function __construct(LoggerInterface $logger, Environment $twig, ContainerBagInterface $parameters)
     {
-        parent::__construct($logger, $twig, $tokenHelper, $parameters);
+        parent::__construct($logger, $twig, $parameters);
         $this->dbLogger = \CCR\Log::factory('rest.logger.db', array(
             'console' => false,
             'file' => false,
