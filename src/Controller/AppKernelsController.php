@@ -8,13 +8,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Psr\Log\LoggerInterface;
 use Twig\Environment;
-use CCR\Security\Helpers\Tokens;
 
 use Exception;
 use CCR\DB;
+use AppKernel\PerformanceMap;
 use AppKernel\Report;
 
 /**
@@ -37,11 +38,16 @@ class AppKernelsController extends BaseController
 
     const DEFAULT_DELIM=',';
 
+    /**
+     * @var ContainerBagInterface
+     */
+    protected ContainerBagInterface $parameters;
+
     private $dbLogger;
 
-    public function __construct(LoggerInterface $logger, Environment $twig, Tokens $tokenHelper)
+    public function __construct(LoggerInterface $logger, Environment $twig, ContainerBagInterface $parameters)
     {
-        parent::__construct($logger, $twig, $tokenHelper);
+        parent::__construct($logger, $twig, $parameters);
         $this->dbLogger = \CCR\Log::factory('rest.logger.db', array(
             'console' => false,
             'file' => false,
@@ -979,7 +985,7 @@ class AppKernelsController extends BaseController
 
 
             //PerformanceMap
-            $perfMap = new \AppKernel\PerformanceMap(array(
+            $perfMap = new PerformanceMap(array(
                 'start_date' => $start_date,
                 'end_date' => $end_date,
                 'resource' => $resources,
@@ -1711,7 +1717,7 @@ or "Show Details of Successful Tasks" options to see details on tasks';
 
         $data = array();
         try {
-            $perfMap = new \AppKernel\PerformanceMap(array(
+            $perfMap = new PerformanceMap(array(
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'resource' => $resource,

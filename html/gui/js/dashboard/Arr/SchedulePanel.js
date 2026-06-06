@@ -45,7 +45,7 @@ XDMoD.Arr.SchedulePanel = Ext.extend(Ext.FormPanel, {
         XDMoD.Arr.SchedulePanel.superclass.initComponent.apply(this, arguments);
 
         this.form.method = 'PUT';
-        this.form.url = XDMoD.REST.url + '/akrr/tasks/scheduled?token=' + XDMoD.REST.token;
+        this.form.url = '/akrr/tasks/scheduled';
     },
 
     listeners: {
@@ -81,7 +81,7 @@ XDMoD.Arr.SchedulePanel = Ext.extend(Ext.FormPanel, {
 
     _createStore: function () {
         return new Ext.data.JsonStore({
-            url: XDMoD.REST.url + '/akrr/tasks/scheduled?token=' + XDMoD.REST.token,
+            url: '/akrr/tasks/scheduled',
             root: 'data',
             messageProperty: 'message',
             successProperty: 'success',
@@ -133,7 +133,7 @@ XDMoD.Arr.SchedulePanel = Ext.extend(Ext.FormPanel, {
                     scope: this,
                     handler: function () {
                         if (self.getForm().active_record) {
-                            fetch(`${XDMoD.REST.url}/akrr/tasks/scheduled/${self.getForm().active_record.data.task_id}?token=${XDMoD.REST.token}`, {
+                            fetch(`/akrr/tasks/scheduled/${self.getForm().active_record.data.task_id}`, {
                                 method: 'DELETE'
                             })
                             .then((response) => {

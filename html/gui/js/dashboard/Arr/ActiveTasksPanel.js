@@ -68,7 +68,7 @@ XDMoD.Arr.ActiveTasksPanel = Ext.extend(Ext.Panel, {
                     case Ext.MessageBox.buttonText.yes.toLowerCase():
 
                         var task = self.selected.get('task_id');
-                        var url = XDMoD.REST.url + '/akrr/tasks/active/' + task + '?token=' + XDMoD.REST.token;
+                        var url = '/akrr/tasks/active/' + task;
 
                         Ext.Ajax.request({
                             url: url,
@@ -183,7 +183,7 @@ XDMoD.Arr.ActiveTasksPanel = Ext.extend(Ext.Panel, {
             restful: true,
             proxy: new Ext.data.HttpProxy({
                 method: 'GET',
-                url: XDMoD.REST.url + '/akrr/tasks/active?token=' + XDMoD.REST.token
+                url: '/akrr/tasks/active'
             }),
             fields: [
                 { name: 'status_update_time', type: 'string' },
