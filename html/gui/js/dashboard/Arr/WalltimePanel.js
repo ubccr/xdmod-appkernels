@@ -97,7 +97,7 @@ XDMoD.Arr.WalltimePanel = Ext.extend(Ext.FormPanel, {
 
             } else {
                 var id = this.selected.get('id') || this.selected.id;
-                var url = XDMoD.REST.url + '/akrr/walltime/' + id + '?token=' + XDMoD.REST.token;
+                var url = '/akrr/walltime/' + id;
                 Ext.Ajax.request({
                     url: url,
                     method: 'DELETE',
@@ -206,7 +206,7 @@ XDMoD.Arr.WalltimePanel = Ext.extend(Ext.FormPanel, {
             root: 'data',
             proxy: new Ext.data.HttpProxy({
                 method: 'GET',
-                url: XDMoD.REST.url + '/akrr/walltime?token=' + XDMoD.REST.token,
+                url: '/akrr/walltime',
                 baseParams: {
                     disabled: false
                 }

@@ -25,7 +25,7 @@ XDMoD.Arr.WalltimeNewEntryPanel = Ext.extend(Ext.FormPanel, {
 
         XDMoD.Arr.WalltimeNewEntryPanel.superclass.initComponent.apply(this, arguments);
 
-        this.form.url = XDMoD.REST.url + '/akrr/walltime?token=' + XDMoD.REST.token;
+        this.form.url = '/akrr/walltime';
         this.form.method = 'POST';
     }, // initComponent
 
@@ -225,7 +225,7 @@ XDMoD.Arr.WalltimeNewEntryPanel = Ext.extend(Ext.FormPanel, {
             idProperty: 'id',
             proxy: new Ext.data.HttpProxy({
                 method: 'GET',
-                url: XDMoD.REST.url + '/akrr/kernels?token=' + XDMoD.REST.token,
+                url: '/akrr/kernels',
                 baseParams: {
                     disabled: true
                 }
@@ -257,7 +257,7 @@ XDMoD.Arr.WalltimeNewEntryPanel = Ext.extend(Ext.FormPanel, {
             idProperty: 'id',
             proxy: new Ext.data.HttpProxy({
                 method: 'GET',
-                url: XDMoD.REST.url + '/akrr/resources?token=' + XDMoD.REST.token
+                url: '/akrr/resources'
             }),
             fields: [
                 {name: 'id', type: 'int'},

@@ -2,18 +2,18 @@
 
 namespace CCR\Controller;
 
-use \CCR\DataWarehouse;
+use CCR\DataWarehouse;
+use CCR\Security\Attributes\MustBeLoggedIn;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class UIController extends BaseController
 {
+    #[MustBeLoggedIn]
     #[Route('/controllers/ui_data.php', methods: ["GET", "POST"])]
     public function index(Request $request): Response
     {
-        $this->authorize($request);
-
         $operation = $this->getStringParam($request, 'operation', true);
 
         switch ($operation) {
@@ -29,7 +29,7 @@ class UIController extends BaseController
 
     private function getAppKernels(Request $request)
     {
-        $logged_in_user = $this->authorize($request);
+        $logged_in_user = $this->getXDUser();
 
         $scale = $this->getIntParam('scale', 1);
 

@@ -15,15 +15,13 @@ class AppKernelController extends BaseController
     #[Route('/internal_dashboard/controllers/app_kernel.php')]
     public function index(Request $request): Response
     {
-        $user = $this->authorize($request);
-
         $operation = $this->getStringParam($request, 'operation', true);
 
         switch ($operation) {
             case 'get_ingestion_report':
-                return $this->getIngestionReport($request, $user);
+                return $this->getIngestionReport($request);
             case 'get_ingestion_summary':
-                return $this->getIngestionSummary($request, $user);
+                return $this->getIngestionSummary($request);
         }
 
         return $this->json([
@@ -37,7 +35,7 @@ class AppKernelController extends BaseController
      *
      * @return Response
      */
-    private function getIngestionReport(): Response
+    private function getIngestionReport(Request $request): Response
     {
         try {
 
@@ -53,10 +51,10 @@ class AppKernelController extends BaseController
             $clauses = array();
             $params = array();
 
-            $onlyMostRecent = $this->getBoolParam('only_most_recent');
-            $startDate = $this->getStringParam('start_date');
-            $endDate = $this->getStringParam('end_date');
-            $onlyFailures = $this->getBoolParam(['only_failures']);
+            $onlyMostRecent = $this->getBoolParam($request, 'only_most_recent');
+            $startDate = $this->getStringParam($request, 'start_date');
+            $endDate = $this->getStringParam($request, 'end_date');
+            $onlyFailures = $this->getBoolParam($request, 'only_failures');
 
             if (isset($onlyMostRecent) && $onlyMostRecent) {
                 $limit = true;

@@ -2,23 +2,21 @@
 
 namespace CCR\Controller;
 
+use Appkernel\Report;
+use CCR\DB;
+use CCR\Security\Attributes\MustBeLoggedIn;
+use CCR\Security\Attributes\MgrRequired;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\SecurityBundle\Security;
-use Appkernel\Report;
-use Rest\Controllers\AppKernelController;
-
-use CCR\DB;
 
 class ArrController extends BaseController
 {
-
+    #[MustBeLoggedIn]
     #[Route('/controllers/arr.php', methods: ["GET", "POST"])]
     public function index(Request $request): Response
     {
-        $this->authorize($request);
-
         $operation = $this->getStringParam($request, 'operation', true);
 
         switch ($operation) {
@@ -152,11 +150,10 @@ class ArrController extends BaseController
         return $this->json($returnData);
     }
 
+    #[MgrRequired]
     #[Route('/controllers/arr/scheduler.php')]
     public function getScheduler(Request $request, Security $security): Response
     {
-        $this->authorize($request, array(ROLE_ID_MANAGER));
-
         $operation = $this->getStringParam($request, 'operation');
 
         $response = array();
@@ -181,10 +178,11 @@ class ArrController extends BaseController
         return $this->json($response);
     }
 
+    #[MgrRequired]
     #[Route('/controllers/arr/send_report.php', methods: ["GET", "POST"])]
     private function sendReport(Request $request, Security $security): Response
     {
-        $user = $this->authorize($request, array(ROLE_ID_MANAGER));
+        $user = $this->getXDUser();
 
         $operation = $this->getStringParam($request, 'operation');
 
@@ -211,10 +209,11 @@ class ArrController extends BaseController
 
     }
 
+    #[MgrRequired]
     #[Route('/controllers/arr/settings.php', methods: ["GET", "POST"])]
     private function getSettings(Request $request, Security $security): Response
     {
-        $user = $this->authorize($request, array(ROLE_ID_MANAGER));
+        $user = $this->getXDUser();
 
         $operation = $this->getStringParam($request, 'operation');
 

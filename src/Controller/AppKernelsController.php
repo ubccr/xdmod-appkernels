@@ -1,21 +1,24 @@
 <?php
 namespace CCR\Controller;
 
+use CCR\AppKernel\AppKernelDb;
+use AppKernel\PerformanceMap;
+use AppKernel\Report;
+use CCR\DB;
+use CCR\Log;
+use CCR\Security\Attributes\CenterRelatedRequired;
+use CCR\Security\Attributes\MgrRequired;
 use DataWarehouse\Access\MetricExplorer;
 use DateTime;
-
+use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
-use Psr\Log\LoggerInterface;
 use Twig\Environment;
-use CCR\Security\Helpers\Tokens;
-
-use Exception;
-use CCR\DB;
-use AppKernel\Report;
 
 /**
  * Class AppKernelControllerProvider
@@ -37,16 +40,21 @@ class AppKernelsController extends BaseController
 
     const DEFAULT_DELIM=',';
 
+    /**
+     * @var ContainerBagInterface
+     */
+    protected ContainerBagInterface $parameters;
+
     private $dbLogger;
 
-    public function __construct(LoggerInterface $logger, Environment $twig, Tokens $tokenHelper)
+    public function __construct(LoggerInterface $logger, Environment $twig, ContainerBagInterface $parameters)
     {
-        parent::__construct($logger, $twig, $tokenHelper);
-        $this->dbLogger = \CCR\Log::factory('rest.logger.db', array(
+        parent::__construct($logger, $twig, $parameters);
+        $this->dbLogger = Log::factory('rest.logger.db', array(
             'console' => false,
             'file' => false,
             'mail' => false,
-            'dbLogLevel' => \CCR\Log::INFO
+            'dbLogLevel' => Log::INFO
         ));
     }
 
@@ -155,7 +163,7 @@ class AppKernelsController extends BaseController
     public function getDetails(Request $request): Response
     {
         $results = array();
-        $db = new \AppKernel\AppKernelDb();
+        $db = new AppKernelDb();
 
         // Extract the parameters that were sent
 
@@ -309,7 +317,7 @@ class AppKernelsController extends BaseController
     public function getDatasets(Request $request, $returnRawData = false)
     {
         $results = array();
-        $db = new \AppKernel\AppKernelDb();
+        $db = new AppKernelDb();
 
         // Extract the parameters that were sent
 
@@ -667,7 +675,7 @@ class AppKernelsController extends BaseController
         $resource_id = $this->getIntParam($request, 'resource_id', true);
         $ak_def_id = $this->getIntParam($request, 'ak_def_id', true);
         // TODO: wire in the db.logger.
-        $db = new \AppKernel\AppKernelDb($this->dbLogger);
+        $db = new AppKernelDb($this->dbLogger);
         $results = $db->getControlRegions($resource_id, $ak_def_id);
 
         return $this->json(array(
@@ -689,14 +697,12 @@ class AppKernelsController extends BaseController
      *                              success: A boolean indicating if the call was successful.
      *                              message: A human-readable message about what occurred.
      */
+    #[MgrRequired]
     #[Route('/control_regions', methods: ["PUT"])]
     public function createOrUpdateControlRegions(Request $request, bool $update = true): Response
     {
-        // Ensure that the user is a manager.
-        $this->authorize($request, array(ROLE_ID_MANAGER));
-
         // Get an app kernel database connection.
-        $db = new \AppKernel\AppKernelDb($this->dbLogger);
+        $db = new AppKernelDb($this->dbLogger);
 
         // Load the application kernel definitions for the description
         $akList = $this->getAppKernelMapping($db);
@@ -751,14 +757,12 @@ class AppKernelsController extends BaseController
      *                              success: A boolean indicating if the call was successful.
      *                              message: A human-readable message about what occurred.
      */
+    #[MgrRequired]
     #[Route('/control_regions', methods: ['DELETE'])]
     public function deleteControlRegions(Request $request): Response
     {
-        // Ensure that the user is a manager.
-        $this->authorize($request, array(ROLE_ID_MANAGER));
-
         // Get an app kernel database connection.
-        $db = new \AppKernel\AppKernelDb($this->dbLogger);
+        $db = new AppKernelDb($this->dbLogger);
 
         // Load the application kernel definitions for the description
         $akList = $this->getAppKernelMapping($db);
@@ -979,7 +983,7 @@ class AppKernelsController extends BaseController
 
 
             //PerformanceMap
-            $perfMap = new \AppKernel\PerformanceMap(array(
+            $perfMap = new PerformanceMap(array(
                 'start_date' => $start_date,
                 'end_date' => $end_date,
                 'resource' => $resources,
@@ -1109,7 +1113,7 @@ class AppKernelsController extends BaseController
     {
         $response = array();
         try {
-            $ak_db = new \AppKernel\AppKernelDb();
+            $ak_db = new AppKernelDb();
 
             $user = $this->getUserFromRequest($request);
 
@@ -1156,7 +1160,7 @@ class AppKernelsController extends BaseController
     {
         $response = array();
         try {
-            $ak_db = new \AppKernel\AppKernelDb();
+            $ak_db = new AppKernelDb();
             $start_ts = date_timestamp_get(date_sub(date_create(), date_interval_create_from_date_string("90 days")));
 
             $all_app_kernels = $ak_db->getUniqueAppKernels();
@@ -1338,7 +1342,7 @@ class AppKernelsController extends BaseController
      * @return array                      An associative array of app kernel
      *                                    IDs to app kernels.
      */
-    private function getAppKernelMapping(\AppKernel\AppKernelDb $db)
+    private function getAppKernelMapping(AppKernelDb $db)
     {
         $appKernelDefs = $db->loadAppKernelDefinitions();
         $akList = array();
@@ -1355,7 +1359,7 @@ class AppKernelsController extends BaseController
      * @return array                      An associative array of resource
      *                                    IDs to resources.
      */
-    private function getResourceMapping(\AppKernel\AppKernelDb $db)
+    private function getResourceMapping(AppKernelDb $db)
     {
         $resourceDefs = $db->loadResources();
         $resourceList = array();
@@ -1669,10 +1673,11 @@ or "Show Details of Successful Tasks" options to see details on tasks';
      * @throws Exception if there is a problem instantiating \DateTime objects.
      * @throws Exception if the user making the request is not a Center [Director|Staff]
      */
+    #[CenterRelatedRequired]
     #[Route('/performance_map/raw', methods: ["GET"])]
     public function getRawPerformanceMap(Request $request): Response
     {
-        $user = $this->authorize($request);
+        $user = $this->getXDUser();
 
         // We need to ensure that only Center Director / Center Staff users are authorized to
         // utilize this endpoint. Note, we do not utilize the `requirements` parameter of the above
@@ -1711,7 +1716,7 @@ or "Show Details of Successful Tasks" options to see details on tasks';
 
         $data = array();
         try {
-            $perfMap = new \AppKernel\PerformanceMap(array(
+            $perfMap = new PerformanceMap(array(
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'resource' => $resource,

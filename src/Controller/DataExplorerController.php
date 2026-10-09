@@ -2,18 +2,20 @@
 
 namespace CCR\Controller;
 
+use CCR\Security\Attributes\MustBeLoggedIn;
+use DataWarehouse\Access\DataExplorer;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Bundle\SecurityBundle\Security;
-
 
 class DataExplorerController extends BaseController
 {
+    #[MustBeLoggedIn]
     #[Route('/controllers/data_explorer.php', methods: ["GET", "POST"])]
     public function index(Request $request): Response
     {
-        $user = $this->authorize($request);
+        $user = $this->getXDUser();
 
         $operation = $this->getStringParam($request, 'operation', true);
 
@@ -39,7 +41,7 @@ class DataExplorerController extends BaseController
      */
     private function getAkPlot(Request $request, $user): Response
     {
-        $m = new \DataWarehouse\Access\DataExplorer();
+        $m = new DataExplorer();
 
         $result = $m->get_ak_plot($user);
         $response = new Response($result['results']);
