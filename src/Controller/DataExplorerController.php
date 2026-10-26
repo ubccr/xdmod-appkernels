@@ -72,8 +72,6 @@ class DataExplorerController extends BaseController
 
                 $selectedProcessingUnits = array();
 
-                /*checkDateParameters();*/
-
                 $resources = $ak_db->getResources(
                     $startDate,
                     $endDate,
@@ -84,11 +82,8 @@ class DataExplorerController extends BaseController
 
 
                 foreach ($allResources as $resource) {
-                    if ($resource->visible != 1) {
-                        continue;
-                    }
-                    $returnData[] =
-                        array(
+                    if ($resource->visible == 1) {
+                        $returnData[] = array(
                             'text' => $resource->name,
                             'id' => $resource->id,
                             'nick' => $resource->nickname,
@@ -99,6 +94,7 @@ class DataExplorerController extends BaseController
                             'disabled' => !isset($resources[$resource->nickname]),
                             'checked' => in_array($resource->id, $selectedResourceIds)
                         );
+                    }
                 }
                 $returnData = array('totalCount' => 1, 'data' => array(array('nodes' => json_encode($returnData))));
             } elseif (isset($node) && $node === 'pus') {
@@ -106,8 +102,6 @@ class DataExplorerController extends BaseController
                 $selectedMetrics = $this->getArrayParam('selectedMetrics');
                 $selectedProcessingUnits = $this->getArrayParam('selectedPUCounts');
                 $expandedAppKernels = $this->getArrayParam('expandedAppKernels');
-
-                /*checkDateParameters();*/
                 $selectedProcessingUnitsCount = count($selectedProcessingUnits);
 
                 $processing_units = $ak_db->getProcessingUnits(
@@ -121,15 +115,7 @@ class DataExplorerController extends BaseController
 
                 $pus = array();
                 foreach ($all_processing_units as $processing_unit) {
-                    $disabled = true;
-
-                    foreach ($processing_units as $pu) {
-                        if ($processing_unit->count === $pu->count && $processing_unit->unit === $pu->unit) {
-                            $disabled = false;
-                        }
-                    }
-                    $pus[$processing_unit->count] =
-                        array(
+                    $pus[$processing_unit->count] = array(
                             'text' => $processing_unit->count,
                             'id' => $processing_unit->count,
                             'qtip' => $processing_unit->count . ' Node(s)/Core(s)',
@@ -220,7 +206,6 @@ class DataExplorerController extends BaseController
             //       which would allow this block to be removed.
             throw $see;
         } catch (\Exception $ex) {
-            /*print_r($ex);*/
             $returnData = array();
         }
 
@@ -235,6 +220,4 @@ class DataExplorerController extends BaseController
         }
         return explode($delim, $paramValue);
     }
-
-
 }

@@ -8,7 +8,6 @@ Ext.namespace('XDMoD', 'XDMoD.AppKernel');
 
 XDMoD.AppKernel.InstancePanel = Ext.extend(Ext.Panel, {
     autoScroll: true,
-
     constructor: function (config) {
         config = config || {};
 
@@ -23,13 +22,11 @@ XDMoD.AppKernel.InstancePanel = Ext.extend(Ext.Panel, {
                             instance_id: config.instanceId
                         },
                         success: function (response, options) {
-                            var retval = Ext.decode(response.responseText);
+                            const retval = Ext.decode(response.responseText);
                             this.update(retval.results[0]);
                         },
                         failure: function (response, options) {
-                            var retval = Ext.decode(response.responseText);
-                            console.log(retval);
-                            // TODO
+                            const retval = Ext.decode(response.responseText);
                         },
                         scope: this
                     });
@@ -40,4 +37,3 @@ XDMoD.AppKernel.InstancePanel = Ext.extend(Ext.Panel, {
         XDMoD.AppKernel.InstancePanel.superclass.constructor.call(this, config);
     }
 });
-

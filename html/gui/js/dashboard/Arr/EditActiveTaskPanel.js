@@ -278,7 +278,7 @@ XDMoD.Arr.EditActiveTaskPanel = Ext.extend(Ext.FormPanel, {
         nctTime.setValue(nextCheckTime[1]);
         taskIdField.setValue(taskId);
 
-        this.form.url = XDMoD.REST.url + '/akrr/tasks/active/' + taskId + '?token=' + XDMoD.REST.token;
+        this.form.url = '/akrr/tasks/active/' + taskId;
     },
 
     _checkAllAreClean: function (components) {

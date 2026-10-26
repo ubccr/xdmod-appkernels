@@ -19,7 +19,7 @@ XDMoD.Arr.ActiveTasksStore = Ext.extend(Ext.data.JsonStore, {
         // eslint-disable-next-line no-param-reassign
         config = config || {};
 
-        var nowEpoch = Date.now();
+        const nowEpoch = Date.now();
 
         Ext.apply(config, {
             baseParams: {
@@ -73,7 +73,7 @@ XDMoD.Arr.ActiveTasksStore = Ext.extend(Ext.data.JsonStore, {
                     name: 'time_in_queue',
                     type: 'int',
                     convert: function (value, record) {
-                        var timeSubmitted = record.time_submitted_to_queue;
+                        const timeSubmitted = record.time_submitted_to_queue;
 
                         if (timeSubmitted === null) {
                             return 0;
@@ -140,4 +140,3 @@ XDMoD.Arr.ActiveTasksStore = Ext.extend(Ext.data.JsonStore, {
         XDMoD.Arr.ActiveTasksStore.superclass.constructor.call(this, config);
     }
 });
-

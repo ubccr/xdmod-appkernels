@@ -26,7 +26,7 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
 
         this.store = new XDMoD.Arr.ActiveTasksStore();
 
-        var expander = new Ext.ux.grid.RowExpander({
+        const expander = new Ext.ux.grid.RowExpander({
             tpl: new Ext.Template(
                 '<div class="status-info-details"><pre>{status_info}</pre></div>'
             )
@@ -36,15 +36,15 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
         // classes in addition to the class returned from the original
         // getRowClass function.
 
-        var getRowClass = expander.getRowClass;
+        const getRowClass = expander.getRowClass;
 
         expander.getRowClass = function (record) {
-            var rowClass = getRowClass.apply(this, arguments);
+            let rowClass = getRowClass.apply(this, arguments);
 
             if (record.get('status').match(/ERROR/)) {
-                return rowClass + ' grid-row-error';
+                rowClass = rowClass + ' grid-row-error';
             } else if (record.get('fatal_errors_count') > 0 || record.get('fails_to_submit_to_the_queue') > 0) {
-                return rowClass + ' grid-row-warning';
+                rowClass = rowClass + ' grid-row-warning';
             }
 
             return rowClass;
@@ -54,12 +54,10 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
             autoExpandColumn: 3,
             autoExpandMax: 10000,
             plugins: [expander],
-
             colModel: new Ext.grid.ColumnModel({
                 defaults: {
                     sortable: true
                 },
-
                 columns: [
                     expander,
                     {
@@ -80,9 +78,9 @@ XDMoD.Arr.ActiveTasksGrid = Ext.extend(Ext.grid.GridPanel, {
                         header: 'Time in Queue',
                         dataIndex: 'time_in_queue',
                         renderer: function (value) {
-                            var minute = 1000 * 60;
-                            var hour = minute * 60;
-                            var day = hour * 24;
+                            const minute = 1000 * 60;
+                            const hour = minute * 60;
+                            const day = hour * 24;
 
                             if (value === 0) {
                                 return '0';

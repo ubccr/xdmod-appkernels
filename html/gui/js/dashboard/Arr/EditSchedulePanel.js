@@ -131,7 +131,7 @@ XDMoD.Arr.EditSchedulePanel = Ext.extend(Ext.Panel, {
 
             var form = this.parentPanel.getForm();
             var task_id = form.active_record.get('task_id');
-            form.url = XDMoD.REST.url + '/akrr/tasks/scheduled/' + task_id + "?token=" + XDMoD.REST.token;
+            form.url = '/akrr/tasks/scheduled/' + task_id;
 
             form.updateRecord(form.active_record);
             form.submit({

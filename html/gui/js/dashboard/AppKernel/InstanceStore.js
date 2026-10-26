@@ -90,4 +90,3 @@ XDMoD.AppKernel.InstanceStore = Ext.extend(Ext.data.JsonStore, {
         XDMoD.AppKernel.InstanceStore.superclass.constructor.call(this, config);
     }
 });
-

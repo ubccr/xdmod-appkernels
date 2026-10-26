@@ -86,24 +86,18 @@ XDMoD.Ingestion.AppKernelStore = Ext.extend(Ext.data.JsonStore, {
                 }
             ]
         });
-
         XDMoD.Ingestion.AppKernelStore.superclass.constructor.call(this, config);
     },
-
     setStartDate: function (date) {
         this.setBaseParam('start_date', date.format('Y-m-d'));
     },
-
     setEndDate: function (date) {
         this.setBaseParam('end_date', date.format('Y-m-d'));
     },
-
     setOnlyMostRecent: function (only) {
         this.setBaseParam('only_most_recent', only ? '1' : '0');
     },
-
     setOnlyFailures: function (only) {
         this.setBaseParam('only_failures', only ? '1' : '0');
     }
 });
-

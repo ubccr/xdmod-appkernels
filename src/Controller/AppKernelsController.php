@@ -271,7 +271,7 @@ class AppKernelsController extends BaseController
                 $node->leaf = (($debugMode && self::TREENODE_INSTANCE == $nodeType) ||
                     (!$debugMode && self::TREENODE_UNITS == $nodeType));
                 $results[] = $node;
-            }  // foreach ( $retval as $row )
+            }
         } else {
             $ak = new \AppKernel\InstanceData;
 
@@ -284,7 +284,6 @@ class AppKernelsController extends BaseController
             $results[] = $ak->toHtml();
         }
 
-        // Return the found information.
         return $this->json(array(
             'success' => true,
             'results' => $results,
@@ -462,7 +461,7 @@ class AppKernelsController extends BaseController
             array('session_variable', 'png_inline', 'img_tag', 'png', 'svg', 'pdf')
         );
 
-        $dataset = $this->getDatasets($request, $app, true);
+        $dataset = $this->getDatasets($request, true);
         if (!$dataset['success']) {
             throw new Exception('Dataset is empty');
         }
@@ -835,7 +834,7 @@ class AppKernelsController extends BaseController
             return $this->json($response);
         } catch (Exception $e) {
             //i.e. setting is not saved by user so send defaults
-            return $this->getDefaultNotifications($request, $app);
+            return $this->getDefaultNotifications($request);
         }
     }
 
@@ -848,6 +847,7 @@ class AppKernelsController extends BaseController
     #[Route('/notifications', methods: ["PUT"])]
     public function putNotifications(Request $request)
     {
+        $response = [];
         try {
             $pdo = \CCR\DB::factory('database');
 
@@ -898,7 +898,6 @@ class AppKernelsController extends BaseController
             }
             $response['data'] = array();
             $response['success'] = true;
-
         } catch (Exception $e) {
             $response['success'] = false;
             $response['errorMessage'] = 'Can not save notification_settings. ' . $e->getMessage();
@@ -1162,7 +1161,6 @@ class AppKernelsController extends BaseController
             $all_app_kernels = $ak_db->getUniqueAppKernels();
             $returnData = array();
             foreach ($all_app_kernels as $app_kernel) {
-                //print_r($app_kernel);
                 if ($app_kernel->end_ts > $start_ts) {
                     $returnData[] = array('name' => $app_kernel->name,
                         'id' => 'app_kernel_' . $app_kernel->id,
@@ -1279,7 +1277,7 @@ class AppKernelsController extends BaseController
                 }
                 break;
             case self::TREENODE_APPKERNEL:
-                $node['text'] = $record['ak_name'];/*.' '.date('Y-m-d',$record['start_ts']).' '.date('Y-m-d', $record['end_ts'])*/
+                $node['text'] = $record['ak_name'];
                 $node['ak_id'] = $record['ak_def_id'];
                 if ($resource_first) {
                     $node['resource_id'] = $record['resource_id'];
@@ -1365,7 +1363,7 @@ class AppKernelsController extends BaseController
         return $resourceList;
     }
 
-    public function getAppKernelSuccessRate(Request $req, Application $app)
+    public function getAppKernelSuccessRate(Request $req)
     {
         $response = null;
 

@@ -60,4 +60,3 @@ XDMoD.Arr.SummaryStore = Ext.extend(Ext.data.JsonStore, {
         XDMoD.Arr.SummaryStore.superclass.constructor.call(this, config);
     }
 });
-

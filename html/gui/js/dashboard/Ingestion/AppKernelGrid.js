@@ -130,10 +130,9 @@ XDMoD.Ingestion.AppKernelGrid = Ext.extend(Ext.grid.GridPanel, {
 
         this.store = new XDMoD.Ingestion.AppKernelStore();
 
-        var startDate = new Date(),
-            endDate = new Date();
+        const startDate = new Date();
+        const endDate = new Date();
 
-        // One week.
         startDate.setDate(endDate.getDate() - 6);
 
         this.store.setStartDate(startDate);
@@ -148,8 +147,8 @@ XDMoD.Ingestion.AppKernelGrid = Ext.extend(Ext.grid.GridPanel, {
                     listeners: {
                         check: {
                             fn: function (checkbox, checked) {
-                                var tb = this.getTopToolbar(),
-                                    datefields = tb.findByType('datefield');
+                                const tb = this.getTopToolbar(),
+                                const datefields = tb.findByType('datefield');
 
                                 this.store.setOnlyMostRecent(checked);
 
@@ -227,9 +226,6 @@ XDMoD.Ingestion.AppKernelGrid = Ext.extend(Ext.grid.GridPanel, {
                 }
             ]
         });
-
-
         XDMoD.Ingestion.AppKernelGrid.superclass.constructor.call(this, config);
     }
 });
-
